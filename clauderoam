@@ -10,7 +10,7 @@ set -euo pipefail
 
 # ── Constants ────────────────────────────────────────────────────────────────
 
-readonly VERSION="0.2.0"
+readonly VERSION="0.3.0"
 readonly REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly CLAUDE_DIR="${CLAUDE_HOME:-$HOME/.claude}"
 

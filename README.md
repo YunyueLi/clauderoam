@@ -2,136 +2,249 @@
 
 # clauderoam
 
-**Your Claude Code config, anywhere. Across Macs. Across accounts.**
+### Your Claude Code config, anywhere.<br/>Across Macs. Across accounts. Without the copy-paste.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Shell](https://img.shields.io/badge/shell-bash-89e051)](clauderoam)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey)]()
-[![Version](https://img.shields.io/badge/version-0.2.0-orange)]()
+[![Version](https://img.shields.io/badge/version-0.3.0-orange)]()
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-[中文](./README.zh-CN.md) · [Docs](./docs) · [Examples](./examples)
+[中文](./README.zh-CN.md)  ·  [Docs](./docs)  ·  [Examples](./examples)  ·  [FAQ](./docs/faq.md)
 
 </div>
 
 ---
 
-Claude Code's `~/.claude/` directory holds everything you've customized — your `CLAUDE.md`, your subagents, your slash commands, your auto-memory. Switch Macs and it's gone. Switch Claude accounts and it's gone.
-
-**clauderoam puts the portable parts in git, symlinks them back, and lets you roam.**
-
-## Install
+> Customize Claude Code on one Mac → switch Macs → lose everything.<br/>
+> Switch Claude accounts → lose everything again.<br/>
+> **clauderoam fixes that with two commands and a symlink farm.**
 
 ```bash
 git clone https://github.com/YunyueLi/clauderoam.git ~/clauderoam
 cd ~/clauderoam && ./clauderoam init
 ```
 
-That's the whole setup. `init` personalizes your `CLAUDE.md` and links everything into `~/.claude/`. Restart Claude Code and your preferences are live.
+`init` personalizes your `CLAUDE.md`, links it into `~/.claude/`, and you're done. Same two commands on every other device.
 
-On a second device, same two lines.
+---
 
-## How it works
+## Mental model
+
+Claude Code reads config from **three places** every time it starts. clauderoam manages the first one. Your projects own the second. The third is the live conversation.
+
+```mermaid
+flowchart TB
+    classDef personal fill:#dbeafe,stroke:#3b82f6,color:#1e3a8a
+    classDef project fill:#fef3c7,stroke:#f59e0b,color:#78350f
+    classDef session fill:#e5e7eb,stroke:#6b7280,color:#1f2937
+
+    A["<b>1. Personal layer</b><br/>~/.claude/<br/><i>'How I work'</i><br/><br/>preferences · agents · slash commands<br/>auto-memory · keybindings"]:::personal
+    B["<b>2. Project layer</b><br/>&lt;project&gt;/CLAUDE.md + .claude/<br/><i>'How this codebase works'</i><br/><br/>tech stack · test commands · conventions<br/>project-only agents"]:::project
+    C["<b>3. Session layer</b><br/>This conversation<br/><i>'What we're doing right now'</i>"]:::session
+
+    A --> B --> C
+```
+
+> **Rule of thumb**<br/>
+> If it follows _you_ across projects → **personal** (clauderoam).<br/>
+> If it belongs to _this codebase_ → **project repo**.<br/>
+> If it's just for _this conversation_ → nothing, it'll be in the transcript.
+
+## What's in clauderoam vs what's in each project
+
+|  | clauderoam (personal) | Each project repo |
+|---|---|---|
+| **Lives at** | `~/clauderoam/` → `~/.claude/` (symlinks) | `<project>/CLAUDE.md` + `<project>/.claude/` |
+| **Who edits it** | You, alone | You and any contributors to that project |
+| **Travels with** | Your Claude account & GitHub identity | The codebase |
+| **Lifetime** | Years (your career) | Lifetime of the project |
+| **Examples** | "Reply in 中文" · "use conventional commits" · your `/commit` slash command · the `code-reviewer` agent you use everywhere | "Python 3.12, `uv run pytest`" · "import sort: stdlib, third-party, local" · a `migration-checker` agent only useful here |
 
 ```mermaid
 flowchart LR
-    subgraph GH["📦 GitHub (truth)"]
-      A["CLAUDE.md<br/>settings.json<br/>agents/ skills/ commands/<br/>memory/"]
+    subgraph You["👤 You"]
+      CR["📦 clauderoam<br/>(personal config)"]
     end
-    subgraph M1["💻 Mac A"]
-      B["~/clauderoam"] -->|symlinks| C["~/.claude/"]
+    subgraph Projects["🏗️ Project repos"]
+      P1["📦 my-blog<br/>+ CLAUDE.md"]
+      P2["📦 startup-app<br/>+ CLAUDE.md"]
+      P3["📦 ..."]
     end
-    subgraph M2["💻 Mac B / new account"]
-      D["~/clauderoam"] -->|symlinks| E["~/.claude/"]
-    end
-    GH <-->|git push/pull| B
-    GH <-->|git push/pull| D
+    CR -.symlinks.-> CC["💻 ~/.claude/<br/>(Claude Code reads here)"]
+    P1 --> CC
+    P2 --> CC
+    P3 --> CC
 ```
 
-Claude Code reads `~/.claude/` as usual — it doesn't know (or care) the files are symlinks. Switching accounts only replaces `.credentials.json`; everything else stays put.
+When you open `startup-app` in Claude Code, it loads **your personal layer + startup-app's project layer**, combined. Open `my-blog` next, same personal layer + my-blog's project layer. Two contexts, zero conflict.
+
+## What clauderoam actually does (under the hood)
+
+It does **not** copy or sync files. It uses **symlinks**.
+
+```
+~/.claude/CLAUDE.md ────► ~/clauderoam/CLAUDE.md
+                          (the real file, tracked in git)
+```
+
+Editing one *is* editing the other. There's only one copy. No "did I forget to sync" anxiety.
+
+```mermaid
+flowchart LR
+    subgraph M1["💻 Mac A"]
+      CC1["~/.claude/CLAUDE.md"] -.symlink.-> R1["~/clauderoam/CLAUDE.md"]
+    end
+    subgraph M2["💻 Mac B"]
+      CC2["~/.claude/CLAUDE.md"] -.symlink.-> R2["~/clauderoam/CLAUDE.md"]
+    end
+    subgraph GH["📦 GitHub"]
+      G["clauderoam repo"]
+    end
+    R1 <-->|git push/pull| G
+    R2 <-->|git push/pull| G
+```
+
+**Switch accounts?** The symlink doesn't care which Claude account is signed in. Your config keeps working — only the credential file (`~/.claude/.credentials.json`) changes, which is exactly what you want.
+
+The one exception is **auto-memory**, which is folder-tree based and gets snapshotted (real copy) by `clauderoam sync`. See [Memory](#memory) below.
+
+## Memory
+
+Claude Code stores per-project memory at `~/.claude/projects/<encoded-path>/memory/`. Each project gets its own bucket:
+
+```
+~/.claude/projects/
+├── -Users-you-Desktop-my-blog/
+│   └── memory/
+│       ├── MEMORY.md           ← index, always loaded
+│       ├── user_xxx.md         ← facts about you
+│       ├── feedback_xxx.md     ← corrections you've given
+│       └── project_xxx.md      ← project state
+│
+├── -Users-you-Desktop-startup-app/
+│   └── memory/  ← totally independent from my-blog's memory
+│
+└── -Users-you-Desktop-clauderoam/
+    └── memory/
+```
+
+| Command | What it does |
+|---|---|
+| `clauderoam sync` | Copy every project's `memory/` into the clauderoam repo |
+| `clauderoam restore` | Reverse: copy from repo back to `~/.claude/projects/`. Rewrites the username if the new machine has a different `$USER` |
+
+## Install
+
+```bash
+git clone https://github.com/YunyueLi/clauderoam.git ~/clauderoam
+cd ~/clauderoam
+./clauderoam init     # personalize CLAUDE.md + symlink into ~/.claude/
+```
+
+On a second device, same two commands. Want `clauderoam` on your `$PATH`? See [docs/setup.md](./docs/setup.md).
 
 ## Commands
 
 | Command | What it does |
 |---|---|
-| `clauderoam init` | Interactive setup — personalize `CLAUDE.md` and install symlinks |
-| `clauderoam install` | (Re-)create the symlinks. Always backs up first. |
-| `clauderoam doctor` | Verify symlinks point right and no secrets are tracked |
+| `clauderoam init` | Interactive first-time setup — personalize and install |
+| `clauderoam install` | Re-create the symlinks (idempotent, backs up first) |
+| `clauderoam doctor` | Verify symlinks point right & no secrets are tracked |
 | `clauderoam sync` | Snapshot `~/.claude/projects/*/memory/` into `./memory/` |
-| `clauderoam restore` | Restore memory snapshots (rewrites usernames across machines) |
+| `clauderoam restore` | Restore memory snapshots (handles username changes) |
 | `clauderoam push` | `sync` + `git commit` + `git push` |
 | `clauderoam status` | Show repo state and current symlinks |
+| `clauderoam --dry-run` | Preview any command without making changes |
 
-Run `clauderoam help` for the full list.
+## What gets synced
 
-## What's portable
-
-| Synced to git | Stays on the machine |
+| ✅ Synced to git | ❌ Stays on the machine |
 |---|---|
-| `CLAUDE.md` · `settings.json` | `.credentials.json` |
-| `agents/` · `skills/` · `commands/` | `sessions/` · `shell-snapshots/` |
-| `keybindings.json` | `projects/` (except `memory/` subfolder) |
-| `memory/` (snapshots) | `telemetry/` · `policy-limits.json` |
+| `CLAUDE.md` · `settings.json` · `keybindings.json` | `.credentials.json` — your auth token |
+| `agents/` · `skills/` · `commands/` | `sessions/` · `shell-snapshots/` · `telemetry/` |
+| `memory/` (snapshots) | `policy-limits.json` · `projects/` runtime data |
 
 ## Examples
 
 Drop-in [agents](./examples/agents) and [slash commands](./examples/commands):
 
-- `code-reviewer` — focused diff review
-- `git-helper` — careful commit/branch/PR operations
-- `test-runner` — finds the right tests for a change
-- `/commit` `/pr` `/sync` `/new-project` `/save`
+- 🤖 `code-reviewer` — focused diff review
+- 🤖 `git-helper` — careful commit/branch/PR operations
+- 🤖 `test-runner` — finds the right tests for a change
+- 💬 `/commit` `/pr` `/sync` `/new-project` `/save`
+
+Install one:
 
 ```bash
 cp examples/agents/code-reviewer.md agents/
-git add agents/code-reviewer.md && git commit -m "feat: add code-reviewer" && git push
+./clauderoam push
 ```
 
 ## Documentation
 
-- [Setup](./docs/setup.md) — install in detail, uninstall, machine-local overrides
-- [Multi-device](./docs/multi-device.md) — adding a new Mac / iPad / iPhone workflow
-- [Multi-account](./docs/multi-account.md) — switching Claude accounts without losing setup
-- [Auto-sync](./docs/auto-sync.md) — optional shell hook for hands-off sync
+- [Setup](./docs/setup.md) — install, uninstall, machine-local overrides, PATH
+- [Multi-device workflow](./docs/multi-device.md) — adding Macs, iPhone, iPad
+- [Switching Claude accounts](./docs/multi-account.md) — the migration checklist
+- [Auto-sync](./docs/auto-sync.md) — optional hands-off shell hook
 - [FAQ](./docs/faq.md)
 
 <details>
-<summary><b>How does clauderoam compare to other sync projects?</b></summary>
+<summary><b>📊 How clauderoam compares to other Claude sync projects</b></summary>
 
-| Project | ⭐ | Backends | Auto-sync | Doctor | Memory snapshots | Multi-account | Bilingual | Stack |
+<br/>
+
+| Project | ⭐ | Sync backend | Auto-sync | Doctor | Memory snapshots | Multi-account focus | Bilingual | Stack |
 |---|---|---|---|---|---|---|---|---|
-| **clauderoam** | — | git | optional shell hook | ✓ | ✓ + username rewriting | **✓ focus** | ✓ EN/中文 | pure bash |
+| **clauderoam** | — | git | optional shell hook | ✓ | ✓ + username rewriting | **✓ designed for it** | ✓ EN / 中文 | pure bash |
 | [renefichtmueller/claude-sync](https://github.com/renefichtmueller/claude-sync) | 16 | git · iCloud · Dropbox · Syncthing · rsync | ✓ | implicit | manual | ✗ | ✗ | TypeScript |
 | [balingsisi/claude-sync-tool](https://github.com/balingsisi/claude-sync-tool) | 11 | git | watch mode | ✓ | ✗ | ✗ | ✗ | CLI |
 | [elizabethfuentes12/claude-code-dotfiles](https://github.com/elizabethfuentes12/claude-code-dotfiles) | 9 | git | ✓ shell function | ✗ | ✗ | ✗ | ✗ | shell |
-| [zircote/.claude](https://github.com/zircote/.claude) | 24 | git (fork) | ✗ | ✗ | ✗ | ✗ | ✗ | dotfiles + 100+ agents |
+| [zircote/.claude](https://github.com/zircote/.claude) | 24 | git (fork model) | ✗ | ✗ | ✗ | ✗ | ✗ | dotfiles + 100+ agents |
 
-Pick **clauderoam** if you switch Claude accounts, want bilingual docs, prefer zero dependencies, or want memory snapshots that survive a username change on a new Mac.
+**Pick clauderoam** if you switch Claude accounts, want bilingual docs, prefer zero dependencies, or want memory snapshots that survive a username change.
 
-Pick **renefichtmueller/claude-sync** if you want multiple sync backends.
+**Pick renefichtmueller/claude-sync** if you want multiple sync backends (iCloud, Dropbox, Syncthing).
 
-Pick **zircote/.claude** if you mostly want a curated agent library.
+**Pick zircote/.claude** if you mostly want a curated agent library.
 
 </details>
 
 <details>
-<summary><b>FAQ</b></summary>
+<summary><b>❓ FAQ</b></summary>
 
-**Will this break Claude Code?** No. Symlinks are transparent — Claude Code reads `~/.claude/` exactly as before.
+<br/>
 
-**Public or private repo?** Private if you sync `memory/` (it may contain project notes). Otherwise public is fine.
+**Will this break Claude Code?**<br/>
+No. Symlinks are transparent — Claude Code reads `~/.claude/` exactly as before.
 
-**Linux? WSL?** Should work. Only standard Unix tools (bash, git, rsync, ln) are used.
+**Should the clauderoam repo be public or private?**<br/>
+Private if you sync `memory/` (it may contain project notes). Otherwise public is fine and lets you show off your setup.
 
-**Is it portable Claude Code binary?** No — it's portable **config**. For a USB-drive Claude Code, see [`SonnyTaylor/claude-code-portable`](https://github.com/SonnyTaylor/claude-code-portable).
+**Does `init` / `install` delete anything?**<br/>
+No. It copies your current `~/.claude/` to `~/.claude.bak.<timestamp>` first. Run `--dry-run` to preview.
 
-**How do I undo?** `clauderoam install` backs up your existing `~/.claude/` to `~/.claude.bak.<timestamp>` first. Restore from there.
+**Is this a portable Claude Code _binary_?**<br/>
+No — it's portable **config**. For USB-drive Claude Code, see [`SonnyTaylor/claude-code-portable`](https://github.com/SonnyTaylor/claude-code-portable).
+
+**Linux? WSL?**<br/>
+Should work. Pure bash, only standard Unix tools.
+
+**Can I have machine-only overrides that don't sync?**<br/>
+Yes: `~/.claude/settings.local.json` and `~/.claude/CLAUDE.local.md` are gitignored and loaded in addition to the shared versions.
+
+**How do project `CLAUDE.md` files interact with my personal one?**<br/>
+They _combine_. Personal sets defaults; project overrides where they conflict. See [Mental model](#mental-model) above.
+
+**How do I undo everything?**<br/>
+Remove the symlinks in `~/.claude/` and restore from `~/.claude.bak.<timestamp>`. See [docs/setup.md#uninstall](./docs/setup.md).
 
 </details>
 
 ## Contributing
 
-Issues and PRs welcome — see [CONTRIBUTING.md](./CONTRIBUTING.md). Keep it small, keep it bash.
+Issues and PRs welcome — see [CONTRIBUTING.md](./CONTRIBUTING.md). Keep it small, keep it bash, keep it readable.
 
 ## License
 
-[MIT](./LICENSE)
+[MIT](./LICENSE) © YunyueLi and contributors
