@@ -1,0 +1,376 @@
+#!/usr/bin/env bash
+# clauderoam — Your Claude Code config, anywhere.
+#
+# One-tool CLI for setting up, syncing, and checking your portable
+# Claude Code configuration.
+#
+# Run `clauderoam help` for usage.
+
+set -euo pipefail
+
+# ── Constants ────────────────────────────────────────────────────────────────
+
+readonly VERSION="0.2.0"
+readonly REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly CLAUDE_DIR="${CLAUDE_HOME:-$HOME/.claude}"
+
+# Items to symlink from repo → ~/.claude/
+readonly LINK_ITEMS=(
+  "CLAUDE.md"
+  "settings.json"
+  "agents"
+  "skills"
+  "commands"
+  "keybindings.json"
+)
+
+# Items that MUST stay machine-local (never overwrite from repo)
+readonly PRESERVE_ITEMS=(
+  ".credentials.json"
+  "policy-limits.json"
+  "telemetry"
+  "sessions"
+  "shell-snapshots"
+  "session-env"
+  "projects"
+  "backups"
+  "plans"
+  "todos"
+  "statsig"
+  ".last-cleanup"
+  "settings.local.json"
+  "CLAUDE.local.md"
+)
+
+# ── Pretty output ────────────────────────────────────────────────────────────
+
+if [ -t 1 ] && [ "${NO_COLOR:-}" = "" ]; then
+  C_DIM='\033[2m';  C_BOLD='\033[1m'
+  C_RED='\033[31m'; C_GRN='\033[32m'; C_YEL='\033[33m'; C_BLU='\033[34m'
+  C_RST='\033[0m'
+else
+  C_DIM=''; C_BOLD=''; C_RED=''; C_GRN=''; C_YEL=''; C_BLU=''; C_RST=''
+fi
+
+say()  { printf '%b\n' "$*"; }
+info() { printf '%b\n' "${C_DIM}  $*${C_RST}"; }
+ok()   { printf '%b\n' "${C_GRN}  ✓${C_RST} $*"; }
+warn() { printf '%b\n' "${C_YEL}  !${C_RST} $*" >&2; }
+err()  { printf '%b\n' "${C_RED}  ✗${C_RST} $*" >&2; }
+step() { printf '\n%b\n' "${C_BOLD}${C_BLU}▸${C_RST} ${C_BOLD}$*${C_RST}"; }
+
+ask() {
+  local prompt="$1" default="${2:-}" answer
+  if [ -n "$default" ]; then
+    printf '%b' "  ${C_BOLD}?${C_RST} $prompt ${C_DIM}[$default]${C_RST}: "
+  else
+    printf '%b' "  ${C_BOLD}?${C_RST} $prompt: "
+  fi
+  read -r answer
+  printf '%s' "${answer:-$default}"
+}
+
+# ── Subcommand: help ─────────────────────────────────────────────────────────
+
+cmd_help() {
+  cat <<EOF
+${C_BOLD}clauderoam${C_RST} — Your Claude Code config, anywhere. (v$VERSION)
+
+${C_BOLD}USAGE${C_RST}
+  clauderoam <command> [flags]
+
+${C_BOLD}COMMANDS${C_RST}
+  ${C_GRN}init${C_RST}      Interactive first-time setup (personalize + install)
+  ${C_GRN}install${C_RST}   Symlink this repo's portable items into ~/.claude/
+  ${C_GRN}doctor${C_RST}    Check that everything is wired up and safe
+  ${C_GRN}sync${C_RST}      Snapshot ~/.claude/projects/*/memory/ into ./memory/
+  ${C_GRN}restore${C_RST}   Restore memory from ./memory/ to ~/.claude/projects/
+  ${C_GRN}push${C_RST}      sync + git commit + git push (one-shot)
+  ${C_GRN}status${C_RST}    Show repo + symlink state
+  ${C_GRN}help${C_RST}      This message
+  ${C_GRN}version${C_RST}   Print version
+
+${C_BOLD}FLAGS${C_RST}
+  --dry-run    Print actions without changing anything (install/sync/restore)
+  --no-color   Disable ANSI colors (or set NO_COLOR=1)
+
+${C_BOLD}EXAMPLES${C_RST}
+  clauderoam init                Personalize and install in one go
+  clauderoam doctor              Verify your setup is healthy
+  clauderoam push                Snapshot memory and push to GitHub
+
+Docs: https://github.com/YunyueLi/clauderoam
+EOF
+}
+
+cmd_version() { say "clauderoam $VERSION"; }
+
+# ── Subcommand: init ─────────────────────────────────────────────────────────
+
+cmd_init() {
+  step "Welcome to clauderoam"
+  info "This will personalize your CLAUDE.md and install symlinks into ~/.claude/"
+  echo
+
+  # Detect defaults
+  local default_name default_lang=en
+  default_name="$(git config --global user.name 2>/dev/null || echo "")"
+  default_name="${default_name:-$USER}"
+  if locale 2>/dev/null | grep -qi 'zh_CN\|zh_TW'; then default_lang=zh; fi
+
+  local name lang
+  name="$(ask "Your name (shows up in CLAUDE.md)" "$default_name")"
+  lang="$(ask "Preferred language for Claude to respond in (en/zh/ja/...)" "$default_lang")"
+
+  step "Writing personalized CLAUDE.md"
+  _render_claude_md "$name" "$lang"
+  ok "CLAUDE.md updated"
+
+  step "Installing into $CLAUDE_DIR"
+  cmd_install
+  echo
+
+  step "Next steps"
+  info "1. Restart Claude Code so it picks up the new config"
+  info "2. Commit your changes:  git add CLAUDE.md && git commit -m 'chore: init' && git push"
+  info "3. On a second device:   git clone <this-repo> && cd <it> && ./clauderoam install"
+}
+
+_render_claude_md() {
+  local name="$1" lang="$2"
+  cat > "$REPO_DIR/CLAUDE.md" <<EOF
+# My Claude Code Preferences
+
+> Loaded by Claude Code on every session start (via \`~/.claude/CLAUDE.md\` symlink).
+> Edit freely. Commit and push to sync across all your devices.
+
+## About me
+
+- Name: $name
+- Preferred response language: $lang
+
+## Communication
+
+- Be concise; prefer lists and tables over long paragraphs
+- State assumptions; say "I don't know" when uncertain
+- Skip the trailing "summary" — the diff is the summary
+- No emojis unless I ask
+
+## Engineering defaults
+
+- Conventional commits (\`feat:\`, \`fix:\`, \`chore:\`, …)
+- Confirm before destructive ops (\`rm -rf\`, force push, \`reset --hard\`)
+- For new projects: scaffold \`CLAUDE.md\` + \`.claude/settings.json\` first
+- Don't add comments that just restate the code
+
+## Memory rules
+
+- Save: durable preferences, corrections you've given me, lessons across sessions
+- Skip: ephemeral task state; anything in project \`CLAUDE.md\` or git history;
+  account-specific info (subscription, billing)
+EOF
+}
+
+# ── Subcommand: install ──────────────────────────────────────────────────────
+
+cmd_install() {
+  local dry_run=0
+  for arg in "$@"; do
+    case "$arg" in --dry-run|-n) dry_run=1 ;; esac
+  done
+
+  if [ "$REPO_DIR" = "$CLAUDE_DIR" ]; then
+    err "Repo and target are the same path. Move the repo elsewhere."; exit 1
+  fi
+
+  _run() {
+    if [ "$dry_run" = 1 ]; then info "[dry-run] $*"
+    else "$@"; fi
+  }
+
+  # Backup existing config
+  local backup=""
+  if [ -d "$CLAUDE_DIR" ] && [ -n "$(ls -A "$CLAUDE_DIR" 2>/dev/null)" ]; then
+    backup="$HOME/.claude.bak.$(date +%Y%m%d-%H%M%S)"
+    info "Backing up existing config → $backup"
+    _run cp -R "$CLAUDE_DIR" "$backup"
+  fi
+  _run mkdir -p "$CLAUDE_DIR"
+
+  # Restore preserved items
+  if [ -n "$backup" ]; then
+    for item in "${PRESERVE_ITEMS[@]}"; do
+      if [ -e "$backup/$item" ] && [ ! -e "$CLAUDE_DIR/$item" ]; then
+        _run cp -R "$backup/$item" "$CLAUDE_DIR/$item"
+      fi
+    done
+  fi
+
+  # Create symlinks
+  local linked=0
+  for item in "${LINK_ITEMS[@]}"; do
+    local src="$REPO_DIR/$item" dst="$CLAUDE_DIR/$item"
+    [ -e "$src" ] || continue
+    [ -L "$dst" ] || [ -e "$dst" ] && _run rm -rf "$dst"
+    _run ln -s "$src" "$dst"
+    ok "$item"
+    linked=$((linked + 1))
+  done
+
+  echo
+  ok "Linked $linked items into $CLAUDE_DIR"
+  [ -n "$backup" ] && info "Backup at: $backup (delete once you've verified things work)"
+}
+
+# ── Subcommand: doctor ───────────────────────────────────────────────────────
+
+cmd_doctor() {
+  local pass=0 fail=0 warn=0
+
+  step "Environment"
+  for tool in git rsync; do
+    if command -v "$tool" >/dev/null 2>&1; then ok "$tool installed"; pass=$((pass+1))
+    else err "$tool not installed"; fail=$((fail+1)); fi
+  done
+  if command -v gh >/dev/null 2>&1; then ok "gh (optional) installed"; pass=$((pass+1))
+  else warn "gh not installed (optional, useful for repo ops)"; warn=$((warn+1)); fi
+
+  step "Symlinks"
+  for item in "${LINK_ITEMS[@]}"; do
+    local src="$REPO_DIR/$item" dst="$CLAUDE_DIR/$item"
+    [ -e "$src" ] || { info "$item: not in repo (skipping)"; continue; }
+    if [ ! -L "$dst" ]; then
+      err "$item: missing or not a symlink"; fail=$((fail+1))
+    elif [ "$(readlink "$dst")" = "$src" ]; then
+      ok "$item → $src"; pass=$((pass+1))
+    else
+      err "$item points to $(readlink "$dst") (expected $src)"; fail=$((fail+1))
+    fi
+  done
+
+  step "Safety: no secrets in repo"
+  for item in .credentials.json policy-limits.json sessions shell-snapshots; do
+    if [ -e "$REPO_DIR/$item" ]; then err "$item is inside the repo!"; fail=$((fail+1))
+    else ok "$item not in repo"; pass=$((pass+1)); fi
+  done
+  if [ -d "$REPO_DIR/.git" ]; then
+    local tracked
+    tracked="$(cd "$REPO_DIR" && git ls-files | grep -E '\.credentials\.json|policy-limits\.json|sessions/|shell-snapshots/' || true)"
+    if [ -n "$tracked" ]; then err "Sensitive paths are tracked in git!"; printf '%s\n' "$tracked" | sed 's/^/      /'; fail=$((fail+1))
+    else ok "Nothing sensitive is tracked in git"; pass=$((pass+1)); fi
+  fi
+
+  echo
+  if [ "$fail" -gt 0 ]; then
+    say "${C_RED}✗${C_RST} $pass passed, ${C_RED}$fail failed${C_RST}, $warn warning(s) — run ${C_BOLD}clauderoam install${C_RST} to fix link issues"
+    exit 1
+  else
+    say "${C_GRN}✓${C_RST} Healthy ($pass passed, $warn warning(s))"
+  fi
+}
+
+# ── Subcommand: sync ─────────────────────────────────────────────────────────
+
+cmd_sync() {
+  local src="$CLAUDE_DIR/projects" dst="$REPO_DIR/memory"
+  if [ ! -d "$src" ]; then info "No $src found — nothing to sync"; return 0; fi
+  mkdir -p "$dst"
+  local count=0
+  for proj in "$src"/*/; do
+    [ -d "$proj/memory" ] && [ -n "$(ls -A "$proj/memory" 2>/dev/null)" ] || continue
+    local name; name="$(basename "$proj")"
+    mkdir -p "$dst/$name"
+    rsync -a --delete "$proj/memory/" "$dst/$name/"
+    ok "$name"
+    count=$((count + 1))
+  done
+  echo
+  if [ "$count" -eq 0 ]; then info "No memory to sync"
+  else ok "Synced $count project(s) → memory/"
+       info "Next: git add memory && git commit && git push  (or use 'clauderoam push')"
+  fi
+}
+
+# ── Subcommand: restore ──────────────────────────────────────────────────────
+
+cmd_restore() {
+  local src="$REPO_DIR/memory" dst="$CLAUDE_DIR/projects"
+  if [ ! -d "$src" ] || [ -z "$(ls -A "$src" 2>/dev/null)" ]; then
+    info "No memory snapshots in repo — nothing to restore"; return 0
+  fi
+  mkdir -p "$dst"
+  local prefix="-Users-$USER" restored=0
+  for proj in "$src"/*/; do
+    [ -d "$proj" ] || continue
+    local name; name="$(basename "$proj")"
+    case "$name" in README.md|memory) continue ;; esac
+    [[ "$name" == -* ]] || continue
+    local new_name
+    if [[ "$name" == "$prefix"* ]]; then new_name="$name"
+    elif [[ "$name" == -Users-* ]]; then
+      local suffix="${name#-Users-}"; suffix="${suffix#*-}"
+      new_name="$prefix-$suffix"
+      info "rewrote $name → $new_name"
+    else warn "skip $name (unknown format)"; continue
+    fi
+    mkdir -p "$dst/$new_name/memory"
+    rsync -a "$proj/" "$dst/$new_name/memory/"
+    ok "$new_name"
+    restored=$((restored + 1))
+  done
+  echo
+  ok "Restored $restored project(s)"
+}
+
+# ── Subcommand: push ─────────────────────────────────────────────────────────
+
+cmd_push() {
+  step "Snapshot memory"
+  cmd_sync
+  echo
+  step "Push to GitHub"
+  ( cd "$REPO_DIR"
+    if [ ! -d .git ]; then err "Not a git repo"; exit 1; fi
+    git add -A
+    if git diff --cached --quiet; then info "Nothing to commit"
+    else git commit -m "chore: sync $(date +%Y-%m-%d_%H:%M)" && ok "Committed"
+    fi
+    git push && ok "Pushed"
+  )
+}
+
+# ── Subcommand: status ───────────────────────────────────────────────────────
+
+cmd_status() {
+  step "Repo: $REPO_DIR"
+  ( cd "$REPO_DIR" && git status --short 2>/dev/null || say "  (not a git repo)" )
+  step "Symlinks in $CLAUDE_DIR"
+  local found=0
+  for item in "${LINK_ITEMS[@]}"; do
+    if [ -L "$CLAUDE_DIR/$item" ]; then
+      printf '  %b%s%b → %s\n' "$C_GRN" "$item" "$C_RST" "$(readlink "$CLAUDE_DIR/$item")"
+      found=1
+    fi
+  done
+  [ "$found" = 0 ] && say "  ${C_DIM}(no symlinks — run 'clauderoam install')${C_RST}"
+}
+
+# ── Dispatch ─────────────────────────────────────────────────────────────────
+
+main() {
+  local cmd="${1:-help}"; shift || true
+  case "$cmd" in
+    init)              cmd_init "$@" ;;
+    install|bootstrap) cmd_install "$@" ;;
+    doctor)            cmd_doctor "$@" ;;
+    sync)              cmd_sync "$@" ;;
+    restore)           cmd_restore "$@" ;;
+    push)              cmd_push "$@" ;;
+    status)            cmd_status "$@" ;;
+    version|-v|--version) cmd_version ;;
+    help|-h|--help|"")    cmd_help ;;
+    *) err "Unknown command: $cmd"; say ""; cmd_help; exit 2 ;;
+  esac
+}
+
+main "$@"

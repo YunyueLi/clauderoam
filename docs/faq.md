@@ -1,60 +1,53 @@
 # FAQ
 
-### Why symlinks instead of copying files?
+### Why symlinks instead of copying?
 
-So that editing `~/.claude/CLAUDE.md` and editing the repo file are the same
-action. No "did I forget to sync" question — there's only one copy.
+So editing `~/.claude/CLAUDE.md` *is* editing the repo file — there's only one copy. No "did I remember to sync" question.
 
 ### Will this break Claude Code?
 
-No. Claude Code reads `~/.claude/CLAUDE.md` etc. regardless of whether it's a
-real file or a symlink. The only thing `bootstrap.sh` changes is how those
-files are stored.
+No. Claude Code reads `~/.claude/CLAUDE.md` and friends the same way whether they're real files or symlinks. The only thing `clauderoam install` changes is how the files are stored.
 
-### Should the repo be public or private?
+### Public or private repo?
 
-**Private** is the safer default — `memory/` may contain notes about projects
-you'd rather not share. If you keep memory out (or scrub it), public is fine
-and lets you show off your setup.
+Private if you sync `memory/` — snapshots can include notes about projects you'd rather not share. If you scrub memory or don't sync it, public is fine and lets you show off your setup.
 
 ### What about `~/.claude/projects/` and `~/.claude/sessions/`?
 
-These are *runtime* state — conversation logs, shell snapshots, telemetry.
-They're huge, machine-specific, and have no value on another device. They're
-in `.gitignore` and `bootstrap.sh` keeps them local-only.
+These are *runtime* state — conversation logs, shell snapshots, telemetry. They're huge, machine-specific, and have no value on another device. They're in `.gitignore` and `clauderoam install` keeps them local-only.
 
-### Does `bootstrap.sh` delete my existing config?
+### Does `clauderoam install` delete anything?
 
-No. It backs up `~/.claude/` to `~/.claude.bak.<timestamp>` before changing
-anything. You can always restore it.
+No. Your existing `~/.claude/` is copied to `~/.claude.bak.<timestamp>` before any changes. Run `--dry-run` first if you want to preview.
 
 ### Can I have machine-specific overrides?
 
 Yes:
-- `~/.claude/settings.local.json` — machine-only settings (gitignored)
-- `~/.claude/CLAUDE.local.md` — machine-only preferences (gitignored)
 
-Both files are loaded by Claude Code in addition to the shared versions.
+- `~/.claude/settings.local.json` — settings unique to this machine (gitignored)
+- `~/.claude/CLAUDE.local.md` — preferences unique to this machine (gitignored)
+
+Both are loaded **in addition to** the shared versions.
 
 ### How is this different from dotfiles?
 
-It is dotfiles, specialized for Claude Code. The same pattern (symlink from a
-git repo) used for `.zshrc`, `.vimrc`, etc.
+It *is* dotfiles, specialized for Claude Code. Same pattern (symlink from a git repo) used for `.zshrc`, `.vimrc`, etc.
 
 ### Why not just use Claude's cloud memory feature?
 
-The cloud memory (the one on claude.ai) is account-bound and not exportable.
-This repo gives you a version-controlled, portable, account-independent
-alternative. Use both if you want.
+The cloud memory on claude.ai is account-bound and not exportable. clauderoam gives you a version-controlled, portable, account-independent alternative. You can use both.
 
-### Does this work with the Claude Code CLI, desktop app, and IDE extensions?
+### Does this work with CLI, desktop app, and IDE extensions?
 
 Yes — they all read the same `~/.claude/` directory.
 
 ### What if I'm not on macOS?
 
-The scripts use `bash`, `rsync`, `cp`, `ln` — should work on any Unix-like
-system (Linux, WSL). The only macOS-specific behavior is none.
+The CLI is bash with standard tools (`git`, `rsync`, `cp`, `ln`). Should work on Linux and WSL. No macOS-specific behavior.
+
+### Is this a portable Claude Code binary?
+
+No — it's portable **config**. For a USB-drive Claude Code distribution, see [`SonnyTaylor/claude-code-portable`](https://github.com/SonnyTaylor/claude-code-portable) or similar projects.
 
 ### How do I undo everything?
 

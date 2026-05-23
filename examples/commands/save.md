@@ -1,38 +1,21 @@
 ---
-description: Sync auto-memory, commit all changes in claude-portable, and push to GitHub.
+description: Sync auto-memory, commit, and push your clauderoam repo. Use when you want to save your current Claude Code config to GitHub so other devices can pick it up.
 ---
 
-The user wants to save their current Claude Code config (preferences, agents,
-commands, memory) to GitHub so other devices can pick it up.
+Run `clauderoam push` from the user's clauderoam repo.
 
-Run these steps in order. If any step fails, stop and report the error.
-
-1. Go to the claude-portable repo:
+1. Locate the repo:
    ```bash
-   cd ~/claude-portable  # or wherever the repo lives
-   ```
-   (If the user isn't sure where it is, look for the path that `~/.claude/CLAUDE.md`
-   resolves to — `readlink ~/.claude/CLAUDE.md`.)
-
-2. Snapshot auto-memory:
-   ```bash
-   ./sync-memory.sh
+   # The symlink target tells us where the repo lives
+   readlink ~/.claude/CLAUDE.md   # → /path/to/clauderoam/CLAUDE.md
    ```
 
-3. Show what changed:
+2. Run the push command (it does sync + commit + push in one):
    ```bash
-   git status --short
-   git diff --stat
+   cd "$(dirname "$(dirname "$(readlink ~/.claude/CLAUDE.md)")")"
+   ./clauderoam push
    ```
 
-4. If there's nothing to commit, say so and stop.
+3. Report the resulting commit SHA in one line.
 
-5. Otherwise, ask the user for a short commit message (or propose one based on
-   the diff), then:
-   ```bash
-   git add .
-   git commit -m "<message>"
-   git push
-   ```
-
-6. Confirm done with one line including the commit SHA.
+If `clauderoam push` reports "Nothing to commit," tell the user that everything is already up to date.

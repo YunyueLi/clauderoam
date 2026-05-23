@@ -1,57 +1,48 @@
 # Switching Claude accounts
 
-Sometimes you need to move to a different Claude account — switching
-plans, moving from personal to work, leaving an organization. Here's
-what's portable and what isn't.
+You'll need to switch accounts at some point — joining a Team plan, moving from personal to work, leaving an organization, getting a contractor account. Here's how to do it without losing your setup.
 
 ## What survives an account switch
 
-✅ Everything in your claude-portable repo:
+Everything in your `clauderoam` repo:
+
 - `CLAUDE.md` (your preferences)
-- `settings.json`
-- `agents/`, `skills/`, `commands/`
+- `settings.json` · `keybindings.json`
+- `agents/` · `skills/` · `commands/`
 - `memory/` (snapshotted auto-memory)
 
-## What you lose
+The symlinks in `~/.claude/` themselves survive too — they point at repo files on disk, not at account state.
 
-❌ Account-bound state that lives on Anthropic's servers:
-- Conversation history on claude.ai/code (web UI)
-- Connector authorizations (you'll need to reconnect GitHub etc.)
-- Account-specific usage/billing data
+## What you lose (and there's no fix)
 
-❌ Local credentials:
-- `~/.claude/.credentials.json` (gets replaced when the new account signs in)
+- Conversation history on claude.ai/code (account-bound, lives on Anthropic's servers)
+- Connector authorizations — reconnect GitHub etc. on the new account
+- Account-specific usage / billing data
+
+## What gets replaced (correctly)
+
+- `~/.claude/.credentials.json` — overwritten when you sign in with the new account. This is correct behavior; you don't want the old account's token.
 
 ## Migration checklist
 
-1. **Before logging out of the old account**:
-   ```bash
-   cd ~/claude-portable
-   ./sync-memory.sh   # capture current auto-memory
-   git add -A
-   git commit -m "chore: pre-account-switch snapshot"
-   git push
-   ```
+```bash
+# 1. Before signing out of the old account: snapshot and push
+cd ~/clauderoam
+./clauderoam push     # sync + commit + push
 
-2. **Switch accounts** in Claude Code (Mac app: Settings → Account → Sign out,
-   then sign in with new account)
+# 2. Sign out and back in on Claude Code with the new account
+#    (Desktop app: Settings → Account → Sign out)
 
-3. **Verify symlinks still work**:
-   ```bash
-   ./doctor.sh
-   ```
-   The symlinks themselves survive — they point to repo files, not account state.
+# 3. Verify everything still works
+./clauderoam doctor
 
-4. **Reconnect GitHub** in Claude Code Web (claude.ai/code → Connectors)
+# 4. Reconnect GitHub Connector
+#    claude.ai/code → Connectors → GitHub → Authorize
 
-5. **Optional: restore auto-memory** if it got cleared:
-   ```bash
-   ./restore-memory.sh
-   ```
+# 5. (Optional) Restore memory if it got cleared
+./clauderoam restore
+```
 
 ## Why this matters
 
-Without claude-portable, switching accounts means losing every customization
-you've built up — your CLAUDE.md, your agents, your slash commands, your
-remembered preferences. With it, that surface area is just "files in a git
-repo", and accounts are interchangeable.
+Without clauderoam, switching accounts means losing every customization you've built up — your `CLAUDE.md`, your agents, your slash commands, your remembered facts. With clauderoam, that surface area is just "files in a git repo." Accounts become interchangeable.

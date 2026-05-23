@@ -1,163 +1,136 @@
-# claude-portable
+<div align="center">
 
-**把 Claude Code 配置放进 git。换 Mac 不丢，换 Claude 账号也不丢。**
+# clauderoam
 
-[English](./README.md) · [安装](./docs/setup.md) · [多设备](./docs/multi-device.md) · [换账号](./docs/multi-account.md) · [FAQ](./docs/faq.md)
+**让你的 Claude Code 配置漫游 —— 跨 Mac、跨账号、跨设备。**
 
-> ⚠️  这是可移植的**配置**，不是可移植的 Claude Code **二进制**。
-> 如果你要的是 U 盘版 Claude Code，请看
-> [`SonnyTaylor/claude-code-portable`](https://github.com/SonnyTaylor/claude-code-portable) 之类项目。
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Shell](https://img.shields.io/badge/shell-bash-89e051)](clauderoam)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey)]()
+[![Version](https://img.shields.io/badge/version-0.2.0-orange)]()
+
+[English](./README.md) · [文档](./docs) · [示例](./examples)
+
+</div>
 
 ---
 
-## 别人都没解决的问题：换 Claude 账号
+Claude Code 的 `~/.claude/` 目录里装着你所有的定制 —— `CLAUDE.md`、subagent、slash 命令、auto-memory。换 Mac，全没了。换 Claude 账号，也全没了。
 
-大多数「同步 ~/.claude」的项目都默认你一辈子用同一个 Claude 账号。
-现实不是这样：
+**clauderoam 把可移植的部分放进 git，symlink 回来，让你的配置自由漫游。**
 
-- 你是外包，客户给你开了新的 Claude 账号
-- 你公司从个人版升级到 Team
-- 你换工作了，账号留在前公司
-- 你想把个人账号和工作账号分开
+## 安装
 
-一旦换账号，你会**丢掉每一个** 自定义 slash 命令、每一个 subagent、
-每一条偏好、每一条被记住的事实。claude-portable 就是为这个时刻设计的：
-新账号，5 分钟恢复，零丢失。
+```bash
+git clone https://github.com/YunyueLi/clauderoam.git ~/clauderoam
+cd ~/clauderoam && ./clauderoam init
+```
+
+就这两行。`init` 会交互式生成你的 `CLAUDE.md` 并 symlink 到 `~/.claude/`。重启 Claude Code，配置立即生效。
+
+第二台设备，同样两行。
 
 ## 工作原理
 
-经典的 dotfiles 套路，针对 Claude Code 做了优化：
-
-1. 把 `~/.claude/` 里可移植的子集（CLAUDE.md、agents、skills、commands、
-   memory 快照）放进 git 仓库
-2. `bootstrap.sh` 把它们 symlink 进 `~/.claude/`
-3. Claude Code 正常读取 `~/.claude/` —— symlink 对它透明
-4. 换账号？Symlink 还指向 git，配置不丢。只有凭证（**本来就该换的东西**）
-   会被替换
-
-## 快速开始
-
-```bash
-# 1. 在 GitHub 上 "Use this template"（或 fork）。然后克隆你自己的副本：
-git clone git@github.com:<你>/claude-portable.git ~/claude-portable
-cd ~/claude-portable
-
-# 2. 编辑 CLAUDE.md 写自己的偏好
-$EDITOR CLAUDE.md
-
-# 3. 激活
-./bootstrap.sh
-
-# 4. 验证
-./doctor.sh
+```mermaid
+flowchart LR
+    subgraph GH["📦 GitHub（真理之源）"]
+      A["CLAUDE.md<br/>settings.json<br/>agents/ skills/ commands/<br/>memory/"]
+    end
+    subgraph M1["💻 Mac A"]
+      B["~/clauderoam"] -->|symlinks| C["~/.claude/"]
+    end
+    subgraph M2["💻 Mac B / 新账号"]
+      D["~/clauderoam"] -->|symlinks| E["~/.claude/"]
+    end
+    GH <-->|git push/pull| B
+    GH <-->|git push/pull| D
 ```
 
-到此结束。编辑 `~/.claude/CLAUDE.md` 就等于编辑仓库文件（它是个 symlink）。
-`git push` 之后，任何跑过 `bootstrap.sh` 的设备都能同步。
+Claude Code 照常读取 `~/.claude/` —— 它不知道（也不在乎）那些是 symlink。换账号只会替换 `.credentials.json`，其他配置原地不动。
 
-## 什么可移植，什么不能
+## 命令
 
-| 可移植（进仓库） | 仅本机（gitignore） |
+| 命令 | 作用 |
 |---|---|
-| `CLAUDE.md` — 个人偏好 | `.credentials.json` — 登录凭证 |
-| `settings.json` — 权限、hook | `sessions/` — 对话历史 |
-| `agents/` — 自定义 subagent | `shell-snapshots/` — shell 状态 |
-| `skills/` — 自定义 skill | `projects/` — 项目运行时数据 |
-| `commands/` — slash 命令 | `telemetry/` — 用量统计 |
-| `keybindings.json` | `policy-limits.json` — 账号额度 |
-| `memory/` — auto-memory 快照 | |
+| `clauderoam init` | 交互式初次设置 —— 生成 `CLAUDE.md` + 安装 symlink |
+| `clauderoam install` | （重新）创建 symlink，改动前先备份 |
+| `clauderoam doctor` | 检查 symlink 指向是否正确、敏感文件是否泄漏 |
+| `clauderoam sync` | 把 `~/.claude/projects/*/memory/` 快照到 `./memory/` |
+| `clauderoam restore` | 反向恢复 memory（跨机器自动重写用户名） |
+| `clauderoam push` | `sync` + `git commit` + `git push` 一条龙 |
+| `clauderoam status` | 看仓库状态和 symlink 状态 |
 
-## 日常命令
+`clauderoam help` 列出所有命令。
 
-```bash
-make help       # 列出所有
-make bootstrap  # 重新激活 symlink
-make doctor     # 健康检查
-make sync       # 快照 auto-memory → ./memory/
-make push       # sync + commit + push
-make status     # 看仓库 + symlink 状态
-```
+## 什么会被同步
 
-想要零摩擦自动同步？见 [docs/auto-sync.md](./docs/auto-sync.md)，
-里面有可选的 shell 函数，每次启动 Claude Code 前自动 pull，结束后自动 push。
-
-## 添加到第二台设备
-
-```bash
-git clone git@github.com:<你>/claude-portable.git ~/claude-portable
-cd ~/claude-portable && ./bootstrap.sh
-./restore-memory.sh   # 可选：把 auto-memory 也恢复回来（含智能用户名重写）
-```
-
-## 与同类项目对比
-
-诚实对比 —— 这个领域已经有几个不错的项目，按需选：
-
-| 项目 | Stars | 同步方式 | 自动同步 | Doctor | Memory 快照 | 多账号 | 双语 | 技术栈 |
-|---|---|---|---|---|---|---|---|---|
-| **claude-portable**（本项目） | — | git | 可选 shell hook | ✅ | ✅ + 用户名重写 | ✅ **主打** | ✅ 中英 | 纯 bash |
-| [renefichtmueller/claude-sync](https://github.com/renefichtmueller/claude-sync) | 16 | **5 种后端**（git/iCloud/Dropbox/Syncthing/rsync） | ✅ | 隐式 | 手动 | ❌ | ❌ | TypeScript |
-| [balingsisi/claude-sync-tool](https://github.com/balingsisi/claude-sync-tool) | 11 | git | watch 模式 | ✅ | ❌ | ❌ | ❌ | CLI 工具 |
-| [elizabethfuentes12/claude-code-dotfiles](https://github.com/elizabethfuentes12/claude-code-dotfiles) | 9 | git | ✅ shell function | ❌ | ❌ | ❌ | ❌ | shell |
-| [zircote/.claude](https://github.com/zircote/.claude) | 24 | git（fork 模式） | ❌ | ❌ | ❌ | ❌ | ❌ | 个人 dotfiles + 100+ agents |
-
-**选 claude-portable 如果**：你会换 Claude 账号、想要中英双语文档、偏爱纯 bash
-零依赖，或者特别需要换 Mac 后能正确恢复（自动重写用户名路径）的 memory 快照。
-
-**选 renefichtmueller/claude-sync 如果**：你想要多种同步后端（iCloud、
-Dropbox、Syncthing），不想自己托管 git 仓库。
-
-**选 zircote/.claude 如果**：你更想要一个精心策划的 agent 库，而非同步框架。
-
-## 架构
-
-```
-GitHub（真理之源，与 Claude 账号无关）
-   │
-   │  <你>/claude-portable
-   │    ├── CLAUDE.md, settings.json
-   │    ├── agents/, commands/, skills/
-   │    └── memory/
-   ▼
-~/claude-portable（克隆下来）
-   │
-   │  bootstrap.sh 创建 symlink
-   ▼
-~/.claude/CLAUDE.md  ────► ~/claude-portable/CLAUDE.md
-~/.claude/agents/    ────► ~/claude-portable/agents/
-~/.claude/commands/  ────► ~/claude-portable/commands/
-   ...
-```
-
-Claude Code 正常读取 `~/.claude/`，并不知道（也不在乎）那些是 symlink。
+| 同步到 git | 仅本机 |
+|---|---|
+| `CLAUDE.md` · `settings.json` | `.credentials.json` |
+| `agents/` · `skills/` · `commands/` | `sessions/` · `shell-snapshots/` |
+| `keybindings.json` | `projects/`（除 `memory/` 子目录） |
+| `memory/`（快照） | `telemetry/` · `policy-limits.json` |
 
 ## 示例
 
-[`examples/`](./examples) 目录里有可以直接复用的 agent 和 slash 命令：
+开箱即用的 [agents](./examples/agents) 和 [slash 命令](./examples/commands)：
 
 - `code-reviewer` — 聚焦的 diff 审查
-- `git-helper` — 强制执行分支/提交/PR 规范
+- `git-helper` — 谨慎的 commit/branch/PR 操作
 - `test-runner` — 自动找到一次改动该跑的测试
-- `/new-project` — 一键创建新 GitHub repo + CLAUDE.md
-- `/commit` — 基于 staged diff 提议 conventional commit 消息
-- `/pr` — 用规范模板开 PR
-- `/sync` — 一次性 pull 所有项目 repo
-- `/save` — 同步 memory 并推送 claude-portable 变更
+- `/commit` `/pr` `/sync` `/new-project` `/save`
 
-## FAQ
+```bash
+cp examples/agents/code-reviewer.md agents/
+git add agents/code-reviewer.md && git commit -m "feat: add code-reviewer" && git push
+```
 
-详见 [docs/faq.md](./docs/faq.md)。重点：
+## 文档
 
-- **会不会搞坏 Claude Code？** 不会，symlink 对 Claude Code 透明
-- **仓库公开还是私有？** 同步 `memory/` 的话建议私有；否则公开也没问题
-- **支持 Linux / WSL 吗？** 应该支持 —— 只用标准 Unix 工具
-- **怎么撤销？** `bootstrap.sh` 改动前已经全量备份，还原备份即可
-- **怎么自动同步？** 见 [docs/auto-sync.md](./docs/auto-sync.md)
+- [Setup](./docs/setup.md) — 详细安装、卸载、本机覆盖
+- [Multi-device](./docs/multi-device.md) — 新 Mac / iPad / iPhone 工作流
+- [Multi-account](./docs/multi-account.md) — 换 Claude 账号不丢配置
+- [Auto-sync](./docs/auto-sync.md) — 可选的自动同步 shell hook
+- [FAQ](./docs/faq.md)
 
-## 状态
+<details>
+<summary><b>跟其他同类项目怎么比？</b></summary>
 
-为 Claude Code（CLI、桌面 App、IDE 扩展）打造。macOS 14+ 测试通过。
-欢迎 PR —— 详见 [CONTRIBUTING.md](./CONTRIBUTING.md)。
+| 项目 | ⭐ | 同步方式 | 自动同步 | Doctor | Memory 快照 | 多账号 | 双语 | 技术栈 |
+|---|---|---|---|---|---|---|---|---|
+| **clauderoam** | — | git | 可选 shell hook | ✓ | ✓ + 用户名重写 | **✓ 主打** | ✓ 中英 | 纯 bash |
+| [renefichtmueller/claude-sync](https://github.com/renefichtmueller/claude-sync) | 16 | git · iCloud · Dropbox · Syncthing · rsync | ✓ | 隐式 | 手动 | ✗ | ✗ | TypeScript |
+| [balingsisi/claude-sync-tool](https://github.com/balingsisi/claude-sync-tool) | 11 | git | watch 模式 | ✓ | ✗ | ✗ | ✗ | CLI |
+| [elizabethfuentes12/claude-code-dotfiles](https://github.com/elizabethfuentes12/claude-code-dotfiles) | 9 | git | ✓ shell function | ✗ | ✗ | ✗ | ✗ | shell |
+| [zircote/.claude](https://github.com/zircote/.claude) | 24 | git (fork) | ✗ | ✗ | ✗ | ✗ | ✗ | dotfiles + 100+ agents |
+
+**选 clauderoam** 如果你会换 Claude 账号、想要中英双语、偏爱纯 bash 零依赖，或者特别需要换 Mac 后能正确恢复（自动重写用户名）的 memory 快照。
+
+**选 renefichtmueller/claude-sync** 如果你想要多种同步后端。
+
+**选 zircote/.claude** 如果你主要想要一个精心策划的 agent 库。
+
+</details>
+
+<details>
+<summary><b>FAQ</b></summary>
+
+**会不会搞坏 Claude Code？** 不会。Symlink 对 Claude Code 透明 —— 它读 `~/.claude/` 和之前一样。
+
+**仓库公开还是私有？** 同步 `memory/` 的话建议私有（可能含项目笔记）。否则公开也行。
+
+**Linux / WSL 支持吗？** 应该支持，只用标准 Unix 工具（bash、git、rsync、ln）。
+
+**是 Claude Code 二进制 portable 吗？** 不是 —— 这是 portable **配置**。要 U 盘版 Claude Code 看 [`SonnyTaylor/claude-code-portable`](https://github.com/SonnyTaylor/claude-code-portable)。
+
+**怎么撤销？** `clauderoam install` 改动前会先把 `~/.claude/` 备份到 `~/.claude.bak.<时间戳>`，从那里恢复即可。
+
+</details>
+
+## 贡献
+
+欢迎 Issue 和 PR —— 详见 [CONTRIBUTING.md](./CONTRIBUTING.md)。保持小、保持 bash。
 
 ## License
 

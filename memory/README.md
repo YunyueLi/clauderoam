@@ -1,9 +1,9 @@
 # memory/
 
-Snapshots of Claude Code's per-project auto-memory, organized by project.
-Populated by `sync-memory.sh`, restored by `restore-memory.sh`.
+Snapshots of Claude Code's per-project auto-memory, organized by project. Populated by `clauderoam sync`, restored by `clauderoam restore`.
 
 Directory layout:
+
 ```
 memory/
   -Users-<you>-Desktop-<project>/
@@ -14,6 +14,4 @@ memory/
     reference_*.md         # external system pointers
 ```
 
-⚠️  Project directory names embed the absolute path (with `/` replaced by `-`).
-`restore-memory.sh` rewrites the username portion when restoring to a different
-machine.
+⚠️  Project directory names embed the absolute path (`/` replaced by `-`). `clauderoam restore` rewrites the username portion automatically when restoring on a machine with a different username.

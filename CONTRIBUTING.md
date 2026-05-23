@@ -7,7 +7,7 @@ contributions that keep it that way are the most welcome.
 
 - **Examples** — useful agents, slash commands, or skills others can copy
 - **Docs** — clearer setup instructions, missing FAQ entries, translations
-- **Bug fixes** — `bootstrap.sh` / `doctor.sh` / `sync-memory.sh` corner cases
+- **Bug fixes** — `clauderoam` CLI corner cases (install, doctor, sync, restore)
 - **Compatibility** — Linux distros, WSL, edge cases on macOS
 
 ## Ways to NOT help (please)
@@ -20,16 +20,16 @@ contributions that keep it that way are the most welcome.
 
 1. Fork the repo
 2. Create a branch: `git checkout -b feat/your-thing`
-3. Make the change. If it touches a script, `./doctor.sh` should still pass.
+3. Make the change. If it touches the CLI, `./clauderoam doctor` should still pass and `bash -n clauderoam` should still parse.
 4. Commit using conventional commits: `feat:`, `fix:`, `docs:`, `chore:`
 5. Open a PR with a 1-3 sentence summary and (if it's a script change) a
    description of how you tested it
 
 ## Style
 
-- Bash: `set -euo pipefail` at the top of every script
-- Markdown: wrap at ~80 chars where reasonable; use sentence case for headings
-- Keep messages user-facing-friendly (no jargon, explain what's happening)
+- Bash: `set -euo pipefail`, lowercase function names, `_underscore` prefix for internals
+- Markdown: wrap at ~80 chars; sentence case for headings
+- User-facing messages: short, no jargon, explain what's happening
 
 ## Code of conduct
 

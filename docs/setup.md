@@ -2,74 +2,92 @@
 
 ## Prerequisites
 
-- macOS or Linux (Windows via WSL should work but isn't tested)
-- `git`, `rsync`, `bash` (all standard)
-- Optional but recommended: [`gh`](https://cli.github.com/) for GitHub
-  operations
+- macOS or Linux (Windows via WSL should work; not actively tested)
+- Standard tools: `bash`, `git`, `rsync`
+- Optional: [`gh`](https://cli.github.com/) for GitHub operations
 
 ## First-time install
 
 ```bash
-# 1. Fork this repo on GitHub (so you have your own copy to push to).
-#    On GitHub, click "Use this template" or "Fork".
+git clone https://github.com/<you>/clauderoam.git ~/clauderoam
+cd ~/clauderoam
+./clauderoam init
+```
 
-# 2. Clone your fork
-git clone git@github.com:<your-username>/claude-portable.git ~/claude-portable
-cd ~/claude-portable
+`init` asks for your name and preferred response language, writes a
+personalized `CLAUDE.md`, and creates the symlinks into `~/.claude/` in one
+shot. Restart Claude Code and your config is live.
 
-# 3. Personalize CLAUDE.md
-#    Edit it with your name, language preference, workflow conventions.
-$EDITOR CLAUDE.md
+Commit your personalized `CLAUDE.md` to sync it to all your devices:
 
-# 4. Activate (this symlinks into ~/.claude/)
-./bootstrap.sh
-
-# 5. Verify
-./doctor.sh
-
-# 6. Commit your personalized CLAUDE.md
+```bash
 git add CLAUDE.md
 git commit -m "chore: personalize CLAUDE.md"
 git push
 ```
 
-## What `bootstrap.sh` actually does
-
-It does **not** delete anything irreversibly. The flow:
-
-1. Copies the entire existing `~/.claude/` to `~/.claude.bak.<timestamp>` (only
-   if it had content)
-2. Creates a fresh `~/.claude/` directory
-3. Copies back machine/account-bound files (credentials, sessions, telemetry,
-   etc.) from the backup
-4. Symlinks the portable items (`CLAUDE.md`, `settings.json`, `agents/`,
-   `skills/`, `commands/`) from this repo
-
-Once you've verified things work, you can delete the backup:
-```bash
-rm -rf ~/.claude.bak.*
-```
-
-## Day-to-day commands
+## Verify
 
 ```bash
-make help       # show all
-make bootstrap  # (re)activate symlinks
-make doctor     # verify health
-make sync       # snapshot auto-memory into ./memory/
-make push       # sync + commit + push
-make status     # show repo + symlink state
+./clauderoam doctor
 ```
+
+Reports symlink health, missing tools, and whether any sensitive files
+accidentally ended up in the repo.
+
+## What gets symlinked
+
+The portable subset of `~/.claude/`:
+
+- `CLAUDE.md` · `settings.json` · `keybindings.json`
+- `agents/` · `skills/` · `commands/`
+
+Everything else (`.credentials.json`, `sessions/`, `shell-snapshots/`,
+`telemetry/`, …) stays machine-local and untouched.
+
+## What `install` actually does
+
+`./clauderoam install` (called automatically by `init`) is safe to re-run:
+
+1. Backs up your current `~/.claude/` to `~/.claude.bak.<timestamp>` if it
+   has content
+2. Preserves machine-local files (credentials, sessions, etc.) by copying
+   them back from the backup
+3. Symlinks the portable items from this repo into `~/.claude/`
+
+Use `--dry-run` to preview without making changes:
+
+```bash
+./clauderoam install --dry-run
+```
+
+## Machine-local overrides
+
+Two files are ignored by git, so they stay on the local machine only:
+
+- `~/.claude/settings.local.json` — settings unique to this Mac
+- `~/.claude/CLAUDE.local.md` — preferences unique to this Mac
+
+Both are loaded **in addition to** the shared versions.
 
 ## Uninstall
 
-To go back to a vanilla setup:
-
 ```bash
-# 1. Remove symlinks
-rm ~/.claude/CLAUDE.md ~/.claude/settings.json
+# Remove the symlinks
+rm ~/.claude/CLAUDE.md ~/.claude/settings.json ~/.claude/keybindings.json
 rm -rf ~/.claude/agents ~/.claude/skills ~/.claude/commands
 
-# 2. (Optional) restore your pre-install backup
+# Restore your pre-install backup
 mv ~/.claude.bak.<timestamp>/* ~/.claude/
+```
+
+## Putting `clauderoam` on your PATH (optional)
+
+So you can run it from anywhere:
+
+```bash
+ln -s ~/clauderoam/clauderoam ~/.local/bin/clauderoam   # any dir on your PATH
+# then anywhere:
+clauderoam doctor
+clauderoam push
 ```
