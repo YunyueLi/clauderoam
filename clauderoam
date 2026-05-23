@@ -97,10 +97,11 @@ step() { printf '\n%b\n' "${C_BOLD}${C_BLU}▸${C_RST} ${C_BOLD}$*${C_RST}"; }
 
 ask() {
   local prompt="$1" default="${2:-}" answer
+  # Prompt goes to stderr so $(ask ...) only captures the answer
   if [ -n "$default" ]; then
-    printf '%b' "  ${C_BOLD}?${C_RST} $prompt ${C_DIM}[$default]${C_RST}: "
+    printf '%b' "  ${C_BOLD}?${C_RST} $prompt ${C_DIM}[$default]${C_RST}: " >&2
   else
-    printf '%b' "  ${C_BOLD}?${C_RST} $prompt: "
+    printf '%b' "  ${C_BOLD}?${C_RST} $prompt: " >&2
   fi
   read -r answer
   printf '%s' "${answer:-$default}"
@@ -116,15 +117,16 @@ ${C_BOLD}USAGE${C_RST}
   clauderoam <command> [flags]
 
 ${C_BOLD}COMMANDS${C_RST}
-  ${C_GRN}init${C_RST}      Interactive first-time setup (personalize + install)
-  ${C_GRN}install${C_RST}   Symlink this repo's portable items into ~/.claude/
-  ${C_GRN}doctor${C_RST}    Check that everything is wired up and safe
-  ${C_GRN}sync${C_RST}      Snapshot ~/.claude/projects/*/memory/ into ./memory/
-  ${C_GRN}restore${C_RST}   Restore memory from ./memory/ to ~/.claude/projects/
-  ${C_GRN}push${C_RST}      sync + git commit + git push (one-shot)
-  ${C_GRN}status${C_RST}    Show repo + symlink state
-  ${C_GRN}help${C_RST}      This message
-  ${C_GRN}version${C_RST}   Print version
+  ${C_GRN}init${C_RST}       Interactive first-time setup (personalize + install)
+  ${C_GRN}install${C_RST}    Symlink this repo's portable items into ~/.claude/
+  ${C_GRN}doctor${C_RST}     Check that everything is wired up and safe
+  ${C_GRN}sync${C_RST}       Snapshot ~/.claude/projects/*/memory/ into ./memory/
+  ${C_GRN}restore${C_RST}    Restore memory from ./memory/ to ~/.claude/projects/
+  ${C_GRN}push${C_RST}       sync + git commit + git push (one-shot)
+  ${C_GRN}status${C_RST}     Show repo + symlink state
+  ${C_GRN}projects${C_RST}   Manage your project registry (clone-all, pull-all, …)
+  ${C_GRN}help${C_RST}       This message
+  ${C_GRN}version${C_RST}    Print version
 
 ${C_BOLD}FLAGS${C_RST}
   --dry-run    Print actions without changing anything (install/sync/restore)
@@ -441,6 +443,231 @@ cmd_status() {
   return 0
 }
 
+# ── Subcommand: projects ─────────────────────────────────────────────────────
+#
+# Tracks a list of project repos the user wants on every machine. The list is
+# kept at $DATA_DIR/projects.tsv (one tab-separated row per project) so it
+# syncs through the same git repo as the rest of the personal config.
+
+PROJECTS_FILE="$DATA_DIR/projects.tsv"
+
+# Print non-comment, non-empty lines
+_projects_entries() {
+  [ -f "$PROJECTS_FILE" ] || return 0
+  grep -vE '^[[:space:]]*(#|$)' "$PROJECTS_FILE" || true
+}
+
+# Expand a leading ~ in a path. We match literal ~ on purpose.
+# shellcheck disable=SC2088
+_expand_path() {
+  case "$1" in
+    "~/"*) printf '%s/%s' "$HOME" "${1#~/}" ;;
+    "~")   printf '%s' "$HOME" ;;
+    *)     printf '%s' "$1" ;;
+  esac
+}
+
+_projects_init_file() {
+  if [ ! -f "$PROJECTS_FILE" ]; then
+    cat > "$PROJECTS_FILE" <<'EOF'
+# clauderoam projects registry
+# One project per line, tab-separated:
+#   name<TAB>repo-url<TAB>local-path
+# Lines starting with # are comments.
+EOF
+  fi
+}
+
+cmd_projects() {
+  local sub="${1:-list}"
+  shift || true
+  case "$sub" in
+    list)           cmd_projects_list ;;
+    add)            cmd_projects_add ;;
+    remove|rm)      cmd_projects_remove "$@" ;;
+    clone-all)      cmd_projects_clone_all "$@" ;;
+    pull-all)       cmd_projects_pull_all "$@" ;;
+    status)         cmd_projects_status ;;
+    help|-h|--help) cmd_projects_help ;;
+    *) err "Unknown projects subcommand: $sub"; cmd_projects_help; exit 2 ;;
+  esac
+}
+
+cmd_projects_help() {
+  cat <<EOF
+${C_BOLD}clauderoam projects${C_RST} — manage your project registry
+
+${C_BOLD}USAGE${C_RST}
+  clauderoam projects <subcommand>
+
+${C_BOLD}SUBCOMMANDS${C_RST}
+  ${C_GRN}list${C_RST}        List registered projects (default if omitted)
+  ${C_GRN}add${C_RST}         Interactively register a project
+  ${C_GRN}remove${C_RST}      Remove a project from the registry (files NOT deleted)
+  ${C_GRN}clone-all${C_RST}   Clone all registered projects (skips existing paths)
+  ${C_GRN}pull-all${C_RST}    git pull each project (skips dirty trees)
+  ${C_GRN}status${C_RST}      Show git status of each project
+
+Registry file: $PROJECTS_FILE
+EOF
+}
+
+cmd_projects_list() {
+  if [ ! -s "$PROJECTS_FILE" ] || [ -z "$(_projects_entries)" ]; then
+    info "No projects registered."
+    info "Add one with: clauderoam projects add"
+    return 0
+  fi
+  printf '  %-22s %-50s %s\n' "NAME" "REPO" "PATH"
+  printf '  %-22s %-50s %s\n' "────" "────" "────"
+  while IFS=$'\t' read -r name repo path; do
+    printf '  %-22s %-50s %s\n' "$name" "$repo" "$path"
+  done < <(_projects_entries)
+}
+
+cmd_projects_add() {
+  _projects_init_file
+  step "Register a new project"
+
+  local name repo path
+  name="$(ask "Short name (used for display)" "")"
+  if [ -z "$name" ]; then err "Name required"; exit 2; fi
+  if ! printf '%s' "$name" | grep -qE '^[A-Za-z0-9_-]+$'; then
+    err "Name must be [A-Za-z0-9_-]+ (no spaces or special chars)"; exit 2
+  fi
+  if grep -qE "^${name}"$'\t' "$PROJECTS_FILE" 2>/dev/null; then
+    err "A project named '$name' is already registered"; exit 1
+  fi
+
+  repo="$(ask "Repo URL (git@... or https://...)" "")"
+  if [ -z "$repo" ]; then err "Repo URL required"; exit 2; fi
+
+  # We store the literal "~/..." so the registry is portable across users.
+  # _expand_path handles real-time expansion when we actually use it.
+  # shellcheck disable=SC2088
+  local default_path="~/Desktop/$name"
+  path="$(ask "Local path" "$default_path")"
+
+  printf '%s\t%s\t%s\n' "$name" "$repo" "$path" >> "$PROJECTS_FILE"
+  ok "Registered $name → $path"
+  echo
+  info "Commit so other devices see it:"
+  info "  cd $DATA_DIR && git add projects.tsv && git commit -m 'add project: $name' && git push"
+}
+
+cmd_projects_remove() {
+  local target="${1:-}"
+  [ -n "$target" ] || { err "Usage: clauderoam projects remove <name>"; exit 2; }
+  [ -f "$PROJECTS_FILE" ] || { err "No registry yet"; exit 1; }
+  if ! grep -qE "^${target}"$'\t' "$PROJECTS_FILE"; then
+    err "No project named '$target'"; exit 1
+  fi
+  local tmp; tmp="$(mktemp)"
+  grep -vE "^${target}"$'\t' "$PROJECTS_FILE" > "$tmp"
+  mv "$tmp" "$PROJECTS_FILE"
+  ok "Removed '$target' from registry (local files NOT deleted)"
+}
+
+cmd_projects_clone_all() {
+  local dry_run=0
+  for arg in "$@"; do
+    case "$arg" in --dry-run|-n) dry_run=1 ;; esac
+  done
+
+  if [ ! -s "$PROJECTS_FILE" ] || [ -z "$(_projects_entries)" ]; then
+    info "No projects to clone"; return 0
+  fi
+
+  step "Cloning registered projects"
+  local cloned=0 skipped=0 failed=0
+  while IFS=$'\t' read -r name repo path; do
+    local expanded
+    expanded="$(_expand_path "$path")"
+    if [ -d "$expanded/.git" ]; then
+      info "skip $name (already at $expanded)"
+      skipped=$((skipped + 1))
+      continue
+    fi
+    if [ -d "$expanded" ] && [ -n "$(ls -A "$expanded" 2>/dev/null)" ]; then
+      warn "skip $name ($expanded exists and is not a git repo)"
+      skipped=$((skipped + 1))
+      continue
+    fi
+    if [ "$dry_run" = 1 ]; then
+      info "[dry-run] git clone $repo $expanded"
+      continue
+    fi
+    mkdir -p "$(dirname "$expanded")"
+    if git clone --quiet "$repo" "$expanded" 2>&1; then
+      ok "cloned $name → $expanded"
+      cloned=$((cloned + 1))
+    else
+      err "failed to clone $name"
+      failed=$((failed + 1))
+    fi
+  done < <(_projects_entries)
+  echo
+  ok "cloned $cloned, skipped $skipped, failed $failed"
+}
+
+cmd_projects_pull_all() {
+  if [ ! -s "$PROJECTS_FILE" ] || [ -z "$(_projects_entries)" ]; then
+    info "No projects"; return 0
+  fi
+  step "Pulling registered projects"
+  local pulled=0 skipped=0
+  while IFS=$'\t' read -r name repo path; do
+    local expanded
+    expanded="$(_expand_path "$path")"
+    if [ ! -d "$expanded/.git" ]; then
+      info "skip $name (not cloned)"
+      skipped=$((skipped + 1))
+      continue
+    fi
+    if [ -n "$(cd "$expanded" && git status --porcelain 2>/dev/null)" ]; then
+      warn "skip $name (uncommitted changes)"
+      skipped=$((skipped + 1))
+      continue
+    fi
+    if (cd "$expanded" && git pull --ff-only --quiet 2>/dev/null); then
+      ok "$name pulled"
+      pulled=$((pulled + 1))
+    else
+      warn "skip $name (pull failed — non-fast-forward?)"
+      skipped=$((skipped + 1))
+    fi
+  done < <(_projects_entries)
+  echo
+  ok "pulled $pulled, skipped $skipped"
+}
+
+cmd_projects_status() {
+  if [ ! -s "$PROJECTS_FILE" ] || [ -z "$(_projects_entries)" ]; then
+    info "No projects"; return 0
+  fi
+  step "Project status"
+  while IFS=$'\t' read -r name repo path; do
+    local expanded
+    expanded="$(_expand_path "$path")"
+    if [ ! -d "$expanded/.git" ]; then
+      printf '  %s○%s %-22s missing (%s)\n' "$C_YEL" "$C_RST" "$name" "$expanded"
+      continue
+    fi
+    local dirty branch ahead
+    dirty="$(cd "$expanded" && git status --porcelain 2>/dev/null | wc -l | tr -d ' ')"
+    branch="$(cd "$expanded" && git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '?')"
+    ahead="$(cd "$expanded" && git rev-list '@{u}..HEAD' --count 2>/dev/null || echo 0)"
+    if [ "$dirty" -gt 0 ]; then
+      printf '  %s●%s %-22s %s • %s file(s) changed\n' "$C_YEL" "$C_RST" "$name" "$branch" "$dirty"
+    elif [ "$ahead" -gt 0 ]; then
+      printf '  %s↑%s %-22s %s • %s commit(s) to push\n' "$C_YEL" "$C_RST" "$name" "$branch" "$ahead"
+    else
+      printf '  %s✓%s %-22s %s • clean\n' "$C_GRN" "$C_RST" "$name" "$branch"
+    fi
+  done < <(_projects_entries)
+  return 0
+}
+
 # ── Dispatch ─────────────────────────────────────────────────────────────────
 
 main() {
@@ -453,6 +680,7 @@ main() {
     restore)           cmd_restore "$@" ;;
     push)              cmd_push "$@" ;;
     status)            cmd_status "$@" ;;
+    projects)          cmd_projects "$@" ;;
     version|-v|--version) cmd_version ;;
     help|-h|--help|"")    cmd_help ;;
     *) err "Unknown command: $cmd"; say ""; cmd_help; exit 2 ;;

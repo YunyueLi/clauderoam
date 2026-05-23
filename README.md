@@ -91,6 +91,33 @@ flowchart LR
 
 When you open `startup-app` in Claude Code, it loads **your personal layer + startup-app's project layer**, combined. Open `my-blog` next, same personal layer + my-blog's project layer. Two contexts, zero conflict.
 
+## Project registry — pulling all your repos onto a new Mac
+
+clauderoam doesn't sync project _code_ (each project is its own GitHub repo) but it does track **which projects you have** so a new machine can pull them in one command.
+
+The list lives at `~/clauderoam/projects.tsv` — synced via git alongside your config.
+
+```bash
+clauderoam projects add        # register a project (interactive)
+clauderoam projects list       # see the registry
+clauderoam projects clone-all  # clone every registered project (skips existing)
+clauderoam projects pull-all   # git pull each clean project
+clauderoam projects status     # which projects are dirty / ahead / missing
+clauderoam projects remove <name>
+```
+
+So the complete "set up a new Mac" flow becomes:
+
+```bash
+brew install YunyueLi/tap/clauderoam        # 1. install the CLI
+git clone <your-clauderoam-repo> ~/clauderoam
+clauderoam install                          # 2. personal config
+clauderoam projects clone-all               # 3. all your projects
+# 4. install per-project deps as needed (npm install / pip install / ...)
+```
+
+Four lines, full developer environment.
+
 ## What clauderoam actually does (under the hood)
 
 It does **not** copy or sync files. It uses **symlinks**.
@@ -176,12 +203,13 @@ cd ~/clauderoam
 
 ### On a second device
 
-The CLI install is the same. To bring your config:
+The CLI install is the same. To bring your config and all your project code:
 
 ```bash
-brew install YunyueLi/tap/clauderoam      # or git clone the cli
+brew install YunyueLi/tap/clauderoam        # or use install.sh / git clone
 git clone <your-clauderoam-config-repo> ~/clauderoam
-clauderoam install
+clauderoam install                          # personal config
+clauderoam projects clone-all               # all your project repos
 ```
 
 ## Commands
@@ -195,6 +223,7 @@ clauderoam install
 | `clauderoam restore` | Restore memory snapshots (handles username changes) |
 | `clauderoam push` | `sync` + `git commit` + `git push` |
 | `clauderoam status` | Show repo state and current symlinks |
+| `clauderoam projects ...` | Manage your project registry — see [Project registry](#project-registry--pulling-all-your-repos-onto-a-new-mac) |
 | `clauderoam --dry-run` | Preview any command without making changes |
 
 ## What gets synced
@@ -204,6 +233,7 @@ clauderoam install
 | `CLAUDE.md` · `settings.json` · `keybindings.json` | `.credentials.json` — your auth token |
 | `agents/` · `skills/` · `commands/` | `sessions/` · `shell-snapshots/` · `telemetry/` |
 | `memory/` (snapshots) | `policy-limits.json` · `projects/` runtime data |
+| `projects.tsv` (project registry) | the project _code_ — that's each project's own git repo |
 
 ## Examples
 

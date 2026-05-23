@@ -91,6 +91,33 @@ flowchart LR
 
 在 `startup-app` 里打开 Claude Code 时，它加载**你的个人层 + startup-app 项目层**，组合使用。切换到 `my-blog`，同样的个人层 + my-blog 的项目层。两个上下文，零冲突。
 
+## 项目清单 —— 新 Mac 一键拉所有 repo
+
+clauderoam 不同步项目_代码_（每个项目自己是一个 GitHub repo），但它会跟踪**你有哪些项目**，让新机器能一条命令把它们拉回来。
+
+清单存在 `~/clauderoam/projects.tsv` —— 和其他个人配置一起走 git。
+
+```bash
+clauderoam projects add        # 注册一个项目（交互式）
+clauderoam projects list       # 看清单
+clauderoam projects clone-all  # 把每个已注册项目都 clone 过来（已存在的跳过）
+clauderoam projects pull-all   # 给每个干净的项目 git pull
+clauderoam projects status     # 哪些项目脏 / 领先 / 没拉
+clauderoam projects remove <name>
+```
+
+所以"新 Mac 设置"的完整流程是：
+
+```bash
+brew install YunyueLi/tap/clauderoam        # 1. 装 CLI
+git clone <你的 clauderoam repo> ~/clauderoam
+clauderoam install                          # 2. 个人配置
+clauderoam projects clone-all               # 3. 所有项目代码
+# 4. 各项目按需装依赖（npm install / pip install / ...）
+```
+
+四行命令，完整开发环境。
+
 ## clauderoam 内部到底在做什么
 
 它**不** copy、也**不** sync 文件。它用的是 **symlink**。
@@ -176,12 +203,13 @@ cd ~/clauderoam
 
 ### 在第二台设备上
 
-CLI 安装同上。要把你的配置带过来：
+CLI 安装同上。把配置和所有项目代码一起拉过来：
 
 ```bash
-brew install YunyueLi/tap/clauderoam       # 或 git clone 安装 CLI
+brew install YunyueLi/tap/clauderoam       # 或 install.sh / git clone
 git clone <你的 clauderoam 配置 repo> ~/clauderoam
-clauderoam install
+clauderoam install                         # 个人配置
+clauderoam projects clone-all              # 所有项目 repo
 ```
 
 ## 命令
@@ -195,6 +223,7 @@ clauderoam install
 | `clauderoam restore` | 恢复 memory（处理用户名变化） |
 | `clauderoam push` | `sync` + `git commit` + `git push` |
 | `clauderoam status` | 看仓库状态和当前 symlink |
+| `clauderoam projects ...` | 管理项目清单 —— 详见 [项目清单](#项目清单--新-mac-一键拉所有-repo) |
 | `clauderoam --dry-run` | 任何命令的预览模式 |
 
 ## 什么会被同步
@@ -204,6 +233,7 @@ clauderoam install
 | `CLAUDE.md` · `settings.json` · `keybindings.json` | `.credentials.json` —— 你的登录凭证 |
 | `agents/` · `skills/` · `commands/` | `sessions/` · `shell-snapshots/` · `telemetry/` |
 | `memory/`（快照） | `policy-limits.json` · `projects/` 运行时数据 |
+| `projects.tsv`（项目清单） | 项目_代码_本身 —— 那是每个项目自己的 git repo |
 
 ## 示例
 

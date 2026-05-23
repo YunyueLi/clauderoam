@@ -57,6 +57,21 @@ jobs:
           CLAUDE_HOME: /tmp/cr-claude
         run: ./clauderoam status
 
+      - name: projects subcommand
+        env:
+          CLAUDEROAM_DATA: /tmp/cr-data
+          CLAUDE_HOME: /tmp/cr-claude
+        run: |
+          # Register a project (tiny public repo)
+          printf "octocat\nhttps://github.com/octocat/Hello-World.git\n/tmp/cr-projects/octocat\n" \
+            | ./clauderoam projects add
+          ./clauderoam projects list
+          ./clauderoam projects clone-all --dry-run
+          ./clauderoam projects status   # 'octocat' should show as missing
+          ./clauderoam projects remove octocat
+          # Empty state after removal
+          ./clauderoam projects list
+
   formula-test:
     name: homebrew formula test (macOS)
     runs-on: macos-latest
