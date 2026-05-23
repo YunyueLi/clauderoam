@@ -10,9 +10,42 @@ set -euo pipefail
 
 # ── Constants ────────────────────────────────────────────────────────────────
 
-readonly VERSION="0.3.0"
-readonly REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly VERSION="0.4.0"
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly CLAUDE_DIR="${CLAUDE_HOME:-$HOME/.claude}"
+
+# DATA_DIR — where the user's config repo lives.
+#   Priority: $CLAUDEROAM_DATA env var → git checkout next to script → ~/clauderoam
+_resolve_data_dir() {
+  if [ -n "${CLAUDEROAM_DATA:-}" ]; then
+    printf '%s' "$CLAUDEROAM_DATA"
+  elif [ -f "$SCRIPT_DIR/CLAUDE.md" ] && [ -d "$SCRIPT_DIR/.git" ]; then
+    printf '%s' "$SCRIPT_DIR"
+  else
+    printf '%s' "$HOME/clauderoam"
+  fi
+}
+readonly DATA_DIR="$(_resolve_data_dir)"
+
+# STARTER_DIR — where template files live (for seeding a new DATA_DIR).
+#   Checks: alongside the script (git checkout) → Homebrew share dir → /usr/local/share
+_resolve_starter_dir() {
+  for candidate in \
+    "$SCRIPT_DIR" \
+    "$SCRIPT_DIR/../share/clauderoam" \
+    "/opt/homebrew/share/clauderoam" \
+    "/usr/local/share/clauderoam"; do
+    if [ -f "$candidate/CLAUDE.md" ] && [ "$candidate" != "$DATA_DIR" ]; then
+      ( cd "$candidate" && pwd )
+      return
+    fi
+  done
+  # Fallback: if script dir IS the data dir (git checkout), starters == data
+  if [ -f "$SCRIPT_DIR/CLAUDE.md" ]; then
+    printf '%s' "$SCRIPT_DIR"
+  fi
+}
+readonly STARTER_DIR="$(_resolve_starter_dir)"
 
 # Items to symlink from repo → ~/.claude/
 readonly LINK_ITEMS=(
@@ -94,6 +127,11 @@ ${C_BOLD}FLAGS${C_RST}
   --dry-run    Print actions without changing anything (install/sync/restore)
   --no-color   Disable ANSI colors (or set NO_COLOR=1)
 
+${C_BOLD}ENVIRONMENT${C_RST}
+  CLAUDEROAM_DATA   Path to your config repo (default: ~/clauderoam)
+  CLAUDE_HOME       Path Claude Code reads from (default: ~/.claude)
+  NO_COLOR          Disable ANSI colors when set
+
 ${C_BOLD}EXAMPLES${C_RST}
   clauderoam init                Personalize and install in one go
   clauderoam doctor              Verify your setup is healthy
@@ -109,36 +147,75 @@ cmd_version() { say "clauderoam $VERSION"; }
 
 cmd_init() {
   step "Welcome to clauderoam"
-  info "This will personalize your CLAUDE.md and install symlinks into ~/.claude/"
+  info "Data directory: $DATA_DIR"
   echo
 
-  # Detect defaults
+  # Step 1: seed DATA_DIR with starter files if it's new
+  local seeded=0
+  if [ ! -d "$DATA_DIR" ] || [ -z "$(ls -A "$DATA_DIR" 2>/dev/null)" ]; then
+    if [ -z "$STARTER_DIR" ]; then
+      err "Starter files not found. Reinstall clauderoam or set CLAUDEROAM_DATA."
+      exit 1
+    fi
+    step "Seeding new data directory from $STARTER_DIR"
+    mkdir -p "$DATA_DIR"
+    # Copy template content (everything except git internals and runtime cruft)
+    ( cd "$STARTER_DIR" && find . -maxdepth 1 -mindepth 1 \
+        ! -name '.git' ! -name '.github' ! -name 'memory' \
+        ! -name 'clauderoam' ! -name 'docs' \
+        -exec cp -R {} "$DATA_DIR/" \; )
+    # Create an empty memory dir
+    mkdir -p "$DATA_DIR/memory"
+    ok "Copied starter files"
+    seeded=1
+  fi
+
+  # Step 2: initialize git if needed
+  if [ ! -d "$DATA_DIR/.git" ]; then
+    step "Initializing git repository"
+    ( cd "$DATA_DIR" && git init -q -b main )
+    ok "git init"
+  fi
+
+  # Step 3: interactive personalization
   local default_name default_lang=en
   default_name="$(git config --global user.name 2>/dev/null || echo "")"
   default_name="${default_name:-$USER}"
   if locale 2>/dev/null | grep -qi 'zh_CN\|zh_TW'; then default_lang=zh; fi
 
+  step "Personalize your CLAUDE.md"
   local name lang
   name="$(ask "Your name (shows up in CLAUDE.md)" "$default_name")"
   lang="$(ask "Preferred language for Claude to respond in (en/zh/ja/...)" "$default_lang")"
-
-  step "Writing personalized CLAUDE.md"
   _render_claude_md "$name" "$lang"
-  ok "CLAUDE.md updated"
+  ok "Wrote $DATA_DIR/CLAUDE.md"
 
-  step "Installing into $CLAUDE_DIR"
+  # Step 4: install symlinks into ~/.claude/
+  step "Linking $DATA_DIR → $CLAUDE_DIR"
   cmd_install
   echo
 
+  # Step 5: next steps
   step "Next steps"
-  info "1. Restart Claude Code so it picks up the new config"
-  info "2. Commit your changes:  git add CLAUDE.md && git commit -m 'chore: init' && git push"
-  info "3. On a second device:   git clone <this-repo> && cd <it> && ./clauderoam install"
+  if [ "$seeded" = 1 ]; then
+    info "1. Push your new config repo to GitHub so other devices can pull it:"
+    info "     cd $DATA_DIR"
+    info "     gh repo create clauderoam --private --source=. --remote=origin --push"
+    info "   (or do it manually via the GitHub UI + git push)"
+    info "2. Restart Claude Code to pick up the new config"
+    info "3. On a second device:"
+    info "     brew install YunyueLi/tap/clauderoam"
+    info "     git clone <your repo> ~/clauderoam"
+    info "     clauderoam install"
+  else
+    info "1. Restart Claude Code to pick up the new config"
+    info "2. Commit your changes:  cd $DATA_DIR && git add CLAUDE.md && git commit -m 'chore: personalize' && git push"
+  fi
 }
 
 _render_claude_md() {
   local name="$1" lang="$2"
-  cat > "$REPO_DIR/CLAUDE.md" <<EOF
+  cat > "$DATA_DIR/CLAUDE.md" <<EOF
 # My Claude Code Preferences
 
 > Loaded by Claude Code on every session start (via \`~/.claude/CLAUDE.md\` symlink).
@@ -179,7 +256,7 @@ cmd_install() {
     case "$arg" in --dry-run|-n) dry_run=1 ;; esac
   done
 
-  if [ "$REPO_DIR" = "$CLAUDE_DIR" ]; then
+  if [ "$DATA_DIR" = "$CLAUDE_DIR" ]; then
     err "Repo and target are the same path. Move the repo elsewhere."; exit 1
   fi
 
@@ -209,7 +286,7 @@ cmd_install() {
   # Create symlinks
   local linked=0
   for item in "${LINK_ITEMS[@]}"; do
-    local src="$REPO_DIR/$item" dst="$CLAUDE_DIR/$item"
+    local src="$DATA_DIR/$item" dst="$CLAUDE_DIR/$item"
     [ -e "$src" ] || continue
     [ -L "$dst" ] || [ -e "$dst" ] && _run rm -rf "$dst"
     _run ln -s "$src" "$dst"
@@ -237,7 +314,7 @@ cmd_doctor() {
 
   step "Symlinks"
   for item in "${LINK_ITEMS[@]}"; do
-    local src="$REPO_DIR/$item" dst="$CLAUDE_DIR/$item"
+    local src="$DATA_DIR/$item" dst="$CLAUDE_DIR/$item"
     [ -e "$src" ] || { info "$item: not in repo (skipping)"; continue; }
     if [ ! -L "$dst" ]; then
       err "$item: missing or not a symlink"; fail=$((fail+1))
@@ -250,12 +327,12 @@ cmd_doctor() {
 
   step "Safety: no secrets in repo"
   for item in .credentials.json policy-limits.json sessions shell-snapshots; do
-    if [ -e "$REPO_DIR/$item" ]; then err "$item is inside the repo!"; fail=$((fail+1))
+    if [ -e "$DATA_DIR/$item" ]; then err "$item is inside the repo!"; fail=$((fail+1))
     else ok "$item not in repo"; pass=$((pass+1)); fi
   done
-  if [ -d "$REPO_DIR/.git" ]; then
+  if [ -d "$DATA_DIR/.git" ]; then
     local tracked
-    tracked="$(cd "$REPO_DIR" && git ls-files | grep -E '\.credentials\.json|policy-limits\.json|sessions/|shell-snapshots/' || true)"
+    tracked="$(cd "$DATA_DIR" && git ls-files | grep -E '\.credentials\.json|policy-limits\.json|sessions/|shell-snapshots/' || true)"
     if [ -n "$tracked" ]; then err "Sensitive paths are tracked in git!"; printf '%s\n' "$tracked" | sed 's/^/      /'; fail=$((fail+1))
     else ok "Nothing sensitive is tracked in git"; pass=$((pass+1)); fi
   fi
@@ -272,7 +349,7 @@ cmd_doctor() {
 # ── Subcommand: sync ─────────────────────────────────────────────────────────
 
 cmd_sync() {
-  local src="$CLAUDE_DIR/projects" dst="$REPO_DIR/memory"
+  local src="$CLAUDE_DIR/projects" dst="$DATA_DIR/memory"
   if [ ! -d "$src" ]; then info "No $src found — nothing to sync"; return 0; fi
   mkdir -p "$dst"
   local count=0
@@ -294,7 +371,7 @@ cmd_sync() {
 # ── Subcommand: restore ──────────────────────────────────────────────────────
 
 cmd_restore() {
-  local src="$REPO_DIR/memory" dst="$CLAUDE_DIR/projects"
+  local src="$DATA_DIR/memory" dst="$CLAUDE_DIR/projects"
   if [ ! -d "$src" ] || [ -z "$(ls -A "$src" 2>/dev/null)" ]; then
     info "No memory snapshots in repo — nothing to restore"; return 0
   fi
@@ -329,7 +406,7 @@ cmd_push() {
   cmd_sync
   echo
   step "Push to GitHub"
-  ( cd "$REPO_DIR"
+  ( cd "$DATA_DIR"
     if [ ! -d .git ]; then err "Not a git repo"; exit 1; fi
     git add -A
     if git diff --cached --quiet; then info "Nothing to commit"
@@ -342,8 +419,8 @@ cmd_push() {
 # ── Subcommand: status ───────────────────────────────────────────────────────
 
 cmd_status() {
-  step "Repo: $REPO_DIR"
-  ( cd "$REPO_DIR" && git status --short 2>/dev/null || say "  (not a git repo)" )
+  step "Repo: $DATA_DIR"
+  ( cd "$DATA_DIR" && git status --short 2>/dev/null || say "  (not a git repo)" )
   step "Symlinks in $CLAUDE_DIR"
   local found=0
   for item in "${LINK_ITEMS[@]}"; do
