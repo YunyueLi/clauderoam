@@ -157,25 +157,27 @@ fi
 # ── Checksums ───────────────────────────────────────────────────────────────
 step "Computing checksums"
 TARBALL_URL="https://github.com/$REPO/archive/refs/tags/$TAG.tar.gz"
-TMP_TAR="$(mktemp -d)/clauderoam-$NEW_VERSION.tar.gz"
-
-# Wait for GitHub to propagate the tag tarball (eventual consistency)
-for i in 1 2 3 4 5; do
-  if curl -fsSL -o "$TMP_TAR" "$TARBALL_URL" 2>/dev/null; then break; fi
-  info "Tarball not yet available (attempt $i/5), waiting 3s..."
-  sleep 3
-done
-[ -s "$TMP_TAR" ] || { err "Could not fetch $TARBALL_URL"; exit 1; }
-
-SHA256="$(shasum -a 256 "$TMP_TAR" | awk '{print $1}')"
-ok "sha256: $SHA256"
-
-CHECKSUMS_FILE="$(dirname "$TMP_TAR")/checksums.txt"
-printf '%s  clauderoam-%s.tar.gz\n' "$SHA256" "$NEW_VERSION" > "$CHECKSUMS_FILE"
 
 if [ "$DRY_RUN" = 1 ]; then
-  printf '  %s[dry-run]%s upload checksums.txt to release\n' "$C_DIM" "$C_RST"
+  printf '  %s[dry-run]%s would download %s\n' "$C_DIM" "$C_RST" "$TARBALL_URL"
+  printf '  %s[dry-run]%s would compute sha256 and upload checksums.txt\n' "$C_DIM" "$C_RST"
+  SHA256="<sha256-would-go-here>"
 else
+  TMP_TAR="$(mktemp -d)/clauderoam-$NEW_VERSION.tar.gz"
+  # Wait for GitHub to propagate the tag tarball (eventual consistency)
+  for i in 1 2 3 4 5; do
+    if curl -fsSL -o "$TMP_TAR" "$TARBALL_URL" 2>/dev/null; then break; fi
+    info "Tarball not yet available (attempt $i/5), waiting 3s..."
+    sleep 3
+  done
+  [ -s "$TMP_TAR" ] || { err "Could not fetch $TARBALL_URL"; exit 1; }
+
+  SHA256="$(shasum -a 256 "$TMP_TAR" | awk '{print $1}')"
+  ok "sha256: $SHA256"
+
+  CHECKSUMS_FILE="$(dirname "$TMP_TAR")/checksums.txt"
+  printf '%s  clauderoam-%s.tar.gz\n' "$SHA256" "$NEW_VERSION" > "$CHECKSUMS_FILE"
+
   gh release upload "$TAG" "$CHECKSUMS_FILE" --repo "$REPO"
   ok "Uploaded checksums.txt"
 fi
