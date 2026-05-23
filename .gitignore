@@ -1,0 +1,29 @@
+# ===== Never commit (contains credentials / sensitive) =====
+.credentials.json
+.last-cleanup
+policy-limits.json
+
+# ===== Runtime / ephemeral data =====
+sessions/
+shell-snapshots/
+session-env/
+telemetry/
+projects/
+backups/
+plans/
+todos/
+statsig/
+
+# ===== Personal-only overrides (local, not synced) =====
+settings.local.json
+CLAUDE.local.md
+
+# ===== OS / editor cruft =====
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+*~
+.idea/
+.vscode/
