@@ -299,7 +299,10 @@ cmd_install() {
 
   echo
   ok "Linked $linked items into $CLAUDE_DIR"
-  [ -n "$backup" ] && info "Backup at: $backup (delete once you've verified things work)"
+  if [ -n "$backup" ]; then
+    info "Backup at: $backup (delete once you've verified things work)"
+  fi
+  return 0
 }
 
 # ── Subcommand: doctor ───────────────────────────────────────────────────────
@@ -432,7 +435,10 @@ cmd_status() {
       found=1
     fi
   done
-  [ "$found" = 0 ] && say "  ${C_DIM}(no symlinks — run 'clauderoam install')${C_RST}"
+  if [ "$found" = 0 ]; then
+    say "  ${C_DIM}(no symlinks — run 'clauderoam install')${C_RST}"
+  fi
+  return 0
 }
 
 # ── Dispatch ─────────────────────────────────────────────────────────────────
