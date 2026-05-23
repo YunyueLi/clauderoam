@@ -7,7 +7,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Shell](https://img.shields.io/badge/shell-bash-89e051)](clauderoam)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey)]()
-[![Version](https://img.shields.io/badge/version-0.3.0-orange)]()
+[![Version](https://img.shields.io/badge/version-0.4.0-orange)]()
+[![Homebrew](https://img.shields.io/badge/homebrew-tap-FBB040)](https://github.com/YunyueLi/homebrew-tap)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 [English](./README.md)  ·  [文档](./docs)  ·  [示例](./examples)  ·  [FAQ](./docs/faq.md)
@@ -21,11 +22,21 @@
 > **clauderoam 用两条命令 + 一组 symlink 修好这件事。**
 
 ```bash
+brew install YunyueLi/tap/clauderoam
+clauderoam init
+```
+
+`init` 会在 `~/clauderoam/` 创建你的配置 repo、个性化 `CLAUDE.md`、symlink 到 `~/.claude/`。每台新设备同样两条命令（前提是你已经把 repo push 到 GitHub）。
+
+<details>
+<summary>没装 Homebrew？用 git clone。</summary>
+
+```bash
 git clone https://github.com/YunyueLi/clauderoam.git ~/clauderoam
 cd ~/clauderoam && ./clauderoam init
 ```
 
-`init` 会个性化你的 `CLAUDE.md`、symlink 到 `~/.claude/`，搞定。每台新设备，同样两条命令。
+</details>
 
 ---
 
@@ -136,13 +147,32 @@ Claude Code 把项目级 memory 存在 `~/.claude/projects/<编码路径>/memory
 
 ## 安装
 
+### macOS / Linux（Homebrew）
+
+```bash
+brew install YunyueLi/tap/clauderoam
+clauderoam init
+```
+
+升级：`brew upgrade clauderoam`（只升级 CLI 本身，**绝不动你的配置 repo**）。
+
+### 不用 Homebrew
+
 ```bash
 git clone https://github.com/YunyueLi/clauderoam.git ~/clauderoam
 cd ~/clauderoam
-./clauderoam init     # 个性化 CLAUDE.md + symlink 到 ~/.claude/
+./clauderoam init
 ```
 
-第二台设备，同样两条命令。想把 `clauderoam` 放到 `$PATH` 里？见 [docs/setup.md](./docs/setup.md)。
+### 在第二台设备上
+
+CLI 安装同上。要把你的配置带过来：
+
+```bash
+brew install YunyueLi/tap/clauderoam       # 或 git clone 安装 CLI
+git clone <你的 clauderoam 配置 repo> ~/clauderoam
+clauderoam install
+```
 
 ## 命令
 

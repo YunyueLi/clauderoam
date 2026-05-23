@@ -7,7 +7,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Shell](https://img.shields.io/badge/shell-bash-89e051)](clauderoam)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey)]()
-[![Version](https://img.shields.io/badge/version-0.3.0-orange)]()
+[![Version](https://img.shields.io/badge/version-0.4.0-orange)]()
+[![Homebrew](https://img.shields.io/badge/homebrew-tap-FBB040)](https://github.com/YunyueLi/homebrew-tap)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 [中文](./README.zh-CN.md)  ·  [Docs](./docs)  ·  [Examples](./examples)  ·  [FAQ](./docs/faq.md)
@@ -21,11 +22,21 @@
 > **clauderoam fixes that with two commands and a symlink farm.**
 
 ```bash
+brew install YunyueLi/tap/clauderoam
+clauderoam init
+```
+
+`init` creates your config repo at `~/clauderoam/`, personalizes your `CLAUDE.md`, and links it into `~/.claude/`. Same two commands on every other device — after pushing your repo to GitHub, of course.
+
+<details>
+<summary>Don't have Homebrew? Use git clone.</summary>
+
+```bash
 git clone https://github.com/YunyueLi/clauderoam.git ~/clauderoam
 cd ~/clauderoam && ./clauderoam init
 ```
 
-`init` personalizes your `CLAUDE.md`, links it into `~/.claude/`, and you're done. Same two commands on every other device.
+</details>
 
 ---
 
@@ -136,13 +147,32 @@ Claude Code stores per-project memory at `~/.claude/projects/<encoded-path>/memo
 
 ## Install
 
+### macOS / Linux (Homebrew)
+
+```bash
+brew install YunyueLi/tap/clauderoam
+clauderoam init
+```
+
+Updates: `brew upgrade clauderoam` (updates the CLI only — your config repo is yours and is never touched).
+
+### Without Homebrew
+
 ```bash
 git clone https://github.com/YunyueLi/clauderoam.git ~/clauderoam
 cd ~/clauderoam
-./clauderoam init     # personalize CLAUDE.md + symlink into ~/.claude/
+./clauderoam init
 ```
 
-On a second device, same two commands. Want `clauderoam` on your `$PATH`? See [docs/setup.md](./docs/setup.md).
+### On a second device
+
+The CLI install is the same. To bring your config:
+
+```bash
+brew install YunyueLi/tap/clauderoam      # or git clone the cli
+git clone <your-clauderoam-config-repo> ~/clauderoam
+clauderoam install
+```
 
 ## Commands
 
