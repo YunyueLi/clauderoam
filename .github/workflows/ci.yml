@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  shellcheck:
+    name: shellcheck + bash syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get update -qq && sudo apt-get install -y shellcheck
+
+      - name: bash syntax check
+        run: |
+          for f in clauderoam install.sh bump.sh; do
+            echo "→ bash -n $f"
+            bash -n "$f"
+          done
+
+      - name: shellcheck
+        run: |
+          shellcheck --severity=warning --shell=bash clauderoam install.sh bump.sh
+
+  smoke-test:
+    name: smoke test (init + doctor)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install rsync
+        run: sudo apt-get update -qq && sudo apt-get install -y rsync
+
+      - name: run init in temp dirs (non-interactive)
+        env:
+          CLAUDEROAM_DATA: /tmp/cr-data
+          CLAUDE_HOME: /tmp/cr-claude
+        run: |
+          mkdir -p "$CLAUDE_HOME"
+          printf "CI User\nen\n" | ./clauderoam init
+          ls -la "$CLAUDE_HOME"
+
+      - name: run doctor
+        env:
+          CLAUDEROAM_DATA: /tmp/cr-data
+          CLAUDE_HOME: /tmp/cr-claude
+        run: ./clauderoam doctor
+
+      - name: status output
+        env:
+          CLAUDEROAM_DATA: /tmp/cr-data
+          CLAUDE_HOME: /tmp/cr-claude
+        run: ./clauderoam status
+
+  formula-test:
+    name: homebrew formula test (macOS)
+    runs-on: macos-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: tap & install
+        run: |
+          brew tap YunyueLi/tap
+          brew install --build-from-source YunyueLi/tap/clauderoam
+          clauderoam version
+          clauderoam help
