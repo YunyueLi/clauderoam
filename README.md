@@ -14,6 +14,10 @@
 
 [中文](./README.zh-CN.md)  ·  [Docs](./docs)  ·  [Examples](./examples)  ·  [FAQ](./docs/faq.md)
 
+<br/>
+
+<img src=".assets/demo.gif" alt="clauderoam demo" width="800">
+
 </div>
 
 ---

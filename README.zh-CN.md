@@ -14,6 +14,10 @@
 
 [English](./README.md)  ·  [文档](./docs)  ·  [示例](./examples)  ·  [FAQ](./docs/faq.md)
 
+<br/>
+
+<img src=".assets/demo.gif" alt="clauderoam demo" width="800">
+
 </div>
 
 ---

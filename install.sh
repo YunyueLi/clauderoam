@@ -8,6 +8,7 @@
 #   CLAUDEROAM_VERSION   Version to install (default: latest)
 #   CLAUDEROAM_PREFIX    Install prefix (default: $HOME/.local)
 #   CLAUDEROAM_NO_VERIFY If set, skip sha256 verification
+#   CLAUDEROAM_FORCE     If set, reinstall even if already at latest
 #
 # Installs:
 #   <PREFIX>/bin/clauderoam
@@ -42,6 +43,22 @@ for tool in curl tar bash; do
   fi
 done
 
+# ── Detect existing install ─────────────────────────────────────────────────
+INSTALLED_VERSION=""
+INSTALLED_AT=""
+if command -v clauderoam >/dev/null 2>&1; then
+  INSTALLED_AT="$(command -v clauderoam)"
+  INSTALLED_VERSION="$(clauderoam version 2>/dev/null | awk '{print $2}')"
+fi
+
+if [ -n "$INSTALLED_VERSION" ]; then
+  step "Existing install detected"
+  info "Found clauderoam $INSTALLED_VERSION at $INSTALLED_AT"
+  if [ "$INSTALLED_AT" != "$PREFIX/bin/clauderoam" ]; then
+    info "(installed via a different method — Homebrew?)"
+  fi
+fi
+
 # ── Resolve version ─────────────────────────────────────────────────────────
 step "Resolving version"
 if [ "$VERSION" = "latest" ]; then
@@ -52,7 +69,18 @@ if [ "$VERSION" = "latest" ]; then
     exit 1
   fi
 fi
-ok "Installing clauderoam v$VERSION"
+
+if [ -n "$INSTALLED_VERSION" ] && [ "$INSTALLED_VERSION" = "$VERSION" ] && [ -z "${CLAUDEROAM_FORCE:-}" ]; then
+  ok "Already at v$VERSION — nothing to do"
+  info "Set CLAUDEROAM_FORCE=1 to reinstall anyway"
+  exit 0
+fi
+
+if [ -n "$INSTALLED_VERSION" ]; then
+  ok "Upgrading v$INSTALLED_VERSION → v$VERSION"
+else
+  ok "Installing clauderoam v$VERSION"
+fi
 
 # ── Download ────────────────────────────────────────────────────────────────
 step "Downloading"
