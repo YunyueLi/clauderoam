@@ -4,6 +4,7 @@
 
 ### Your Claude Code config, anywhere.<br/>Across Macs. Across accounts. Without the copy-paste.
 
+[![CI](https://github.com/YunyueLi/clauderoam/actions/workflows/ci.yml/badge.svg)](https://github.com/YunyueLi/clauderoam/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Shell](https://img.shields.io/badge/shell-bash-89e051)](clauderoam)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey)]()
@@ -156,7 +157,16 @@ clauderoam init
 
 Updates: `brew upgrade clauderoam` (updates the CLI only — your config repo is yours and is never touched).
 
-### Without Homebrew
+### Without Homebrew (curl)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/YunyueLi/clauderoam/main/install.sh | bash
+clauderoam init
+```
+
+Installs to `~/.local/bin/clauderoam` + `~/.local/share/clauderoam/`. Verifies sha256 against the release manifest. Override paths with `CLAUDEROAM_PREFIX`.
+
+### From source (git clone)
 
 ```bash
 git clone https://github.com/YunyueLi/clauderoam.git ~/clauderoam
@@ -217,6 +227,8 @@ cp examples/agents/code-reviewer.md agents/
 - [Multi-device workflow](./docs/multi-device.md) — adding Macs, iPhone, iPad
 - [Switching Claude accounts](./docs/multi-account.md) — the migration checklist
 - [Auto-sync](./docs/auto-sync.md) — optional hands-off shell hook
+- [Releasing](./docs/RELEASING.md) — for maintainers: how to cut a release
+- [Upstreaming to homebrew-core](./docs/HOMEBREW-CORE.md) — when/how to apply
 - [FAQ](./docs/faq.md)
 
 <details>

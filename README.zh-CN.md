@@ -4,6 +4,7 @@
 
 ### 让 Claude Code 配置漫游<br/>跨 Mac、跨账号、跨设备 —— 无需复制粘贴
 
+[![CI](https://github.com/YunyueLi/clauderoam/actions/workflows/ci.yml/badge.svg)](https://github.com/YunyueLi/clauderoam/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Shell](https://img.shields.io/badge/shell-bash-89e051)](clauderoam)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey)]()
@@ -156,7 +157,16 @@ clauderoam init
 
 升级：`brew upgrade clauderoam`（只升级 CLI 本身，**绝不动你的配置 repo**）。
 
-### 不用 Homebrew
+### 不用 Homebrew（curl）
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/YunyueLi/clauderoam/main/install.sh | bash
+clauderoam init
+```
+
+装到 `~/.local/bin/clauderoam` + `~/.local/share/clauderoam/`。会用 release manifest 验证 sha256。用 `CLAUDEROAM_PREFIX` 覆盖路径。
+
+### 从源码安装（git clone）
 
 ```bash
 git clone https://github.com/YunyueLi/clauderoam.git ~/clauderoam
@@ -217,6 +227,8 @@ cp examples/agents/code-reviewer.md agents/
 - [多设备工作流](./docs/multi-device.md) — 新 Mac、iPhone、iPad
 - [换 Claude 账号](./docs/multi-account.md) — 迁移清单
 - [自动同步](./docs/auto-sync.md) — 可选的自动 shell hook
+- [发版流程](./docs/RELEASING.md) — 维护者用：怎么 cut release
+- [上游 homebrew-core](./docs/HOMEBREW-CORE.md) — 什么时候 / 怎么申请
 - [FAQ](./docs/faq.md)
 
 <details>

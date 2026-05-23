@@ -11,7 +11,8 @@ set -euo pipefail
 # ── Constants ────────────────────────────────────────────────────────────────
 
 readonly VERSION="0.4.0"
-readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly SCRIPT_DIR
 readonly CLAUDE_DIR="${CLAUDE_HOME:-$HOME/.claude}"
 
 # DATA_DIR — where the user's config repo lives.
@@ -25,7 +26,8 @@ _resolve_data_dir() {
     printf '%s' "$HOME/clauderoam"
   fi
 }
-readonly DATA_DIR="$(_resolve_data_dir)"
+DATA_DIR="$(_resolve_data_dir)"
+readonly DATA_DIR
 
 # STARTER_DIR — where template files live (for seeding a new DATA_DIR).
 #   Checks: alongside the script (git checkout) → Homebrew share dir → /usr/local/share
@@ -45,7 +47,8 @@ _resolve_starter_dir() {
     printf '%s' "$SCRIPT_DIR"
   fi
 }
-readonly STARTER_DIR="$(_resolve_starter_dir)"
+STARTER_DIR="$(_resolve_starter_dir)"
+readonly STARTER_DIR
 
 # Items to symlink from repo → ~/.claude/
 readonly LINK_ITEMS=(
