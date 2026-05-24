@@ -41,6 +41,27 @@ The cloud memory on claude.ai is account-bound and not exportable. clauderoam gi
 
 Yes — they all read the same `~/.claude/` directory.
 
+### Does this work with claude.ai/code (the web version)?
+
+**Partially, and not in the way you'd want.**
+
+claude.ai/code spins up a fresh Linux sandbox per project. There's no persistent `~/.claude/` to symlink into, no cross-project user-level config, and `auto` mode isn't available there (only `acceptEdits` and `plan`). So clauderoam's core trick — symlinking your personal config into Claude Code's read path — has no place to land.
+
+The closest workaround: **open your `clauderoam-config` repo in claude.ai/code as the project**. The web version will read that repo's `CLAUDE.md` like any project file, so your preferences are visible for that one session. But it won't carry over to other projects you open next.
+
+**Bottom line:** clauderoam is built for local Claude Code (desktop / CLI / IDE extensions). If your main interface is the web, the gains are smaller and you'll still re-introduce yourself every session.
+
+### Does "cloud workflow" mean I should switch to claude.ai/code?
+
+Not necessarily. "Cloud" can mean two things:
+
+1. **Data and config live in GitHub, not pinned to one Mac.** ← clauderoam solves this. Your customization is in git; any new Mac that runs Claude Code can `clauderoam install` and have your full setup in a minute.
+2. **Claude Code runs in a browser, no local install needed.** ← That's claude.ai/code, and it has its own limits (no auto mode, no user-level config, no persistent memory).
+
+For most "I want my Claude Code to follow me" use cases, you actually want meaning #1, with the desktop app on each machine you switch between. That's the supported clauderoam workflow.
+
+For mobile or someone-else's-computer scenarios where local install isn't possible, use the [GitHub @claude bot](https://github.com/apps/claude) for async work via issues and PRs.
+
 ### What if I'm not on macOS?
 
 The CLI is bash with standard tools (`git`, `rsync`, `cp`, `ln`). Should work on Linux and WSL. No macOS-specific behavior.

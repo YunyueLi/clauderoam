@@ -45,6 +45,54 @@ cd ~/clauderoam && ./clauderoam init
 
 ---
 
+## Where clauderoam works
+
+clauderoam manages the **local Claude Code installation** — the one that reads `~/.claude/`. That covers the Mac desktop app, the CLI, and IDE extensions. The browser version of Claude Code is a different runtime and outside its scope.
+
+| Surface | Status | Why |
+|---|---|---|
+| **Claude Code desktop** (macOS, Linux, Windows) | ✅ Full | Reads `~/.claude/`; clauderoam symlinks into it |
+| **Claude Code CLI** (terminal) | ✅ Full | Same `~/.claude/` mechanism |
+| **VS Code / JetBrains** extensions | ✅ Full | Same `~/.claude/` mechanism |
+| **[claude.ai/code](https://claude.ai/code)** (web) | ⚠️ Project-only | Each web session is an isolated sandbox; no `~/.claude/` exists there. Workaround: open your `clauderoam-config` repo as the project so its `CLAUDE.md` loads — but `auto` mode and cross-project memory still aren't available |
+| **Claude iOS / Android** app | ➖ N/A | Read-only chat. For mobile cloud work, use the [GitHub @claude bot](https://github.com/apps/claude) to delegate via issues/PRs |
+
+```mermaid
+flowchart TD
+    Q{Where are you using<br/>Claude Code?}
+    Q -->|desktop app| A
+    Q -->|CLI terminal| A
+    Q -->|VS Code · JetBrains| A
+    Q -->|claude.ai/code| B
+    Q -->|iOS · Android app| C
+
+    A[✅ <b>Full clauderoam experience</b><br/>~/.claude/ ◄ symlinks ◄ ~/clauderoam<br/>auto mode · memory · personal CLAUDE.md]
+    B[⚠️ <b>Project-scoped only</b><br/>Open clauderoam-config to load<br/>your CLAUDE.md as a project file]
+    C[➖ <b>Use GitHub @claude</b><br/>for async cloud work from mobile]
+
+    classDef ok    fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef warn  fill:#fef3c7,stroke:#eab308,color:#78350f
+    classDef info  fill:#dbeafe,stroke:#3b82f6,color:#1e3a8a
+    classDef q     fill:#f3f4f6,stroke:#9ca3af,color:#111827
+    class A ok
+    class B warn
+    class C info
+    class Q q
+```
+
+### "Fully cloud" — two meanings
+
+The phrase "cloud workflow" gets used for two different things. clauderoam solves one of them, not both:
+
+| What you mean by "cloud" | clauderoam helps? |
+|---|---|
+| **My data and config live in GitHub**, not pinned to one Mac → I can switch Macs / Claude accounts and not lose anything | ✅ **Yes — this is exactly what clauderoam is for** |
+| **I want to run Claude Code inside a browser** so I never install anything locally | ❌ No. That's claude.ai/code's job, and it has its own architectural limits (no user-level config, no `auto` mode, no cross-session memory). clauderoam can't change those |
+
+If your goal is the first one — **use desktop Claude Code on each Mac you switch between, and let clauderoam carry your config in git**. That's the supported workflow.
+
+---
+
 ## Mental model
 
 Claude Code reads config from **three places** every time it starts. clauderoam manages the first one. Your projects own the second. The third is the live conversation.

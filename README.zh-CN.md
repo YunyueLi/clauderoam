@@ -45,6 +45,54 @@ cd ~/clauderoam && ./clauderoam init
 
 ---
 
+## clauderoam 在哪些场景生效
+
+clauderoam 管的是**本地 Claude Code 安装** —— 也就是会读 `~/.claude/` 的那些。包括 Mac 桌面 App、CLI、IDE 扩展。**浏览器版（claude.ai/code）是另一个运行时**，不在它的覆盖范围里。
+
+| 入口 | 状态 | 原因 |
+|---|---|---|
+| **Claude Code 桌面 App**（macOS / Linux / Windows） | ✅ 全部生效 | 读 `~/.claude/`，clauderoam symlink 到里面 |
+| **Claude Code CLI**（终端） | ✅ 全部生效 | 同一套 `~/.claude/` 机制 |
+| **VS Code / JetBrains** 扩展 | ✅ 全部生效 | 同一套 `~/.claude/` 机制 |
+| **[claude.ai/code](https://claude.ai/code)**（网页版） | ⚠️ 仅项目级 | 每个网页 session 都是独立沙箱，根本没有 `~/.claude/`。**绕过办法**：把 `clauderoam-config` repo 当项目打开，它的 `CLAUDE.md` 会被加载 —— 但 `auto` 模式、跨项目记忆、跨 session 记忆都还是没有 |
+| **Claude iOS / Android** App | ➖ 不适用 | 只读聊天客户端。移动端的云端工作请用 [GitHub @claude bot](https://github.com/apps/claude) 通过 issue/PR 异步触发 |
+
+```mermaid
+flowchart TD
+    Q{你在哪里用<br/>Claude Code？}
+    Q -->|桌面 App| A
+    Q -->|CLI 终端| A
+    Q -->|VS Code · JetBrains| A
+    Q -->|claude.ai/code| B
+    Q -->|iOS · Android App| C
+
+    A[✅ <b>clauderoam 全部生效</b><br/>~/.claude/ ◄ symlink ◄ ~/clauderoam<br/>auto 模式 · 记忆 · 个人 CLAUDE.md]
+    B[⚠️ <b>仅项目级生效</b><br/>打开 clauderoam-config<br/>能读到你的 CLAUDE.md]
+    C[➖ <b>用 GitHub @claude</b><br/>从手机异步触发云端工作]
+
+    classDef ok    fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef warn  fill:#fef3c7,stroke:#eab308,color:#78350f
+    classDef info  fill:#dbeafe,stroke:#3b82f6,color:#1e3a8a
+    classDef q     fill:#f3f4f6,stroke:#9ca3af,color:#111827
+    class A ok
+    class B warn
+    class C info
+    class Q q
+```
+
+### "全程云端" 有两种含义
+
+"云端工作流" 这个词被两种意思混着用。**clauderoam 只解决其中一种**：
+
+| 你说"云端"指的是 | clauderoam 管这个吗 |
+|---|---|
+| **我的数据和配置存在 GitHub**，不绑死在某一台 Mac 上 → 换 Mac、换 Claude 账号都不丢 | ✅ **就是干这个的** |
+| **我想在浏览器里跑 Claude Code**，本地完全不装东西 | ❌ 那是 claude.ai/code 的活，它本身有架构限制（没有用户级配置、没有 `auto` 模式、没有跨 session 记忆）。clauderoam 改不了这些 |
+
+如果你想要的是第一种 —— **在你切换的每台 Mac 上都装 Claude Code 桌面版，让 clauderoam 帮你把配置用 git 带过去**。这是支持的工作流。
+
+---
+
 ## 心智模型
 
 Claude Code 每次启动都从**三个地方**读配置。clauderoam 管第一层，你的项目管第二层，第三层是当前对话。
