@@ -78,11 +78,11 @@ Install:
   clauderoam init
 
 Or curl|bash:
-  https://github.com/YunyueLi/clauderoam#install
+  https://github.com/YunyueLi/ClaudeRoam#install
 
 MIT, ~500 lines of pure bash. Issues + PRs welcome.
 
-https://github.com/YunyueLi/clauderoam
+https://github.com/YunyueLi/ClaudeRoam
 ```
 
 ## After posting

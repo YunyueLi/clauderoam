@@ -32,7 +32,7 @@ The account-switch case is the wedge — most other tools (`renefichtmueller/cla
     brew install YunyueLi/tap/clauderoam
     clauderoam init
 
-Or `curl -fsSL https://raw.githubusercontent.com/YunyueLi/clauderoam/main/install.sh | bash`.
+Or `curl -fsSL https://raw.githubusercontent.com/YunyueLi/ClaudeRoam/main/install.sh | bash`.
 
 ### Stack
 
@@ -40,7 +40,7 @@ Pure bash, shellcheck-clean, ~500 lines. CI runs shellcheck + a smoke test on ev
 
 ### Repo + docs
 
-https://github.com/YunyueLi/clauderoam (MIT)
+https://github.com/YunyueLi/ClaudeRoam (MIT)
 
 Honest about competitors in the README — see the comparison table.
 

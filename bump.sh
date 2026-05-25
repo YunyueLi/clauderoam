@@ -46,7 +46,7 @@ if ! [[ "$NEW_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
 fi
 
 # ── Config ──────────────────────────────────────────────────────────────────
-REPO="YunyueLi/clauderoam"
+REPO="YunyueLi/ClaudeRoam"
 TAP_REPO="YunyueLi/homebrew-tap"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TAP_DIR="${HOMEBREW_TAP_DIR:-$HOME/Desktop/homebrew-tap}"

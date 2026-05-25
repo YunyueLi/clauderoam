@@ -4,7 +4,7 @@
 
 <br/>
 
-[![CI](https://github.com/YunyueLi/clauderoam/actions/workflows/ci.yml/badge.svg)](https://github.com/YunyueLi/clauderoam/actions/workflows/ci.yml)
+[![CI](https://github.com/YunyueLi/ClaudeRoam/actions/workflows/ci.yml/badge.svg)](https://github.com/YunyueLi/ClaudeRoam/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Shell](https://img.shields.io/badge/shell-bash-89e051)](clauderoam)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey)]()
@@ -104,10 +104,10 @@ clauderoam init
 
 ```bash
 # curl one-liner (verifies sha256)
-curl -fsSL https://raw.githubusercontent.com/YunyueLi/clauderoam/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/YunyueLi/ClaudeRoam/main/install.sh | bash
 
 # or git clone
-git clone https://github.com/YunyueLi/clauderoam.git ~/clauderoam
+git clone https://github.com/YunyueLi/ClaudeRoam.git ~/clauderoam
 cd ~/clauderoam && ./clauderoam init
 ```
 
@@ -379,7 +379,7 @@ Updates: `brew upgrade clauderoam` (updates the CLI only — your config repo is
 ### Without Homebrew (curl)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YunyueLi/clauderoam/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/YunyueLi/ClaudeRoam/main/install.sh | bash
 clauderoam init
 ```
 
@@ -388,7 +388,7 @@ Installs to `~/.local/bin/clauderoam` + `~/.local/share/clauderoam/`. Verifies s
 ### From source (git clone)
 
 ```bash
-git clone https://github.com/YunyueLi/clauderoam.git ~/clauderoam
+git clone https://github.com/YunyueLi/ClaudeRoam.git ~/clauderoam
 cd ~/clauderoam
 ./clauderoam init
 ```

@@ -14,7 +14,7 @@ Show HN: ClaudeRoam – Your Claude Code config, anywhere
 ## URL
 
 ```
-https://github.com/YunyueLi/clauderoam
+https://github.com/YunyueLi/ClaudeRoam
 ```
 
 ## Text (optional but recommended for Show HN)
@@ -37,7 +37,7 @@ The whole thing is ~500 lines of bash. Pure shell, no daemon, no Python, no Node
 
 I'd love feedback on: the data/CLI separation model, the projects registry design, anything that feels over-engineered for a dotfiles tool.
 
-Repo: https://github.com/YunyueLi/clauderoam
+Repo: https://github.com/YunyueLi/ClaudeRoam
 ```
 
 ## After posting

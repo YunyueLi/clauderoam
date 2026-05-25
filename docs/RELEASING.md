@@ -13,7 +13,7 @@ That command does everything below. Continue reading if you want to know what it
 ## Prerequisites
 
 - Clean working tree on `main`
-- `gh` CLI authenticated and able to push to both `YunyueLi/clauderoam` and `YunyueLi/homebrew-tap`
+- `gh` CLI authenticated and able to push to both `YunyueLi/ClaudeRoam` and `YunyueLi/homebrew-tap`
 - `$HOMEBREW_TAP_DIR` points at your local checkout of the tap (default: `~/Desktop/homebrew-tap`)
 - The new version follows semver: `X.Y.Z`
 
@@ -64,7 +64,7 @@ gh release create v0.5.0 --title "v0.5.0" --notes "..."
 
 # 5. Compute checksum
 curl -fsSL -o /tmp/clauderoam.tar.gz \
-  "https://github.com/YunyueLi/clauderoam/archive/refs/tags/v0.5.0.tar.gz"
+  "https://github.com/YunyueLi/ClaudeRoam/archive/refs/tags/v0.5.0.tar.gz"
 SHA=$(shasum -a 256 /tmp/clauderoam.tar.gz | awk '{print $1}')
 echo "$SHA  clauderoam-0.5.0.tar.gz" > /tmp/checksums.txt
 
@@ -74,7 +74,7 @@ gh release upload v0.5.0 /tmp/checksums.txt
 # 7. Update formula
 cd ~/Desktop/homebrew-tap
 sed -i '' \
-  -e "s|url \".*\"|url \"https://github.com/YunyueLi/clauderoam/archive/refs/tags/v0.5.0.tar.gz\"|" \
+  -e "s|url \".*\"|url \"https://github.com/YunyueLi/ClaudeRoam/archive/refs/tags/v0.5.0.tar.gz\"|" \
   -e "s|sha256 \".*\"|sha256 \"$SHA\"|" \
   -e "s|version \".*\"|version \"0.5.0\"|" \
   Formula/clauderoam.rb

@@ -2,7 +2,7 @@
 # install.sh — one-liner installer for clauderoam.
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/YunyueLi/clauderoam/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/YunyueLi/ClaudeRoam/main/install.sh | bash
 #
 # Environment:
 #   CLAUDEROAM_VERSION   Version to install (default: latest)
@@ -17,7 +17,7 @@
 set -euo pipefail
 
 # ── Config ──────────────────────────────────────────────────────────────────
-REPO="YunyueLi/clauderoam"
+REPO="YunyueLi/ClaudeRoam"
 VERSION="${CLAUDEROAM_VERSION:-latest}"
 PREFIX="${CLAUDEROAM_PREFIX:-$HOME/.local}"
 

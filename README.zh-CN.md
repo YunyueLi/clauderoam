@@ -4,7 +4,7 @@
 
 <br/>
 
-[![CI](https://github.com/YunyueLi/clauderoam/actions/workflows/ci.yml/badge.svg)](https://github.com/YunyueLi/clauderoam/actions/workflows/ci.yml)
+[![CI](https://github.com/YunyueLi/ClaudeRoam/actions/workflows/ci.yml/badge.svg)](https://github.com/YunyueLi/ClaudeRoam/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Shell](https://img.shields.io/badge/shell-bash-89e051)](clauderoam)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey)]()
@@ -104,10 +104,10 @@ clauderoam init
 
 ```bash
 # curl 一键安装（带 sha256 校验）
-curl -fsSL https://raw.githubusercontent.com/YunyueLi/clauderoam/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/YunyueLi/ClaudeRoam/main/install.sh | bash
 
 # 或 git clone
-git clone https://github.com/YunyueLi/clauderoam.git ~/clauderoam
+git clone https://github.com/YunyueLi/ClaudeRoam.git ~/clauderoam
 cd ~/clauderoam && ./clauderoam init
 ```
 
@@ -379,7 +379,7 @@ clauderoam init
 ### 不用 Homebrew（curl）
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YunyueLi/clauderoam/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/YunyueLi/ClaudeRoam/main/install.sh | bash
 clauderoam init
 ```
 
@@ -388,7 +388,7 @@ clauderoam init
 ### 从源码安装（git clone）
 
 ```bash
-git clone https://github.com/YunyueLi/clauderoam.git ~/clauderoam
+git clone https://github.com/YunyueLi/ClaudeRoam.git ~/clauderoam
 cd ~/clauderoam
 ./clauderoam init
 ```
