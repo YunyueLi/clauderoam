@@ -410,12 +410,34 @@ cmd_restore() {
 # ── Subcommand: push ─────────────────────────────────────────────────────────
 
 cmd_push() {
+  # Step 1: pull first (so we never push on top of stale local).
+  # Multi-device safety: if device A pushed, device B's auto-sync must pull
+  # before commit + push, or it'll get rejected as non-fast-forward.
+  step "Pull latest from remote"
+  ( cd "$DATA_DIR"
+    if [ ! -d .git ]; then err "Not a git repo: $DATA_DIR"; exit 1; fi
+    if ! git rev-parse --abbrev-ref --symbolic-full-name '@{u}' >/dev/null 2>&1; then
+      info "No upstream tracking branch — skipping pull"
+      return 0
+    fi
+    if git pull --ff-only --quiet 2>/dev/null; then
+      ok "Up to date"
+    else
+      err "Pull failed — local has diverged from remote."
+      err "Resolve manually:  cd $DATA_DIR && git status"
+      exit 1
+    fi
+  ) || exit $?
+  echo
+
+  # Step 2: snapshot any new memory into the repo.
   step "Snapshot memory"
   cmd_sync
   echo
+
+  # Step 3: commit + push.
   step "Push to GitHub"
   ( cd "$DATA_DIR"
-    if [ ! -d .git ]; then err "Not a git repo"; exit 1; fi
     git add -A
     if git diff --cached --quiet; then info "Nothing to commit"
     else git commit -m "chore: sync $(date +%Y-%m-%d_%H:%M)" && ok "Committed"
