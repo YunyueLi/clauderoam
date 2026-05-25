@@ -47,6 +47,49 @@ Your `CLAUDE.md`, custom agents, slash commands, and snapshotted auto-memory are
 
 The whole thing is a git repo full of your portable Claude Code state, symlinked into `~/.claude/` where Claude Code reads it. No daemon, no service, no copy-and-paste — just dotfiles, specialized for Claude Code.
 
+## What this gives you
+
+Five kinds of Claude Code customization that today only live on one Mac:
+
+| Thing | Example |
+|---|---|
+| **Your preferences** | "reply in 中文", "no trailing summary", "use conventional commits" |
+| **Custom subagents** | your `code-reviewer`, `git-helper`, `test-runner` |
+| **Slash commands** | `/commit`, `/pr`, `/save` |
+| **Project registry** | which GitHub repos you want present on every Mac |
+| **Auto-memory** | what Claude has learned about you across sessions |
+
+ClaudeRoam makes them follow **you**, not the machine. Concretely:
+
+### ① Full restore on a new Mac in ~5 minutes
+
+```bash
+brew install YunyueLi/tap/clauderoam                                        # 1. install the CLI
+git clone git@github.com:<you>/clauderoam-config.git ~/clauderoam           # 2. pull your data
+clauderoam install                                                          # 3. link into ~/.claude/
+clauderoam projects clone-all                                               # 4. pull every project repo
+```
+
+Four commands → Claude Code recognizes you, uses your style, has your custom agents, and your project code is checked out. **No reconfiguration.**
+
+### ② Survive a Claude account switch
+
+Sign out of one account, sign in to another. The `~/.claude/` symlinks still point at your config repo. Only `.credentials.json` gets replaced — which is exactly correct, because you _do_ want the new account's token.
+
+Your preferences, agents, commands, and memory: untouched.
+
+### ③ Drive work from your phone
+
+Install the [Claude GitHub App](https://github.com/apps/claude) on your project repos. Open an issue from the GitHub mobile app:
+
+> @claude please fix the typo in README section 3
+
+Claude runs in the cloud, opens a PR. You merge later from anywhere. **iPhone never holds any state.**
+
+### ④ Multiple Macs running simultaneously, no conflicts
+
+Both Macs run `clauderoam push` on a schedule (via LaunchAgent). They produce diverging memory snapshots. ClaudeRoam v0.5.2+ automatically detects "the divergence is memory-only" and reconciles — you never see a manual-fix-required error.
+
 ## Quick install
 
 ```bash
@@ -69,6 +112,20 @@ cd ~/clauderoam && ./clauderoam init
 ```
 
 </details>
+
+## Daily use
+
+**Most of the time: nothing.** A LaunchAgent runs `clauderoam push` every 30 minutes in the background (see [docs/auto-sync.md](./docs/auto-sync.md) for the one-command install). Your customization gets snapshotted to GitHub automatically.
+
+When you do need to touch it:
+
+| You want to… | Do this |
+|---|---|
+| Add a custom slash command or agent | Tell Claude Code: _"create a `/refactor` slash command that…"_. Claude writes the file into `~/.claude/commands/` and runs `clauderoam push`. 30 min later every Mac has it. |
+| Tweak your preferences | Edit `~/.claude/CLAUDE.md` (or ask Claude to), then `clauderoam push` |
+| Check the sync state | `clauderoam status` |
+| Health check | `clauderoam doctor` |
+| Upgrade ClaudeRoam itself | `brew upgrade clauderoam` |
 
 ---
 
@@ -385,6 +442,18 @@ Install one:
 cp examples/agents/code-reviewer.md agents/
 clauderoam push
 ```
+
+## Troubleshooting
+
+| Symptom | What it means | Fix |
+|---|---|---|
+| Claude Code doesn't recognize you / your preferences seem missing | The `~/.claude/` symlinks got broken or removed | `clauderoam install` |
+| `clauderoam push` fails with `Permission denied (publickey)` | This Mac has no SSH key on file with GitHub | See [Prerequisites](#prerequisites) — the 3 ssh-keygen + gh ssh-key add commands |
+| `clauderoam push` fails with `[rejected] (fetch first)` | Another Mac pushed while you were offline; you've diverged | Run `clauderoam push` again — v0.5.2+ auto-resolves memory-only divergence. If it still fails, the diverged files include non-memory edits; `cd ~/clauderoam && git status` and resolve manually. |
+| Banner / GIFs not playing after a push | GitHub's CDN cache (≤5 min) | Wait or hard-refresh the page |
+| You're not sure what state things are in | | `clauderoam doctor` runs a full health check with colored output |
+
+For anything else, run `clauderoam doctor` first — its output is usually enough to diagnose.
 
 ## Documentation
 

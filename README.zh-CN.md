@@ -47,6 +47,49 @@ clauderoam install
 
 核心机制就是：你那个装着可移植 Claude Code 状态的 git repo，被 symlink 到 `~/.claude/`，Claude Code 照常读取。没有 daemon、没有后台服务、不用复制粘贴 —— 就是 dotfiles，只不过专门为 Claude Code 做了优化。
 
+## 它具体帮你做什么
+
+5 类 Claude Code 的自定义，平时只活在一台 Mac 上：
+
+| 东西 | 例子 |
+|---|---|
+| **你的偏好** | "用中文回复"、"别写总结段落"、"用 conventional commits" |
+| **自定义 subagent** | 你的 `code-reviewer`、`git-helper`、`test-runner` |
+| **Slash 命令** | `/commit`、`/pr`、`/save` |
+| **项目清单** | 哪些 GitHub repo 你希望每台 Mac 上都有 |
+| **auto-memory** | Claude 跨 session 记住的关于你的事 |
+
+ClaudeRoam 让这些东西跟着**你**走，不跟着机器走。具体表现：
+
+### ① 新 Mac 上 ~5 分钟全套恢复
+
+```bash
+brew install YunyueLi/tap/clauderoam                                        # 1. 装工具
+git clone git@github.com:<你>/clauderoam-config.git ~/clauderoam            # 2. 拉数据
+clauderoam install                                                          # 3. 接入 ~/.claude/
+clauderoam projects clone-all                                               # 4. 拉所有项目代码
+```
+
+四条命令 → Claude Code 立刻认得你、用你的风格、有你写的 agent、项目代码也都到位。**不需要重新配置**。
+
+### ② 换 Claude 账号不丢东西
+
+旧账号登出 → 新账号登入。`~/.claude/` 里那些 symlink 还指向你的 config repo。**只有 `.credentials.json` 被换了**，这正是你想要的（新账号 token）。
+
+偏好、agent、slash 命令、memory：全都还在。
+
+### ③ iPhone 上发任务
+
+在你的项目 repo 上装 [Claude GitHub App](https://github.com/apps/claude)。用 GitHub iOS App 开个 issue：
+
+> @claude 帮我修 README 第 3 段的 typo
+
+Claude 在云端跑、开 PR。你过会儿任意设备上点 merge。**iPhone 上不存任何状态**。
+
+### ④ 多台 Mac 同时用，零冲突
+
+两台 Mac 都跑 LaunchAgent，每 30 分钟 `clauderoam push`。它们会产生互相分叉的 memory 快照。**ClaudeRoam v0.5.2+ 自动识别"分叉只动了 memory"，自动 resolve** —— 你完全看不到任何"需要手动处理"的错误。
+
 ## 快速安装
 
 ```bash
@@ -69,6 +112,20 @@ cd ~/clauderoam && ./clauderoam init
 ```
 
 </details>
+
+## 日常怎么用
+
+**99% 的时间：什么都不用做。** LaunchAgent 后台每 30 分钟跑一次 `clauderoam push`（[一键装见 docs/auto-sync.md](./docs/auto-sync.md)），你的自定义自动落到 GitHub。
+
+只有这几件事需要你主动做：
+
+| 你想… | 怎么做 |
+|---|---|
+| 加一个 slash 命令或 agent | 跟 Claude Code 说："帮我加个 `/refactor` 命令，干 XX"。Claude 会写到 `~/.claude/commands/` 然后跑 `clauderoam push`。30 分钟后所有 Mac 同步。 |
+| 改偏好 | 编辑 `~/.claude/CLAUDE.md`（或让 Claude 改），然后 `clauderoam push` |
+| 看同步状态 | `clauderoam status` |
+| 体检 | `clauderoam doctor` |
+| 升级 ClaudeRoam 本身 | `brew upgrade clauderoam` |
 
 ---
 
@@ -385,6 +442,18 @@ clauderoam projects clone-all              # 所有项目 repo
 cp examples/agents/code-reviewer.md agents/
 clauderoam push
 ```
+
+## 出问题怎么办
+
+| 症状 | 含义 | 修复 |
+|---|---|---|
+| Claude Code 不认得你 / 偏好没生效 | `~/.claude/` 里的 symlink 断了 | `clauderoam install` |
+| `clauderoam push` 报 `Permission denied (publickey)` | 这台 Mac 没在 GitHub 上注册 SSH key | 见[先决条件](#%E5%85%88%E5%86%B3%E6%9D%A1%E4%BB%B6%E6%96%B0%E6%9C%BA%E5%99%A8%E5%BF%85%E7%9C%8B) 那 3 条 ssh-keygen + gh ssh-key add 命令 |
+| `clauderoam push` 报 `[rejected] (fetch first)` | 另一台 Mac 推过、你这边落后了 | 再跑一次 `clauderoam push` —— v0.5.2+ 会自动 resolve 只动 memory 的分叉。如果还不行，说明分叉里包含 memory 之外的文件，`cd ~/clauderoam && git status` 手工处理 |
+| GIF 不播 / 看不到刚 push 的改动 | GitHub CDN 缓存（≤5 分钟） | 等一下或硬刷页面 |
+| 不知道现在状态如何 | | 跑 `clauderoam doctor`，彩色输出基本能定位 |
+
+任何其他问题，先跑 `clauderoam doctor` —— 输出通常足够定位。
 
 ## 文档
 
