@@ -10,7 +10,7 @@ set -euo pipefail
 
 # ── Constants ────────────────────────────────────────────────────────────────
 
-readonly VERSION="0.5.1"
+readonly VERSION="0.5.2"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly SCRIPT_DIR
 readonly CLAUDE_DIR="${CLAUDE_HOME:-$HOME/.claude}"
