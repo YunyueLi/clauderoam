@@ -77,35 +77,41 @@ jobs:
           set -e
           T=/tmp/cr-divtest
           rm -rf "$T" && mkdir -p "$T"
-          # Bare remote with HEAD pointing at main (avoid 'detached HEAD' on clone)
-          git init -q --bare --initial-branch=main "$T/remote.git"
-          git clone -q --branch main "$T/remote.git" "$T/local" || true
-          cd "$T/local"
-          git config user.email a@b.c && git config user.name t
-          git checkout -q -b main 2>/dev/null || git checkout -q main 2>/dev/null || true
-          mkdir -p memory && echo init > CLAUDE.md
-          git add -A && git commit -q -m init
-          git push -q -u origin main
 
-          # Remote adds memory snapshot
-          git clone -q --branch main "$T/remote.git" "$T/rwork"
-          ( cd "$T/rwork"
+          # Bootstrap: init local first (with main branch), push initial commit
+          # to bare remote. This avoids 'clone empty bare repo' edge cases.
+          git init -q --bare --initial-branch=main "$T/remote.git"
+          git init -q --initial-branch=main "$T/local"
+          (
+            cd "$T/local"
+            git config user.email a@b.c && git config user.name t
+            mkdir -p memory && echo init > CLAUDE.md
+            git add -A && git commit -q -m init
+            git remote add origin "$T/remote.git"
+            git push -q -u origin main
+          )
+
+          # Remote-side worker adds a memory snapshot
+          git clone -q "$T/remote.git" "$T/rwork"
+          (
+            cd "$T/rwork"
             git config user.email r@r.c && git config user.name r
             mkdir -p memory/proj-a && echo r > memory/proj-a/MEMORY.md
             git add -A && git commit -q -m "remote sync"
             git push -q
           )
 
-          # Local also adds a different memory snapshot
-          mkdir -p memory/proj-b && echo l > memory/proj-b/MEMORY.md
-          git add -A && git commit -q -m "local sync"
+          # Local-side adds a different memory snapshot — now diverged
+          (
+            cd "$T/local"
+            mkdir -p memory/proj-b && echo l > memory/proj-b/MEMORY.md
+            git add -A && git commit -q -m "local sync"
+            git fetch -q origin
+            test -n "$(git rev-list origin/main..HEAD)" || { echo "FIXTURE BUG: no local-only commits"; exit 1; }
+            test -n "$(git rev-list HEAD..origin/main)" || { echo "FIXTURE BUG: no remote-only commits"; exit 1; }
+          )
 
-          # Sanity check: divergence really exists
-          git fetch -q origin
-          test -n "$(git rev-list origin/main..HEAD)" || { echo "FIXTURE BUG: no local-only commits"; exit 1; }
-          test -n "$(git rev-list HEAD..origin/main)" || { echo "FIXTURE BUG: no remote-only commits"; exit 1; }
-
-          # clauderoam push should auto-resolve and push
+          # clauderoam push should auto-resolve
           CLAUDEROAM_DATA="$T/local" CLAUDE_HOME=/tmp/empty-claude \
             "$GITHUB_WORKSPACE/clauderoam" push 2>&1 | tee /tmp/push.log
           grep -q "Divergence detected" /tmp/push.log
@@ -114,32 +120,41 @@ jobs:
 
       - name: push — non-memory divergence refuses
         run: |
-          set +e
+          set -e
           T=/tmp/cr-divtest2
           rm -rf "$T" && mkdir -p "$T"
           git init -q --bare --initial-branch=main "$T/remote.git"
-          git clone -q --branch main "$T/remote.git" "$T/local" || true
-          cd "$T/local"
-          git config user.email a@b.c && git config user.name t
-          git checkout -q -b main 2>/dev/null || git checkout -q main 2>/dev/null || true
-          echo init > CLAUDE.md
-          git add -A && git commit -q -m init
-          git push -q -u origin main
+          git init -q --initial-branch=main "$T/local"
+          (
+            cd "$T/local"
+            git config user.email a@b.c && git config user.name t
+            echo init > CLAUDE.md
+            git add -A && git commit -q -m init
+            git remote add origin "$T/remote.git"
+            git push -q -u origin main
+          )
 
-          git clone -q --branch main "$T/remote.git" "$T/rwork"
-          ( cd "$T/rwork"
+          git clone -q "$T/remote.git" "$T/rwork"
+          (
+            cd "$T/rwork"
             git config user.email r@r.c && git config user.name r
             echo "remote edit" >> CLAUDE.md
             git add -A && git commit -q -m "remote edit"
             git push -q
           )
 
-          echo "local edit" >> CLAUDE.md
-          git add -A && git commit -q -m "local edit"
+          (
+            cd "$T/local"
+            echo "local edit" >> CLAUDE.md
+            git add -A && git commit -q -m "local edit"
+          )
 
+          set +e
           CLAUDEROAM_DATA="$T/local" CLAUDE_HOME=/tmp/empty-claude \
             "$GITHUB_WORKSPACE/clauderoam" push 2>&1 | tee /tmp/push2.log
           rc=${PIPESTATUS[0]}
+          set -e
+
           if [ "$rc" = 0 ]; then
             echo "FAIL: expected non-zero exit for non-memory divergence (got 0)"
             exit 1
