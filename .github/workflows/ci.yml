@@ -72,6 +72,67 @@ jobs:
           # Empty state after removal
           ./clauderoam projects list
 
+      - name: push — memory-only divergence auto-resolves
+        run: |
+          # Set up a fake bare-remote + local clone with diverging memory commits
+          T=/tmp/cr-divtest
+          rm -rf "$T" && mkdir -p "$T"
+          git init -q --bare "$T/remote.git"
+          git clone -q "$T/remote.git" "$T/local"
+          cd "$T/local"
+          git config user.email a@b.c && git config user.name t
+          mkdir -p memory && echo "init" > CLAUDE.md
+          git add -A && git commit -q -m init
+          git branch -M main && git push -q -u origin main
+
+          # Remote adds memory snapshot
+          git clone -q "$T/remote.git" "$T/rwork"
+          cd "$T/rwork" && git config user.email r@r.c && git config user.name r
+          mkdir -p memory/proj-a && echo r > memory/proj-a/MEMORY.md
+          git add -A && git commit -q -m "remote sync" && git push -q
+
+          # Local also adds a different memory snapshot
+          cd "$T/local"
+          mkdir -p memory/proj-b && echo l > memory/proj-b/MEMORY.md
+          git add -A && git commit -q -m "local sync"
+
+          # Now divergence exists. clauderoam push should auto-resolve.
+          CLAUDEROAM_DATA="$T/local" CLAUDE_HOME=/tmp/empty-claude \
+            $GITHUB_WORKSPACE/clauderoam push 2>&1 | tee /tmp/push.log
+          grep -q "Divergence detected" /tmp/push.log
+          grep -q "Reset to origin/main" /tmp/push.log
+          grep -q "Pushed" /tmp/push.log
+
+      - name: push — non-memory divergence refuses
+        run: |
+          T=/tmp/cr-divtest2
+          rm -rf "$T" && mkdir -p "$T"
+          git init -q --bare "$T/remote.git"
+          git clone -q "$T/remote.git" "$T/local"
+          cd "$T/local"
+          git config user.email a@b.c && git config user.name t
+          echo init > CLAUDE.md
+          git add -A && git commit -q -m init
+          git branch -M main && git push -q -u origin main
+
+          git clone -q "$T/remote.git" "$T/rwork"
+          cd "$T/rwork" && git config user.email r@r.c && git config user.name r
+          echo "remote edit" >> CLAUDE.md
+          git add -A && git commit -q -m "remote edit" && git push -q
+
+          cd "$T/local"
+          echo "local edit" >> CLAUDE.md
+          git add -A && git commit -q -m "local edit"
+
+          # Should refuse with exit 1
+          if CLAUDEROAM_DATA="$T/local" CLAUDE_HOME=/tmp/empty-claude \
+               $GITHUB_WORKSPACE/clauderoam push 2>&1 | tee /tmp/push2.log; then
+            echo "FAIL: expected non-zero exit for non-memory divergence"
+            exit 1
+          fi
+          grep -q "Cannot auto-resolve" /tmp/push2.log
+          grep -q "CLAUDE.md" /tmp/push2.log
+
   formula-test:
     name: homebrew formula test (macOS)
     runs-on: macos-latest

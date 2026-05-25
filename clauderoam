@@ -410,23 +410,65 @@ cmd_restore() {
 # ── Subcommand: push ─────────────────────────────────────────────────────────
 
 cmd_push() {
-  # Step 1: pull first (so we never push on top of stale local).
-  # Multi-device safety: if device A pushed, device B's auto-sync must pull
-  # before commit + push, or it'll get rejected as non-fast-forward.
-  step "Pull latest from remote"
+  # Step 1: reconcile with remote (fast-forward if possible, auto-resolve
+  # memory-only divergence, refuse to auto-resolve anything else).
+  step "Reconcile with remote"
   ( cd "$DATA_DIR"
     if [ ! -d .git ]; then err "Not a git repo: $DATA_DIR"; exit 1; fi
     if ! git rev-parse --abbrev-ref --symbolic-full-name '@{u}' >/dev/null 2>&1; then
-      info "No upstream tracking branch — skipping pull"
-      return 0
+      info "No upstream tracking branch — skipping reconcile"
+      exit 0
     fi
-    if git pull --ff-only --quiet 2>/dev/null; then
-      ok "Up to date"
-    else
-      err "Pull failed — local has diverged from remote."
-      err "Resolve manually:  cd $DATA_DIR && git status"
+
+    # Always fetch first so divergence detection sees the real remote state.
+    if ! git fetch --quiet origin 2>/dev/null; then
+      err "Could not fetch from origin — check network / auth"
       exit 1
     fi
+
+    local upstream
+    upstream="$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}')"
+
+    # Case A: local is at-or-ahead of remote → nothing to pull.
+    if git merge-base --is-ancestor "$upstream" HEAD; then
+      ok "Local is up to date with $upstream"
+      exit 0
+    fi
+
+    # Case B: clean fast-forward → safe pull.
+    if git merge-base --is-ancestor HEAD "$upstream"; then
+      git merge --ff-only --quiet "$upstream"
+      ok "Fast-forwarded to $upstream"
+      exit 0
+    fi
+
+    # Case C: true divergence. Auto-resolve only if local-only commits
+    # touched memory/ exclusively (memory is regenerable from
+    # ~/.claude/projects/ on the next sync, so last-writer-wins is correct).
+    local local_changed non_memory
+    local_changed="$(git diff --name-only "$upstream"..HEAD)"
+    non_memory="$(printf '%s\n' "$local_changed" | grep -v '^memory/' | grep -v '^$' || true)"
+
+    if [ -z "$non_memory" ]; then
+      info "Divergence detected — local commits only touched memory/"
+      info "Resetting to $upstream; sync will regenerate memory from ~/.claude/projects/"
+      git reset --hard "$upstream" --quiet
+      ok "Reset to $upstream"
+      exit 0
+    fi
+
+    # Case D: divergence includes non-memory files. Refuse to auto-resolve —
+    # losing your CLAUDE.md edits or custom agents would be a real loss.
+    err "Cannot auto-resolve: local commits modified non-memory files:"
+    printf '%s\n' "$non_memory" | sed 's/^/    /' >&2
+    err ""
+    err "Resolve manually:"
+    err "  cd $DATA_DIR"
+    err "  git log $upstream..HEAD          # see your local commits"
+    err "  # Then choose one:"
+    err "  git push --force-with-lease       # local wins (drops remote work)"
+    err "  git pull --rebase                 # replay local on top, resolve conflicts"
+    exit 1
   ) || exit $?
   echo
 
