@@ -15,13 +15,15 @@ The two repo types stay separate on purpose. Your **identity and preferences** r
 ## Adding a new Mac
 
 ```bash
-git clone https://github.com/<you>/clauderoam.git ~/clauderoam
-cd ~/clauderoam
-./clauderoam install     # symlinks ~/.claude
-./clauderoam restore     # optional: bring auto-memory back
+brew install YunyueLi/tap/clauderoam                          # 1. install the CLI
+git clone <your-config-repo> ~/clauderoam                     # 2. pull your data
+clauderoam install                                            # 3. symlinks ~/.claude
+clauderoam restore                                            # 4. optional: bring auto-memory back
 ```
 
-Two commands, total. Your `CLAUDE.md`, agents, slash commands, and memory are all present.
+Four commands, total. Your `CLAUDE.md`, agents, slash commands, and memory are all present.
+
+> Make sure SSH key access to GitHub is set up first — see [setup.md](./setup.md#github-access-required-for-cloning-your-private-config-repo).
 
 ## iPhone / iPad
 

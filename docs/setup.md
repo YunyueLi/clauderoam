@@ -71,7 +71,7 @@ git push
 ## Verify
 
 ```bash
-./clauderoam doctor
+clauderoam doctor
 ```
 
 Reports symlink health, missing tools, and whether any sensitive files
@@ -89,7 +89,7 @@ Everything else (`.credentials.json`, `sessions/`, `shell-snapshots/`,
 
 ## What `install` actually does
 
-`./clauderoam install` (called automatically by `init`) is safe to re-run:
+`clauderoam install` (called automatically by `init`) is safe to re-run:
 
 1. Backs up your current `~/.claude/` to `~/.claude.bak.<timestamp>` if it
    has content
@@ -100,7 +100,7 @@ Everything else (`.credentials.json`, `sessions/`, `shell-snapshots/`,
 Use `--dry-run` to preview without making changes:
 
 ```bash
-./clauderoam install --dry-run
+clauderoam install --dry-run
 ```
 
 ## Machine-local overrides
@@ -123,13 +123,19 @@ rm -rf ~/.claude/agents ~/.claude/skills ~/.claude/commands
 mv ~/.claude.bak.<timestamp>/* ~/.claude/
 ```
 
-## Putting `clauderoam` on your PATH (optional)
+## Putting `clauderoam` on your PATH (git-clone install only)
 
-So you can run it from anywhere:
+If you installed via `brew install` or the `curl | bash` installer, `clauderoam` is already on your `PATH` — skip this section.
+
+If you cloned the source directly and want to run `clauderoam` from any directory, symlink the script into a PATH dir:
 
 ```bash
-ln -s ~/clauderoam/clauderoam ~/.local/bin/clauderoam   # any dir on your PATH
-# then anywhere:
+mkdir -p ~/.local/bin
+ln -s ~/clauderoam/clauderoam ~/.local/bin/clauderoam
+
+# Then anywhere:
 clauderoam doctor
 clauderoam push
 ```
+
+Make sure `~/.local/bin` is on your `PATH` (add `export PATH="$HOME/.local/bin:$PATH"` to `~/.zshrc` if not).

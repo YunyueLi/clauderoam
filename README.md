@@ -327,7 +327,7 @@ Install one:
 
 ```bash
 cp examples/agents/code-reviewer.md agents/
-./clauderoam push
+clauderoam push
 ```
 
 ## Documentation

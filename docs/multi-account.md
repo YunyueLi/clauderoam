@@ -27,20 +27,19 @@ The symlinks in `~/.claude/` themselves survive too — they point at repo files
 
 ```bash
 # 1. Before signing out of the old account: snapshot and push
-cd ~/clauderoam
-./clauderoam push     # sync + commit + push
+clauderoam push     # sync + commit + push
 
 # 2. Sign out and back in on Claude Code with the new account
 #    (Desktop app: Settings → Account → Sign out)
 
 # 3. Verify everything still works
-./clauderoam doctor
+clauderoam doctor
 
 # 4. Reconnect GitHub Connector
 #    claude.ai/code → Connectors → GitHub → Authorize
 
 # 5. (Optional) Restore memory if it got cleared
-./clauderoam restore
+clauderoam restore
 ```
 
 ## Why this matters

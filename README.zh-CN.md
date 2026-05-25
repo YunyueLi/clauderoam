@@ -327,7 +327,7 @@ clauderoam projects clone-all              # 所有项目 repo
 
 ```bash
 cp examples/agents/code-reviewer.md agents/
-./clauderoam push
+clauderoam push
 ```
 
 ## 文档
