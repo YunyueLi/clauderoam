@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src=".assets/banner.svg" alt="clauderoam — Your Claude Code config, anywhere" width="100%">
+<img src=".assets/banner.svg" alt="ClaudeRoam — Your Claude Code config, anywhere" width="100%">
 
 <br/>
 
@@ -35,7 +35,7 @@ All of it was sitting in `~/.claude/` on the old machine. Nothing was in git. No
 
 Two weeks later I had to switch to a client's Claude account for a contract. Same story. The customization I'd spent hours building was gone again.
 
-**clauderoam** is what I built after the second time. Three commands on a new Mac:
+**ClaudeRoam** is what I built after the second time. Three commands on a new Mac:
 
 ```bash
 brew install YunyueLi/tap/clauderoam
@@ -72,13 +72,13 @@ cd ~/clauderoam && ./clauderoam init
 
 ---
 
-## Where clauderoam works
+## Where ClaudeRoam works
 
-clauderoam manages the **local Claude Code installation** — the one that reads `~/.claude/`. That covers the Mac desktop app, the CLI, and IDE extensions. The browser version of Claude Code is a different runtime and outside its scope.
+ClaudeRoam manages the **local Claude Code installation** — the one that reads `~/.claude/`. That covers the Mac desktop app, the CLI, and IDE extensions. The browser version of Claude Code is a different runtime and outside its scope.
 
 | Surface | Status | Why |
 |---|---|---|
-| **Claude Code desktop** (macOS, Linux, Windows) | ✅ Full | Reads `~/.claude/`; clauderoam symlinks into it |
+| **Claude Code desktop** (macOS, Linux, Windows) | ✅ Full | Reads `~/.claude/`; ClaudeRoam symlinks into it |
 | **Claude Code CLI** (terminal) | ✅ Full | Same `~/.claude/` mechanism |
 | **VS Code / JetBrains** extensions | ✅ Full | Same `~/.claude/` mechanism |
 | **[claude.ai/code](https://claude.ai/code)** (web) | ⚠️ Project-only | Each web session is an isolated sandbox; no `~/.claude/` exists there. Workaround: open your `clauderoam-config` repo as the project so its `CLAUDE.md` loads — but `auto` mode and cross-project memory still aren't available |
@@ -93,7 +93,7 @@ flowchart TD
     Q -->|claude.ai/code| B
     Q -->|iOS · Android app| C
 
-    A[✅ <b>Full clauderoam experience</b><br/>~/.claude/ ◄ symlinks ◄ ~/clauderoam<br/>auto mode · memory · personal CLAUDE.md]
+    A[✅ <b>Full ClaudeRoam experience</b><br/>~/.claude/ ◄ symlinks ◄ ~/clauderoam<br/>auto mode · memory · personal CLAUDE.md]
     B[⚠️ <b>Project-scoped only</b><br/>Open clauderoam-config to load<br/>your CLAUDE.md as a project file]
     C[➖ <b>Use GitHub @claude</b><br/>for async cloud work from mobile]
 
@@ -109,20 +109,20 @@ flowchart TD
 
 ### "Fully cloud" — two meanings
 
-The phrase "cloud workflow" gets used for two different things. clauderoam solves one of them, not both:
+The phrase "cloud workflow" gets used for two different things. ClaudeRoam solves one of them, not both:
 
-| What you mean by "cloud" | clauderoam helps? |
+| What you mean by "cloud" | ClaudeRoam helps? |
 |---|---|
-| **My data and config live in GitHub**, not pinned to one Mac → I can switch Macs / Claude accounts and not lose anything | ✅ **Yes — this is exactly what clauderoam is for** |
-| **I want to run Claude Code inside a browser** so I never install anything locally | ❌ No. That's claude.ai/code's job, and it has its own architectural limits (no user-level config, no `auto` mode, no cross-session memory). clauderoam can't change those |
+| **My data and config live in GitHub**, not pinned to one Mac → I can switch Macs / Claude accounts and not lose anything | ✅ **Yes — this is exactly what ClaudeRoam is for** |
+| **I want to run Claude Code inside a browser** so I never install anything locally | ❌ No. That's claude.ai/code's job, and it has its own architectural limits (no user-level config, no `auto` mode, no cross-session memory). ClaudeRoam can't change those |
 
-If your goal is the first one — **use desktop Claude Code on each Mac you switch between, and let clauderoam carry your config in git**. That's the supported workflow.
+If your goal is the first one — **use desktop Claude Code on each Mac you switch between, and let ClaudeRoam carry your config in git**. That's the supported workflow.
 
 ---
 
 ## Mental model
 
-Claude Code reads config from **three places** every time it starts. clauderoam manages the first one. Your projects own the second. The third is the live conversation.
+Claude Code reads config from **three places** every time it starts. ClaudeRoam manages the first one. Your projects own the second. The third is the live conversation.
 
 ```mermaid
 flowchart TB
@@ -138,13 +138,13 @@ flowchart TB
 ```
 
 > **Rule of thumb**<br/>
-> If it follows _you_ across projects → **personal** (clauderoam).<br/>
+> If it follows _you_ across projects → **personal** (ClaudeRoam).<br/>
 > If it belongs to _this codebase_ → **project repo**.<br/>
 > If it's just for _this conversation_ → nothing, it'll be in the transcript.
 
-## What's in clauderoam vs what's in each project
+## What's in ClaudeRoam vs what's in each project
 
-|  | clauderoam (personal) | Each project repo |
+|  | ClaudeRoam (personal) | Each project repo |
 |---|---|---|
 | **Lives at** | `~/clauderoam/` → `~/.claude/` (symlinks) | `<project>/CLAUDE.md` + `<project>/.claude/` |
 | **Who edits it** | You, alone | You and any contributors to that project |
@@ -155,7 +155,7 @@ flowchart TB
 ```mermaid
 flowchart LR
     subgraph You["👤 You"]
-      CR["📦 clauderoam<br/>(personal config)"]
+      CR["📦 ClaudeRoam<br/>(personal config)"]
     end
     subgraph Projects["🏗️ Project repos"]
       P1["📦 my-blog<br/>+ CLAUDE.md"]
@@ -172,7 +172,7 @@ When you open `startup-app` in Claude Code, it loads **your personal layer + sta
 
 ## Project registry — pulling all your repos onto a new Mac
 
-clauderoam doesn't sync project _code_ (each project is its own GitHub repo) but it does track **which projects you have** so a new machine can pull them in one command.
+ClaudeRoam doesn't sync project _code_ (each project is its own GitHub repo) but it does track **which projects you have** so a new machine can pull them in one command.
 
 The list lives at `~/clauderoam/projects.tsv` — synced via git alongside your config.
 
@@ -201,7 +201,7 @@ Four lines, full developer environment. The hero GIF at the top of this README s
   <img src=".assets/projects.gif" alt="projects.tsv on the old Mac → clauderoam projects clone-all on the new Mac → ~/Code/ populated with all your project directories" width="900">
 </p>
 
-## What clauderoam actually does (under the hood)
+## What ClaudeRoam actually does (under the hood)
 
 It does **not** copy or sync files. It uses **symlinks**.
 
@@ -397,19 +397,19 @@ clauderoam push
 - [FAQ](./docs/faq.md)
 
 <details>
-<summary><b>📊 How clauderoam compares to other Claude sync projects</b></summary>
+<summary><b>📊 How ClaudeRoam compares to other Claude sync projects</b></summary>
 
 <br/>
 
 | Project | ⭐ | Sync backend | Auto-sync | Doctor | Memory snapshots | Multi-account focus | Bilingual | Stack |
 |---|---|---|---|---|---|---|---|---|
-| **clauderoam** | — | git | optional shell hook | ✓ | ✓ + username rewriting | **✓ designed for it** | ✓ EN / 中文 | pure bash |
+| **ClaudeRoam** | — | git | optional shell hook | ✓ | ✓ + username rewriting | **✓ designed for it** | ✓ EN / 中文 | pure bash |
 | [renefichtmueller/claude-sync](https://github.com/renefichtmueller/claude-sync) | 16 | git · iCloud · Dropbox · Syncthing · rsync | ✓ | implicit | manual | ✗ | ✗ | TypeScript |
 | [balingsisi/claude-sync-tool](https://github.com/balingsisi/claude-sync-tool) | 11 | git | watch mode | ✓ | ✗ | ✗ | ✗ | CLI |
 | [elizabethfuentes12/claude-code-dotfiles](https://github.com/elizabethfuentes12/claude-code-dotfiles) | 9 | git | ✓ shell function | ✗ | ✗ | ✗ | ✗ | shell |
 | [zircote/.claude](https://github.com/zircote/.claude) | 24 | git (fork model) | ✗ | ✗ | ✗ | ✗ | ✗ | dotfiles + 100+ agents |
 
-**Pick clauderoam** if you switch Claude accounts, want bilingual docs, prefer zero dependencies, or want memory snapshots that survive a username change.
+**Pick ClaudeRoam** if you switch Claude accounts, want bilingual docs, prefer zero dependencies, or want memory snapshots that survive a username change.
 
 **Pick renefichtmueller/claude-sync** if you want multiple sync backends (iCloud, Dropbox, Syncthing).
 
@@ -425,7 +425,7 @@ clauderoam push
 **Will this break Claude Code?**<br/>
 No. Symlinks are transparent — Claude Code reads `~/.claude/` exactly as before.
 
-**Should the clauderoam repo be public or private?**<br/>
+**Should your ClaudeRoam config repo be public or private?**<br/>
 Private if you sync `memory/` (it may contain project notes). Otherwise public is fine and lets you show off your setup.
 
 **Does `init` / `install` delete anything?**<br/>

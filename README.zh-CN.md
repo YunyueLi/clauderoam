@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src=".assets/banner.svg" alt="clauderoam — Your Claude Code config, anywhere" width="100%">
+<img src=".assets/banner.svg" alt="ClaudeRoam — Your Claude Code config, anywhere" width="100%">
 
 <br/>
 
@@ -35,7 +35,7 @@
 
 两周后又因为接外包要切到客户的 Claude 账号 —— 同样的故事，几小时调出来的东西又一次清零。
 
-**clauderoam** 就是第二次清零之后写出来的。新 Mac 上 3 条命令：
+**ClaudeRoam** 就是第二次清零之后写出来的。新 Mac 上 3 条命令：
 
 ```bash
 brew install YunyueLi/tap/clauderoam
@@ -72,13 +72,13 @@ cd ~/clauderoam && ./clauderoam init
 
 ---
 
-## clauderoam 在哪些场景生效
+## ClaudeRoam 在哪些场景生效
 
-clauderoam 管的是**本地 Claude Code 安装** —— 也就是会读 `~/.claude/` 的那些。包括 Mac 桌面 App、CLI、IDE 扩展。**浏览器版（claude.ai/code）是另一个运行时**，不在它的覆盖范围里。
+ClaudeRoam 管的是**本地 Claude Code 安装** —— 也就是会读 `~/.claude/` 的那些。包括 Mac 桌面 App、CLI、IDE 扩展。**浏览器版（claude.ai/code）是另一个运行时**，不在它的覆盖范围里。
 
 | 入口 | 状态 | 原因 |
 |---|---|---|
-| **Claude Code 桌面 App**（macOS / Linux / Windows） | ✅ 全部生效 | 读 `~/.claude/`，clauderoam symlink 到里面 |
+| **Claude Code 桌面 App**（macOS / Linux / Windows） | ✅ 全部生效 | 读 `~/.claude/`，ClaudeRoam symlink 到里面 |
 | **Claude Code CLI**（终端） | ✅ 全部生效 | 同一套 `~/.claude/` 机制 |
 | **VS Code / JetBrains** 扩展 | ✅ 全部生效 | 同一套 `~/.claude/` 机制 |
 | **[claude.ai/code](https://claude.ai/code)**（网页版） | ⚠️ 仅项目级 | 每个网页 session 都是独立沙箱，根本没有 `~/.claude/`。**绕过办法**：把 `clauderoam-config` repo 当项目打开，它的 `CLAUDE.md` 会被加载 —— 但 `auto` 模式、跨项目记忆、跨 session 记忆都还是没有 |
@@ -109,20 +109,20 @@ flowchart TD
 
 ### "全程云端" 有两种含义
 
-"云端工作流" 这个词被两种意思混着用。**clauderoam 只解决其中一种**：
+"云端工作流" 这个词被两种意思混着用。**ClaudeRoam 只解决其中一种**：
 
-| 你说"云端"指的是 | clauderoam 管这个吗 |
+| 你说"云端"指的是 | ClaudeRoam 管这个吗 |
 |---|---|
 | **我的数据和配置存在 GitHub**，不绑死在某一台 Mac 上 → 换 Mac、换 Claude 账号都不丢 | ✅ **就是干这个的** |
-| **我想在浏览器里跑 Claude Code**，本地完全不装东西 | ❌ 那是 claude.ai/code 的活，它本身有架构限制（没有用户级配置、没有 `auto` 模式、没有跨 session 记忆）。clauderoam 改不了这些 |
+| **我想在浏览器里跑 Claude Code**，本地完全不装东西 | ❌ 那是 claude.ai/code 的活，它本身有架构限制（没有用户级配置、没有 `auto` 模式、没有跨 session 记忆）。ClaudeRoam 改不了这些 |
 
-如果你想要的是第一种 —— **在你切换的每台 Mac 上都装 Claude Code 桌面版，让 clauderoam 帮你把配置用 git 带过去**。这是支持的工作流。
+如果你想要的是第一种 —— **在你切换的每台 Mac 上都装 Claude Code 桌面版，让 ClaudeRoam 帮你把配置用 git 带过去**。这是支持的工作流。
 
 ---
 
 ## 心智模型
 
-Claude Code 每次启动都从**三个地方**读配置。clauderoam 管第一层，你的项目管第二层，第三层是当前对话。
+Claude Code 每次启动都从**三个地方**读配置。ClaudeRoam 管第一层，你的项目管第二层，第三层是当前对话。
 
 ```mermaid
 flowchart TB
@@ -138,13 +138,13 @@ flowchart TB
 ```
 
 > **判断准则**<br/>
-> 跟着_你_跨项目走的 → **个人层**（clauderoam）<br/>
+> 跟着_你_跨项目走的 → **个人层**（ClaudeRoam）<br/>
 > 属于_这个代码库_的 → **项目 repo**<br/>
 > 仅这次对话的 → 什么都不用做，对话记录里有
 
-## clauderoam 装什么 vs 项目 repo 装什么
+## ClaudeRoam 装什么 vs 项目 repo 装什么
 
-|  | clauderoam（个人） | 每个项目的 repo |
+|  | ClaudeRoam（个人） | 每个项目的 repo |
 |---|---|---|
 | **存在哪** | `~/clauderoam/` → `~/.claude/`（symlink） | `<项目>/CLAUDE.md` + `<项目>/.claude/` |
 | **谁来编辑** | 你一个人 | 你和这个项目的所有贡献者 |
@@ -155,7 +155,7 @@ flowchart TB
 ```mermaid
 flowchart LR
     subgraph You["👤 你"]
-      CR["📦 clauderoam<br/>(个人配置)"]
+      CR["📦 ClaudeRoam<br/>(个人配置)"]
     end
     subgraph Projects["🏗️ 项目 repos"]
       P1["📦 my-blog<br/>+ CLAUDE.md"]
@@ -172,7 +172,7 @@ flowchart LR
 
 ## 项目清单 —— 新 Mac 一键拉所有 repo
 
-clauderoam 不同步项目_代码_（每个项目自己是一个 GitHub repo），但它会跟踪**你有哪些项目**，让新机器能一条命令把它们拉回来。
+ClaudeRoam 不同步项目_代码_（每个项目自己是一个 GitHub repo），但它会跟踪**你有哪些项目**，让新机器能一条命令把它们拉回来。
 
 清单存在 `~/clauderoam/projects.tsv` —— 和其他个人配置一起走 git。
 
@@ -201,7 +201,7 @@ clauderoam projects clone-all               # 3. 所有项目代码
   <img src=".assets/projects.gif" alt="老 Mac 的 projects.tsv → 新 Mac clauderoam projects clone-all → ~/Code/ 出现所有项目目录" width="900">
 </p>
 
-## clauderoam 内部到底在做什么
+## ClaudeRoam 内部到底在做什么
 
 它**不** copy、也**不** sync 文件。它用的是 **symlink**。
 
@@ -403,13 +403,13 @@ clauderoam push
 
 | 项目 | ⭐ | 同步后端 | 自动同步 | Doctor | Memory 快照 | 多账号专注度 | 双语 | 技术栈 |
 |---|---|---|---|---|---|---|---|---|
-| **clauderoam** | — | git | 可选 shell hook | ✓ | ✓ + 用户名重写 | **✓ 专为此设计** | ✓ 中英 | 纯 bash |
+| **ClaudeRoam** | — | git | 可选 shell hook | ✓ | ✓ + 用户名重写 | **✓ 专为此设计** | ✓ 中英 | 纯 bash |
 | [renefichtmueller/claude-sync](https://github.com/renefichtmueller/claude-sync) | 16 | git · iCloud · Dropbox · Syncthing · rsync | ✓ | 隐式 | 手动 | ✗ | ✗ | TypeScript |
 | [balingsisi/claude-sync-tool](https://github.com/balingsisi/claude-sync-tool) | 11 | git | watch 模式 | ✓ | ✗ | ✗ | ✗ | CLI |
 | [elizabethfuentes12/claude-code-dotfiles](https://github.com/elizabethfuentes12/claude-code-dotfiles) | 9 | git | ✓ shell function | ✗ | ✗ | ✗ | ✗ | shell |
 | [zircote/.claude](https://github.com/zircote/.claude) | 24 | git（fork 模式） | ✗ | ✗ | ✗ | ✗ | ✗ | dotfiles + 100+ agents |
 
-**选 clauderoam** 如果你会换 Claude 账号、想要中英双语、偏爱零依赖，或想要换 Mac 后能正确恢复（自动重写用户名）的 memory 快照。
+**选 ClaudeRoam** 如果你会换 Claude 账号、想要中英双语、偏爱零依赖，或想要换 Mac 后能正确恢复（自动重写用户名）的 memory 快照。
 
 **选 renefichtmueller/claude-sync** 如果想要多种同步后端。
 
@@ -425,7 +425,7 @@ clauderoam push
 **会不会搞坏 Claude Code？**<br/>
 不会。Symlink 对 Claude Code 透明 —— 它读 `~/.claude/` 和之前一样。
 
-**clauderoam 仓库该公开还是私有？**<br/>
+**ClaudeRoam 数据 repo 该公开还是私有？**<br/>
 同步 `memory/` 的话建议私有（可能含项目笔记）。否则公开也行，还能展示你的配置。
 
 **`init` / `install` 会删东西吗？**<br/>

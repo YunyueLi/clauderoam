@@ -40,7 +40,7 @@
   <!-- Project title -->
   <text x="600" y="160" font-family="'SF Mono', 'JetBrains Mono', Menlo, monospace"
         font-size="92" font-weight="800" fill="url(#title)"
-        text-anchor="middle" letter-spacing="-2" filter="url(#glow)">clauderoam</text>
+        text-anchor="middle" letter-spacing="-2" filter="url(#glow)">ClaudeRoam</text>
 
   <!-- Primary tagline -->
   <text x="600" y="215" font-family="-apple-system, system-ui, sans-serif"

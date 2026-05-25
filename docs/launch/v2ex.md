@@ -10,7 +10,7 @@
 ### 标题
 
 ```
-[分享] clauderoam：让 Claude Code 的配置跨 Mac 跨账号漫游
+[分享] ClaudeRoam：让 Claude Code 的配置跨 Mac 跨账号漫游
 ```
 
 ### 正文
@@ -18,7 +18,7 @@
 ```markdown
 背景：我同时用两台 Mac，前段时间还换了一次 Claude 账号。每次都把之前调好的 CLAUDE.md、自定义 subagent、slash 命令、auto-memory 全丢了 —— 这些东西默认只存在某一台机器的 ~/.claude/ 里，换设备/换账号全归零。
 
-写了个小工具叫 **clauderoam**（claude + roam，漫游的意思）。
+写了个小工具叫 **ClaudeRoam**（claude + roam，漫游的意思）。
 
 ## 它做什么
 
@@ -65,11 +65,11 @@ GitHub: https://github.com/YunyueLi/clauderoam
 ## 即刻 / 小红书 / 微信群（短版）
 
 ```
-做了一个小工具叫 clauderoam ↓
+做了一个小工具叫 ClaudeRoam ↓
 
 Claude Code 默认把配置存在本机 ~/.claude/，换 Mac / 换账号就全丢了。
 
-clauderoam 用 git + symlink 把这些配置变成跟你走的，新 Mac 上两行命令就能恢复：
+ClaudeRoam 用 git + symlink 把这些配置变成跟你走的，新 Mac 上两行命令就能恢复：
 
   brew install YunyueLi/tap/clauderoam
   clauderoam init

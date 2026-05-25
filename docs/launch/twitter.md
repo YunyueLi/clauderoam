@@ -9,7 +9,7 @@
 ```
 Your Claude Code config — agents, slash commands, memory — lives on one Mac. Switch machines or switch Claude accounts, you lose it all.
 
-I built clauderoam to fix that.
+I built ClaudeRoam to fix that.
 
 brew install YunyueLi/tap/clauderoam ↓
 ```
@@ -67,7 +67,7 @@ Other choices worth knowing about:
 • balingsisi/claude-sync-tool — watch mode
 • zircote/.claude — 100+ curated agents
 
-clauderoam's wedge: account-switching focus, 中文 docs, zero deps.
+ClaudeRoam's wedge: account-switching focus, 中文 docs, zero deps.
 ```
 
 **Tweet 7**

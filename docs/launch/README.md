@@ -1,6 +1,6 @@
 # Launch content
 
-Copy-paste ready drafts for announcing clauderoam. Pick one platform at a time — don't blast all four the same day; each audience is different.
+Copy-paste ready drafts for announcing ClaudeRoam. Pick one platform at a time — don't blast all four the same day; each audience is different.
 
 | File | Platform | Best time to post |
 |---|---|---|

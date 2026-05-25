@@ -9,7 +9,7 @@ I built a small CLI to keep my Claude Code config in sync across Macs (and Claud
 ```
 
 > Alternatives:
-> - `clauderoam: your Claude Code config in git, survives Mac switches AND Claude account switches`
+> - `ClaudeRoam: your Claude Code config in git, survives Mac switches AND Claude account switches`
 > - `Tired of losing my Claude Code customization every time I switch Macs — here's what I built`
 
 ## Body
@@ -19,13 +19,13 @@ Hi all,
 
 Quick context: I work across two Macs and recently moved to a different Claude account. Every time, I lost the customization I'd built up — `CLAUDE.md` preferences, custom subagents, slash commands, auto-memory. Either tied to one machine, or wiped when the account changed.
 
-**clauderoam** is a small bash CLI that fixes that:
+**ClaudeRoam** is a small bash CLI that fixes that:
 
 - The portable subset of `~/.claude/` lives in a git repo. `clauderoam install` symlinks it back, so Claude Code reads it normally.
 - `clauderoam sync` snapshots auto-memory; `clauderoam restore` brings it back on a new Mac, rewriting the username portion of paths so it works across different `$USER` values.
 - `clauderoam projects` tracks the GitHub repos you want on every machine, so `clauderoam projects clone-all` sets up a new Mac.
 
-The account-switch case is the wedge — most other tools (`renefichtmueller/claude-sync`, `balingsisi/claude-sync-tool`, `elizabethfuentes12/claude-code-dotfiles`) assume one account forever. clauderoam was designed for the day you switch.
+The account-switch case is the wedge — most other tools (`renefichtmueller/claude-sync`, `balingsisi/claude-sync-tool`, `elizabethfuentes12/claude-code-dotfiles`) assume one account forever. ClaudeRoam was designed for the day you switch.
 
 ### Install
 
