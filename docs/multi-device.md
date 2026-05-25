@@ -1,6 +1,6 @@
 # Multi-device workflow
 
-clauderoam's goal: any device, any time, pick up where you left off.
+ClaudeRoam's goal: any device, any time, pick up where you left off.
 
 ## What lives where
 
@@ -10,7 +10,7 @@ clauderoam's goal: any device, any time, pick up where you left off.
 | `github.com/<you>/<project>` | Each project's own code + `CLAUDE.md` + `.claude/` | git |
 | `~/.claude/` (each machine) | Symlinks pointing into `~/clauderoam` | `clauderoam install` |
 
-The two repo types stay separate on purpose. Your **identity and preferences** roam through `clauderoam`. Each **project's conventions** roam through its own repo.
+The two repo types stay separate on purpose. Your **identity and preferences** roam through ClaudeRoam. Each **project's conventions** roam through its own repo.
 
 ## Adding a new Mac
 
@@ -86,4 +86,4 @@ sequenceDiagram
     Note over A,B: All memory snapshots preserved (different projects don't overwrite each other)
 ```
 
-Step 13 is the moment that used to require manual intervention. `clauderoam push` (v0.5.2+) handles it without bothering you, because memory is regenerable from `~/.claude/projects/` on each sync.
+Step 13 is the moment that used to require manual intervention. `clauderoam push` (ClaudeRoam v0.5.2+) handles it without bothering you, because memory is regenerable from `~/.claude/projects/` on each sync.

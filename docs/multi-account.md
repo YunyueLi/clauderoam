@@ -4,7 +4,7 @@ You'll need to switch accounts at some point — joining a Team plan, moving fro
 
 ## What survives an account switch
 
-Everything in your `clauderoam` repo:
+Everything in your ClaudeRoam config repo:
 
 - `CLAUDE.md` (your preferences)
 - `settings.json` · `keybindings.json`
@@ -44,4 +44,4 @@ clauderoam restore
 
 ## Why this matters
 
-Without clauderoam, switching accounts means losing every customization you've built up — your `CLAUDE.md`, your agents, your slash commands, your remembered facts. With clauderoam, that surface area is just "files in a git repo." Accounts become interchangeable.
+Without ClaudeRoam, switching accounts means losing every customization you've built up — your `CLAUDE.md`, your agents, your slash commands, your remembered facts. With ClaudeRoam, that surface area is just "files in a git repo." Accounts become interchangeable.

@@ -1,6 +1,6 @@
 # Releasing
 
-How to cut a new clauderoam release.
+How to cut a new ClaudeRoam release.
 
 ## TL;DR
 

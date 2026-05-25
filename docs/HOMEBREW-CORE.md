@@ -1,6 +1,6 @@
 # Upstreaming to homebrew-core
 
-Right now clauderoam ships through a personal tap: `YunyueLi/homebrew-tap`. Users install with:
+Right now ClaudeRoam ships through a personal tap: `YunyueLi/homebrew-tap`. Users install with:
 
 ```bash
 brew install YunyueLi/tap/clauderoam
