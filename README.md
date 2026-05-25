@@ -227,6 +227,33 @@ Claude Code stores per-project memory at `~/.claude/projects/<encoded-path>/memo
 
 ## Install
 
+### Prerequisites
+
+On a fresh machine, set these up **before** running `clauderoam init`, otherwise the GitHub clone step will fail with `Permission denied (publickey)`.
+
+| Need | Why | Get it |
+|---|---|---|
+| [Homebrew](https://brew.sh/) | installs the CLI | `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"` |
+| [`gh` CLI](https://cli.github.com/) | GitHub auth + SSH key upload | `brew install gh` |
+| **GitHub SSH key** | cloning your private config and project repos | see below |
+| Git identity | commit author info | `git config --global user.name "..."`<br/>`git config --global user.email "..."` |
+
+#### GitHub SSH key — 3 commands
+
+```bash
+# 1. generate (no passphrase for convenience; add one if you prefer)
+ssh-keygen -t ed25519 -C "you@example.com" -f ~/.ssh/id_ed25519 -N ""
+
+# 2. upload to GitHub
+gh auth login                                                # if not done
+gh ssh-key add ~/.ssh/id_ed25519.pub --title "$(hostname)"
+
+# 3. confirm
+ssh -T git@github.com   # answer yes once, expect "Hi <username>!"
+```
+
+> **Gotcha**: when `gh auth login` asks _"Upload your SSH public key to your GitHub account?"_ the cursor sits on **Skip** by default. **Choose "Add an SSH key" instead** and it does steps 1+2 in one go. If you've already selected Skip, just run the manual steps above — same result.
+
 ### macOS / Linux (Homebrew)
 
 ```bash

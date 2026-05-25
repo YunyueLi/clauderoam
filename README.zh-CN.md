@@ -227,6 +227,33 @@ Claude Code 把项目级 memory 存在 `~/.claude/projects/<编码路径>/memory
 
 ## 安装
 
+### 先决条件（新机器必看）
+
+在新 Mac 上跑 `clauderoam init` **之前**先把这几样配好，不然 git clone 私有 repo 那步会报 `Permission denied (publickey)`。
+
+| 需要 | 干什么的 | 怎么装 |
+|---|---|---|
+| [Homebrew](https://brew.sh/) | 装 CLI 用 | `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"` |
+| [`gh` CLI](https://cli.github.com/) | GitHub 登录 + 上传 SSH key | `brew install gh` |
+| **GitHub SSH key** | clone 你的私有 config / 项目 repo | 见下面 3 行命令 |
+| Git 身份 | commit 时记作者 | `git config --global user.name "..."`<br/>`git config --global user.email "..."` |
+
+#### GitHub SSH key —— 3 条命令搞定
+
+```bash
+# 1. 生成（图方便不设密码；要安全就去掉 -N ""）
+ssh-keygen -t ed25519 -C "you@example.com" -f ~/.ssh/id_ed25519 -N ""
+
+# 2. 上传到 GitHub
+gh auth login                                                # 还没登过的话
+gh ssh-key add ~/.ssh/id_ed25519.pub --title "$(hostname)"
+
+# 3. 验证
+ssh -T git@github.com   # 第一次问 yes/no 选 yes；看到 "Hi <用户名>!" 就通了
+```
+
+> **坑**：`gh auth login` 走到 _"Upload your SSH public key to your GitHub account?"_ 时，光标默认停在 **Skip**。**选 "Add an SSH key" 一步完成**。如果你已经选了 Skip，跑上面 3 条命令补救，效果一样。
+
 ### macOS / Linux（Homebrew）
 
 ```bash

@@ -2,9 +2,51 @@
 
 ## Prerequisites
 
+### System
+
 - macOS or Linux (Windows via WSL should work; not actively tested)
 - Standard tools: `bash`, `git`, `rsync`
-- Optional: [`gh`](https://cli.github.com/) for GitHub operations
+
+### GitHub access (REQUIRED for cloning your private config repo)
+
+On a brand-new machine you almost certainly need to set up SSH access to GitHub before `clauderoam init` can clone your config repo. Symptom if you skip this:
+
+```
+git@github.com: Permission denied (publickey).
+fatal: Could not read from remote repository.
+```
+
+#### Recommended path: use `gh` CLI
+
+```bash
+brew install gh
+gh auth login
+```
+
+When `gh auth login` asks _"Upload your SSH public key to your GitHub account?"_, **select "Add an SSH key"** (NOT "Skip", which is the default cursor position). `gh` will then generate a key, upload it to GitHub, and configure git to use SSH — all in one step.
+
+#### Manual path (if you skipped the SSH key step or already authenticated)
+
+```bash
+# Generate a new key (no passphrase — convenient but the key is unprotected)
+ssh-keygen -t ed25519 -C "you@example.com" -f ~/.ssh/id_ed25519 -N ""
+
+# Upload to GitHub via gh
+gh ssh-key add ~/.ssh/id_ed25519.pub --title "$(hostname)"
+
+# Confirm — answer "yes" to the host-trust prompt
+ssh -T git@github.com
+# Expected: "Hi <your-github-username>! You've successfully authenticated..."
+```
+
+### Git identity
+
+If you've never used git on this machine:
+
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "you@example.com"
+```
 
 ## First-time install
 
