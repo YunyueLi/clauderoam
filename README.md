@@ -147,6 +147,10 @@ When you open `startup-app` in Claude Code, it loads **your personal layer + sta
 
 clauderoam doesn't sync project _code_ (each project is its own GitHub repo) but it does track **which projects you have** so a new machine can pull them in one command.
 
+<p align="center">
+  <img src=".assets/projects.gif" alt="clauderoam projects subcommand demo" width="800">
+</p>
+
 The list lives at `~/clauderoam/projects.tsv` — synced via git alongside your config.
 
 ```bash
@@ -199,6 +203,37 @@ flowchart LR
 **Switch accounts?** The symlink doesn't care which Claude account is signed in. Your config keeps working — only the credential file (`~/.claude/.credentials.json`) changes, which is exactly what you want.
 
 The one exception is **auto-memory**, which is folder-tree based and gets snapshotted (real copy) by `clauderoam sync`. See [Memory](#memory) below.
+
+### Multi-device push, with conflict handling
+
+Two Macs both running `clauderoam push` on a schedule? Each will produce a memory snapshot commit. They'll diverge. `clauderoam push` (v0.5.2+) reconciles automatically:
+
+<p align="center">
+  <img src=".assets/divergence.gif" alt="clauderoam push auto-resolving a memory-only divergence" width="900">
+</p>
+
+The 4 cases it handles:
+
+```mermaid
+flowchart TD
+    Start([clauderoam push]) --> Fetch[git fetch origin]
+    Fetch --> Compare{compare HEAD<br/>vs origin/main}
+    Compare -->|local at-or-ahead| Push
+    Compare -->|behind, FF| FF[git merge --ff-only] --> Sync
+    Compare -->|diverged| MemOnly{local commits<br/>only in memory/?}
+    MemOnly -->|yes| Auto[git reset --hard origin/main<br/>memory is regenerable] --> Sync
+    MemOnly -->|no| Refuse([❌ exit 1<br/>tell user how to resolve])
+    Sync[clauderoam sync<br/>snapshot memory] --> Push([git commit + git push])
+
+    classDef ok fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef warn fill:#fef3c7,stroke:#f59e0b,color:#78350f
+    classDef bad fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+    class FF,Auto,Push ok
+    class MemOnly warn
+    class Refuse bad
+```
+
+Memory snapshots are auto-regenerable from `~/.claude/projects/`, so last-writer-wins is the correct semantics for them. Edited `CLAUDE.md` or custom agents are not — losing those would be data loss, so push refuses to auto-resolve when those files diverge.
 
 ## Memory
 

@@ -44,3 +44,46 @@ The principle: **iPhone never holds state**. Everything persistent lives in GitH
 | End of day (or week) | Any Mac | `clauderoam push` — snapshot memory + push |
 
 Want hands-off sync? See [auto-sync.md](./auto-sync.md) for a shell hook that runs `git pull` before every Claude Code session and pushes after.
+
+## What multi-device sync actually looks like
+
+Two Macs both with `clauderoam push` on a 30-min LaunchAgent. Here's what flows through GitHub over an hour:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant A as 💻 Mac A
+    participant G as 📦 GitHub
+    participant B as 💻 Mac B
+    Note over A,B: Both running LaunchAgent (clauderoam push every 30 min)
+
+    A->>A: Use Claude Code, accumulate memory in ~/.claude/projects/
+    A->>A: clauderoam push: fetch → up to date → sync → commit → push
+    A->>G: commit X (memory snapshot)
+
+    Note over B: ~15 min later — also accumulated some memory
+    B->>G: fetch
+    G-->>B: commit X (Mac A's snapshot)
+    B->>B: HEAD behind origin/main — fast-forward
+    B->>B: sync memory from ~/.claude/projects/, commit Y
+    B->>G: push commit Y
+    G-->>B: ✓ accepted
+
+    Note over A,B: Race condition: both push almost simultaneously
+    A->>G: fetch (sees commit X, up to date)
+    B->>G: fetch (sees commit X, up to date)
+    A->>A: sync + commit Z (memory)
+    B->>B: sync + commit Q (different memory)
+    A->>G: push Z
+    G-->>A: ✓ accepted
+    B->>G: push Q
+    G-->>B: ❌ rejected (non-FF: A's Z is now on remote)
+    B->>B: detect: local Q only touched memory/
+    B->>B: reset --hard origin/main → re-sync → commit Q'
+    B->>G: push Q'
+    G-->>B: ✓ accepted
+
+    Note over A,B: All memory snapshots preserved (different projects don't overwrite each other)
+```
+
+Step 13 is the moment that used to require manual intervention. `clauderoam push` (v0.5.2+) handles it without bothering you, because memory is regenerable from `~/.claude/projects/` on each sync.

@@ -77,6 +77,10 @@ clauderoam doctor
 Reports symlink health, missing tools, and whether any sensitive files
 accidentally ended up in the repo.
 
+<p align="center">
+  <img src="../.assets/doctor.gif" alt="clauderoam doctor output" width="800">
+</p>
+
 ## What gets symlinked
 
 The portable subset of `~/.claude/`:

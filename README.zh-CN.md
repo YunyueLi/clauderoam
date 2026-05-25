@@ -147,6 +147,10 @@ flowchart LR
 
 clauderoam 不同步项目_代码_（每个项目自己是一个 GitHub repo），但它会跟踪**你有哪些项目**，让新机器能一条命令把它们拉回来。
 
+<p align="center">
+  <img src=".assets/projects.gif" alt="clauderoam projects 子命令演示" width="800">
+</p>
+
 清单存在 `~/clauderoam/projects.tsv` —— 和其他个人配置一起走 git。
 
 ```bash
@@ -199,6 +203,37 @@ flowchart LR
 **换账号？** Symlink 不在乎你登的是哪个 Claude 账号。配置照常工作 —— 只有凭证文件（`~/.claude/.credentials.json`）会被替换，**这正是你想要的行为**。
 
 唯一的例外是 **auto-memory** —— 因为是文件树结构，由 `clauderoam sync` 做真正的拷贝快照。见下方 [Memory](#memory) 部分。
+
+### 多设备 push，自带冲突处理
+
+两台 Mac 都定时跑 `clauderoam push`？两边都会产生 memory 快照 commit，必然分叉。`clauderoam push`（v0.5.2+）会自动 reconcile：
+
+<p align="center">
+  <img src=".assets/divergence.gif" alt="clauderoam push 自动 resolve memory-only 分叉" width="900">
+</p>
+
+它处理的 4 种情况：
+
+```mermaid
+flowchart TD
+    Start([clauderoam push]) --> Fetch[git fetch origin]
+    Fetch --> Compare{比较 HEAD<br/>和 origin/main}
+    Compare -->|本地领先或一致| Push
+    Compare -->|本地落后，能 FF| FF[git merge --ff-only] --> Sync
+    Compare -->|分叉| MemOnly{本地 commit<br/>只动了 memory/？}
+    MemOnly -->|是| Auto[git reset --hard origin/main<br/>memory 可再生] --> Sync
+    MemOnly -->|否| Refuse([❌ exit 1<br/>告诉你如何 resolve])
+    Sync[clauderoam sync<br/>快照 memory] --> Push([git commit + git push])
+
+    classDef ok fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef warn fill:#fef3c7,stroke:#f59e0b,color:#78350f
+    classDef bad fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+    class FF,Auto,Push ok
+    class MemOnly warn
+    class Refuse bad
+```
+
+memory 快照来自 `~/.claude/projects/`，每次 sync 重新生成 —— last-writer-wins 是它的正确语义。但手动改的 `CLAUDE.md` 或自定义 agent 不一样，丢了就是丢了 —— 所以 push 在这两种文件分叉时拒绝自动处理。
 
 ## Memory
 
