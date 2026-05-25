@@ -174,10 +174,6 @@ flowchart LR
 
 clauderoam 不同步项目_代码_（每个项目自己是一个 GitHub repo），但它会跟踪**你有哪些项目**，让新机器能一条命令把它们拉回来。
 
-<p align="center">
-  <img src=".assets/projects.gif" alt="clauderoam projects 子命令演示" width="800">
-</p>
-
 清单存在 `~/clauderoam/projects.tsv` —— 和其他个人配置一起走 git。
 
 ```bash
@@ -199,10 +195,10 @@ clauderoam projects clone-all               # 3. 所有项目代码
 # 4. 各项目按需装依赖（npm install / pip install / ...）
 ```
 
-四行命令，完整开发环境：
+四行命令，完整开发环境。README 顶部的 hero GIF 演了前 3 步里的"个人配置回来了"，下面这个补完了"项目代码也回来了"那部分：
 
 <p align="center">
-  <img src=".assets/new-mac.gif" alt="端到端演示：全新 Mac 到完整工作环境" width="900">
+  <img src=".assets/projects.gif" alt="老 Mac 的 projects.tsv → 新 Mac clauderoam projects clone-all → ~/Code/ 出现所有项目目录" width="900">
 </p>
 
 ## clauderoam 内部到底在做什么
@@ -237,13 +233,7 @@ flowchart LR
 
 ### 多设备 push，自带冲突处理
 
-两台 Mac 都定时跑 `clauderoam push`？两边都会产生 memory 快照 commit，必然分叉。`clauderoam push`（v0.5.2+）会自动 reconcile：
-
-<p align="center">
-  <img src=".assets/divergence.gif" alt="clauderoam push 自动 resolve memory-only 分叉" width="900">
-</p>
-
-它处理的 4 种情况：
+两台 Mac 都定时跑 `clauderoam push`？两边都会产生 memory 快照 commit，必然分叉。`clauderoam push`（v0.5.2+）会自动 reconcile，它处理的 4 种情况：
 
 ```mermaid
 flowchart TD

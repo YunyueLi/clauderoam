@@ -174,10 +174,6 @@ When you open `startup-app` in Claude Code, it loads **your personal layer + sta
 
 clauderoam doesn't sync project _code_ (each project is its own GitHub repo) but it does track **which projects you have** so a new machine can pull them in one command.
 
-<p align="center">
-  <img src=".assets/projects.gif" alt="clauderoam projects subcommand demo" width="800">
-</p>
-
 The list lives at `~/clauderoam/projects.tsv` — synced via git alongside your config.
 
 ```bash
@@ -199,10 +195,10 @@ clauderoam projects clone-all               # 3. all your projects
 # 4. install per-project deps as needed (npm install / pip install / ...)
 ```
 
-Four lines, full developer environment:
+Four lines, full developer environment. The hero GIF at the top of this README shows the personal-config part of that flow. The projects part:
 
 <p align="center">
-  <img src=".assets/new-mac.gif" alt="End-to-end: brand new Mac to fully working dev environment" width="900">
+  <img src=".assets/projects.gif" alt="projects.tsv on the old Mac → clauderoam projects clone-all on the new Mac → ~/Code/ populated with all your project directories" width="900">
 </p>
 
 ## What clauderoam actually does (under the hood)
@@ -237,13 +233,7 @@ The one exception is **auto-memory**, which is folder-tree based and gets snapsh
 
 ### Multi-device push, with conflict handling
 
-Two Macs both running `clauderoam push` on a schedule? Each will produce a memory snapshot commit. They'll diverge. `clauderoam push` (v0.5.2+) reconciles automatically:
-
-<p align="center">
-  <img src=".assets/divergence.gif" alt="clauderoam push auto-resolving a memory-only divergence" width="900">
-</p>
-
-The 4 cases it handles:
+Two Macs both running `clauderoam push` on a schedule? Each produces a memory snapshot commit. They diverge. `clauderoam push` (v0.5.2+) reconciles automatically — the 4 cases it handles:
 
 ```mermaid
 flowchart TD
