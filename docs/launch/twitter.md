@@ -1,10 +1,10 @@
 # X / Twitter thread
 
-7 tweets. Lead with the GIF. Attach `.assets/demo.gif` to tweet 1.
+7 tweets. Lead with the GIF. Attach `.assets/hero.gif` to tweet 1.
 
 ## Thread
 
-**Tweet 1** (with `.assets/demo.gif` attached)
+**Tweet 1** (with `.assets/hero.gif` attached)
 
 ```
 Your Claude Code config — agents, slash commands, memory — lives on one Mac. Switch machines or switch Claude accounts, you lose it all.

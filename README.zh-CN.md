@@ -1,14 +1,14 @@
 <div align="center">
 
-# clauderoam
+<img src=".assets/banner.svg" alt="clauderoam — Your Claude Code config, anywhere" width="100%">
 
-### 让 Claude Code 配置漫游<br/>跨 Mac、跨账号、跨设备 —— 无需复制粘贴
+<br/>
 
 [![CI](https://github.com/YunyueLi/clauderoam/actions/workflows/ci.yml/badge.svg)](https://github.com/YunyueLi/clauderoam/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Shell](https://img.shields.io/badge/shell-bash-89e051)](clauderoam)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey)]()
-[![Version](https://img.shields.io/badge/version-0.4.0-orange)]()
+[![Version](https://img.shields.io/badge/version-0.5.2-orange)]()
 [![Homebrew](https://img.shields.io/badge/homebrew-tap-FBB040)](https://github.com/YunyueLi/homebrew-tap)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
@@ -16,15 +16,38 @@
 
 <br/>
 
-<img src=".assets/demo.gif" alt="clauderoam demo" width="800">
+<img src=".assets/hero.gif" alt="brew install YunyueLi/tap/clauderoam → clauderoam init → clauderoam doctor" width="900">
 
 </div>
 
 ---
 
-> 在一台 Mac 上把 Claude Code 调成你想要的样子 → 换 Mac → 全没了。<br/>
-> 换 Claude 账号 → 又全没了。<br/>
-> **clauderoam 用两条命令 + 一组 symlink 修好这件事。**
+## 为什么有这个东西
+
+上个月买了台新 MacBook，本来兴致勃勃要折腾，结果发现整个上午要花在重装重配 Claude Code 上：
+
+- 几周里反复调教出来的 `CLAUDE.md`
+- 自己写的 7 个 subagent（code review、git 操作、跑测试……）
+- 跟我思维方式匹配的 commit / PR slash 命令
+- 在十来个项目里积累出来的 auto-memory
+
+这些东西全在老 Mac 的 `~/.claude/` 里 —— 不在 git，不在 GitHub，绑死在那台机器、那个 Claude 账号上。
+
+两周后又因为接外包要切到客户的 Claude 账号 —— 同样的故事，几小时调出来的东西又一次清零。
+
+**clauderoam** 就是第二次清零之后写出来的。新 Mac 上 3 条命令：
+
+```bash
+brew install YunyueLi/tap/clauderoam
+git clone <你的 config repo> ~/clauderoam
+clauderoam install
+```
+
+`CLAUDE.md`、自定义 agent、slash 命令、auto-memory 快照 —— 全回来了。换账号也不丢，**只有 credentials 文件被替换**（这正是你要的）。
+
+核心机制就是：你那个装着可移植 Claude Code 状态的 git repo，被 symlink 到 `~/.claude/`，Claude Code 照常读取。没有 daemon、没有后台服务、不用复制粘贴 —— 就是 dotfiles，只不过专门为 Claude Code 做了优化。
+
+## 快速安装
 
 ```bash
 brew install YunyueLi/tap/clauderoam
@@ -34,9 +57,13 @@ clauderoam init
 `init` 会在 `~/clauderoam/` 创建你的配置 repo、个性化 `CLAUDE.md`、symlink 到 `~/.claude/`。每台新设备同样两条命令（前提是你已经把 repo push 到 GitHub）。
 
 <details>
-<summary>没装 Homebrew？用 git clone。</summary>
+<summary>没装 Homebrew？用 curl 或 git clone。</summary>
 
 ```bash
+# curl 一键安装（带 sha256 校验）
+curl -fsSL https://raw.githubusercontent.com/YunyueLi/clauderoam/main/install.sh | bash
+
+# 或 git clone
 git clone https://github.com/YunyueLi/clauderoam.git ~/clauderoam
 cd ~/clauderoam && ./clauderoam init
 ```
@@ -172,7 +199,11 @@ clauderoam projects clone-all               # 3. 所有项目代码
 # 4. 各项目按需装依赖（npm install / pip install / ...）
 ```
 
-四行命令，完整开发环境。
+四行命令，完整开发环境：
+
+<p align="center">
+  <img src=".assets/new-mac.gif" alt="端到端演示：全新 Mac 到完整工作环境" width="900">
+</p>
 
 ## clauderoam 内部到底在做什么
 

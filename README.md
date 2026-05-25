@@ -1,14 +1,14 @@
 <div align="center">
 
-# clauderoam
+<img src=".assets/banner.svg" alt="clauderoam — Your Claude Code config, anywhere" width="100%">
 
-### Your Claude Code config, anywhere.<br/>Across Macs. Across accounts. Without the copy-paste.
+<br/>
 
 [![CI](https://github.com/YunyueLi/clauderoam/actions/workflows/ci.yml/badge.svg)](https://github.com/YunyueLi/clauderoam/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Shell](https://img.shields.io/badge/shell-bash-89e051)](clauderoam)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey)]()
-[![Version](https://img.shields.io/badge/version-0.4.0-orange)]()
+[![Version](https://img.shields.io/badge/version-0.5.2-orange)]()
 [![Homebrew](https://img.shields.io/badge/homebrew-tap-FBB040)](https://github.com/YunyueLi/homebrew-tap)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
@@ -16,27 +16,54 @@
 
 <br/>
 
-<img src=".assets/demo.gif" alt="clauderoam demo" width="800">
+<img src=".assets/hero.gif" alt="brew install YunyueLi/tap/clauderoam → clauderoam init → clauderoam doctor" width="900">
 
 </div>
 
 ---
 
-> Customize Claude Code on one Mac → switch Macs → lose everything.<br/>
-> Switch Claude accounts → lose everything again.<br/>
-> **clauderoam fixes that with two commands and a symlink farm.**
+## Why this exists
+
+I bought a new MacBook last month. Spent the morning excited to set it up. Then realized I'd spend the rest of the day reinstalling and reconfiguring Claude Code:
+
+- the `CLAUDE.md` I'd tuned over weeks of feedback
+- the seven custom subagents I'd written for code review, git ops, test running
+- the slash commands that match how I think about commits and PRs
+- the per-project auto-memory built up across half a dozen codebases
+
+All of it was sitting in `~/.claude/` on the old machine. Nothing was in git. Nothing was on GitHub. Tied to one Mac, tied to one Claude account.
+
+Two weeks later I had to switch to a client's Claude account for a contract. Same story. The customization I'd spent hours building was gone again.
+
+**clauderoam** is what I built after the second time. Three commands on a new Mac:
+
+```bash
+brew install YunyueLi/tap/clauderoam
+git clone <your-config-repo> ~/clauderoam
+clauderoam install
+```
+
+Your `CLAUDE.md`, custom agents, slash commands, and snapshotted auto-memory are back. Switch accounts and they survive — only the credentials file changes, which is correct.
+
+The whole thing is a git repo full of your portable Claude Code state, symlinked into `~/.claude/` where Claude Code reads it. No daemon, no service, no copy-and-paste — just dotfiles, specialized for Claude Code.
+
+## Quick install
 
 ```bash
 brew install YunyueLi/tap/clauderoam
 clauderoam init
 ```
 
-`init` creates your config repo at `~/clauderoam/`, personalizes your `CLAUDE.md`, and links it into `~/.claude/`. Same two commands on every other device — after pushing your repo to GitHub, of course.
+`init` creates your config repo at `~/clauderoam/`, personalizes your `CLAUDE.md`, and links it into `~/.claude/`. Same two commands on every other device — after pushing your repo to GitHub.
 
 <details>
-<summary>Don't have Homebrew? Use git clone.</summary>
+<summary>Don't have Homebrew? Use the curl installer or git clone.</summary>
 
 ```bash
+# curl one-liner (verifies sha256)
+curl -fsSL https://raw.githubusercontent.com/YunyueLi/clauderoam/main/install.sh | bash
+
+# or git clone
 git clone https://github.com/YunyueLi/clauderoam.git ~/clauderoam
 cd ~/clauderoam && ./clauderoam init
 ```
@@ -172,7 +199,11 @@ clauderoam projects clone-all               # 3. all your projects
 # 4. install per-project deps as needed (npm install / pip install / ...)
 ```
 
-Four lines, full developer environment.
+Four lines, full developer environment:
+
+<p align="center">
+  <img src=".assets/new-mac.gif" alt="End-to-end: brand new Mac to fully working dev environment" width="900">
+</p>
 
 ## What clauderoam actually does (under the hood)
 
