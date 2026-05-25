@@ -6,7 +6,7 @@
 
 [![CI](https://github.com/YunyueLi/ClaudeRoam/actions/workflows/ci.yml/badge.svg)](https://github.com/YunyueLi/ClaudeRoam/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Shell](https://img.shields.io/badge/shell-bash-89e051)](clauderoam)
+[![Shell](https://img.shields.io/badge/shell-bash-89e051)]()
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey)]()
 [![Version](https://img.shields.io/badge/version-0.5.2-orange)]()
 [![Homebrew](https://img.shields.io/badge/homebrew-tap-FBB040)](https://github.com/YunyueLi/homebrew-tap)
@@ -33,19 +33,9 @@ I bought a new MacBook last month. Spent the morning excited to set it up. Then 
 
 All of it was sitting in `~/.claude/` on the old machine. Nothing was in git. Nothing was on GitHub. Tied to one Mac, tied to one Claude account.
 
-Two weeks later I had to switch to a client's Claude account for a contract. Same story. The customization I'd spent hours building was gone again.
+Two weeks later I had to switch to a client's Claude account for a contract. Same story. Hours of customization, gone again.
 
-**ClaudeRoam** is what I built after the second time. Three commands on a new Mac:
-
-```bash
-brew install YunyueLi/tap/clauderoam
-git clone <your-config-repo> ~/clauderoam
-clauderoam install
-```
-
-Your `CLAUDE.md`, custom agents, slash commands, and snapshotted auto-memory are back. Switch accounts and they survive — only the credentials file changes, which is correct.
-
-The whole thing is a git repo full of your portable Claude Code state, symlinked into `~/.claude/` where Claude Code reads it. No daemon, no service, no copy-and-paste — just dotfiles, specialized for Claude Code.
+**ClaudeRoam** is what I built after the second time. It's a git repo of your portable Claude Code state, symlinked back into `~/.claude/` where Claude Code reads it. No daemon, no service, no copy-paste — just dotfiles, specialized for Claude Code.
 
 ## What this gives you
 
@@ -59,56 +49,66 @@ Five kinds of Claude Code customization that today only live on one Mac:
 | **Project registry** | which GitHub repos you want present on every Mac |
 | **Auto-memory** | what Claude has learned about you across sessions |
 
-ClaudeRoam makes them follow **you**, not the machine. Concretely:
+ClaudeRoam makes them follow **you**, not the machine. Four concrete wins:
 
-### ① Full restore on a new Mac in ~5 minutes
+| Scenario | What you do | Result |
+|---|---|---|
+| **Restore on a new Mac** | 4 commands ([see Install](#install)) | Claude Code recognizes you, uses your style, has your custom agents, project code checked out. ~5 minutes total. |
+| **Switch Claude accounts** | sign out / sign in | Only `.credentials.json` changes (correct). Your config, agents, commands, memory: untouched. |
+| **Drive work from your phone** | open issue: `@claude fix typo in README §3` | Claude runs in the cloud via the [GitHub @claude bot](https://github.com/apps/claude), opens a PR. iPhone never holds any state. |
+| **Multiple Macs in parallel** | LaunchAgent on each Mac pushes every 30 min | v0.5.2+ auto-resolves memory-only divergence. You never see a "manual fix required" error. |
+
+---
+
+## Install
+
+### Prerequisites (do this first on every new Mac)
+
+Without these, the GitHub clone step will fail with `Permission denied (publickey)`.
+
+| Need | How |
+|---|---|
+| [Homebrew](https://brew.sh/) | `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"` |
+| [`gh`](https://cli.github.com/) CLI | `brew install gh` |
+| GitHub SSH key | `gh auth login` and **choose "Add an SSH key"** when prompted (the cursor defaults to **Skip** — don't take it) |
+| Git identity | `git config --global user.name "..."` and `user.email "..."` |
+
+If you accidentally chose Skip on the SSH step, recover with:
 
 ```bash
-brew install YunyueLi/tap/clauderoam                                        # 1. install the CLI
-git clone git@github.com:<you>/clauderoam-config.git ~/clauderoam           # 2. pull your data
-clauderoam install                                                          # 3. link into ~/.claude/
-clauderoam projects clone-all                                               # 4. pull every project repo
+ssh-keygen -t ed25519 -C "you@example.com" -f ~/.ssh/id_ed25519 -N ""
+gh ssh-key add ~/.ssh/id_ed25519.pub --title "$(hostname)"
+ssh -T git@github.com   # answer yes, expect "Hi <username>!"
 ```
 
-Four commands → Claude Code recognizes you, uses your style, has your custom agents, and your project code is checked out. **No reconfiguration.**
-
-### ② Survive a Claude account switch
-
-Sign out of one account, sign in to another. The `~/.claude/` symlinks still point at your config repo. Only `.credentials.json` gets replaced — which is exactly correct, because you _do_ want the new account's token.
-
-Your preferences, agents, commands, and memory: untouched.
-
-### ③ Drive work from your phone
-
-Install the [Claude GitHub App](https://github.com/apps/claude) on your project repos. Open an issue from the GitHub mobile app:
-
-> @claude please fix the typo in README section 3
-
-Claude runs in the cloud, opens a PR. You merge later from anywhere. **iPhone never holds any state.**
-
-### ④ Multiple Macs running simultaneously, no conflicts
-
-Both Macs run `clauderoam push` on a schedule (via LaunchAgent). They produce diverging memory snapshots. ClaudeRoam v0.5.2+ automatically detects "the divergence is memory-only" and reconciles — you never see a manual-fix-required error.
-
-## Quick install
+### First Mac (creating your config repo)
 
 ```bash
 brew install YunyueLi/tap/clauderoam
 clauderoam init
 ```
 
-`init` creates your config repo at `~/clauderoam/`, personalizes your `CLAUDE.md`, and links it into `~/.claude/`. Same two commands on every other device — after pushing your repo to GitHub.
+`init` creates `~/clauderoam/`, personalizes `CLAUDE.md`, and symlinks into `~/.claude/`. Then push the new repo to your GitHub.
+
+### Every other Mac (using your existing config repo)
+
+```bash
+brew install YunyueLi/tap/clauderoam
+git clone git@github.com:<you>/clauderoam-config.git ~/clauderoam
+clauderoam install
+clauderoam projects clone-all   # also pulls every registered project repo
+```
 
 <details>
-<summary>Don't have Homebrew? Use the curl installer or git clone.</summary>
+<summary>Don't have Homebrew? Use curl or git clone.</summary>
 
 ```bash
 # curl one-liner (verifies sha256)
 curl -fsSL https://raw.githubusercontent.com/YunyueLi/ClaudeRoam/main/install.sh | bash
 
-# or git clone
-git clone https://github.com/YunyueLi/ClaudeRoam.git ~/clauderoam
-cd ~/clauderoam && ./clauderoam init
+# or git clone the CLI source
+git clone https://github.com/YunyueLi/ClaudeRoam.git ~/ClaudeRoam-src
+cd ~/ClaudeRoam-src && ./clauderoam init
 ```
 
 </details>
@@ -121,7 +121,7 @@ When you do need to touch it:
 
 | You want to… | Do this |
 |---|---|
-| Add a custom slash command or agent | Tell Claude Code: _"create a `/refactor` slash command that…"_. Claude writes the file into `~/.claude/commands/` and runs `clauderoam push`. 30 min later every Mac has it. |
+| Add a custom slash command or agent | Tell Claude Code: _"create a `/refactor` slash command that…"_. Claude writes the file into `~/.claude/commands/` and runs `clauderoam push` |
 | Tweak your preferences | Edit `~/.claude/CLAUDE.md` (or ask Claude to), then `clauderoam push` |
 | Check the sync state | `clauderoam status` |
 | Health check | `clauderoam doctor` |
@@ -129,57 +129,11 @@ When you do need to touch it:
 
 ---
 
-## Where ClaudeRoam works
+## How it works
 
-ClaudeRoam manages the **local Claude Code installation** — the one that reads `~/.claude/`. That covers the Mac desktop app, the CLI, and IDE extensions. The browser version of Claude Code is a different runtime and outside its scope.
+### Three layers Claude Code reads from
 
-| Surface | Status | Why |
-|---|---|---|
-| **Claude Code desktop** (macOS, Linux, Windows) | ✅ Full | Reads `~/.claude/`; ClaudeRoam symlinks into it |
-| **Claude Code CLI** (terminal) | ✅ Full | Same `~/.claude/` mechanism |
-| **VS Code / JetBrains** extensions | ✅ Full | Same `~/.claude/` mechanism |
-| **[claude.ai/code](https://claude.ai/code)** (web) | ⚠️ Project-only | Each web session is an isolated sandbox; no `~/.claude/` exists there. Workaround: open your `clauderoam-config` repo as the project so its `CLAUDE.md` loads — but `auto` mode and cross-project memory still aren't available |
-| **Claude iOS / Android** app | ➖ N/A | Read-only chat. For mobile cloud work, use the [GitHub @claude bot](https://github.com/apps/claude) to delegate via issues/PRs |
-
-```mermaid
-flowchart TD
-    Q{Where are you using<br/>Claude Code?}
-    Q -->|desktop app| A
-    Q -->|CLI terminal| A
-    Q -->|VS Code · JetBrains| A
-    Q -->|claude.ai/code| B
-    Q -->|iOS · Android app| C
-
-    A[✅ <b>Full ClaudeRoam experience</b><br/>~/.claude/ ◄ symlinks ◄ ~/clauderoam<br/>auto mode · memory · personal CLAUDE.md]
-    B[⚠️ <b>Project-scoped only</b><br/>Open clauderoam-config to load<br/>your CLAUDE.md as a project file]
-    C[➖ <b>Use GitHub @claude</b><br/>for async cloud work from mobile]
-
-    classDef ok    fill:#dcfce7,stroke:#16a34a,color:#14532d
-    classDef warn  fill:#fef3c7,stroke:#eab308,color:#78350f
-    classDef info  fill:#dbeafe,stroke:#3b82f6,color:#1e3a8a
-    classDef q     fill:#f3f4f6,stroke:#9ca3af,color:#111827
-    class A ok
-    class B warn
-    class C info
-    class Q q
-```
-
-### "Fully cloud" — two meanings
-
-The phrase "cloud workflow" gets used for two different things. ClaudeRoam solves one of them, not both:
-
-| What you mean by "cloud" | ClaudeRoam helps? |
-|---|---|
-| **My data and config live in GitHub**, not pinned to one Mac → I can switch Macs / Claude accounts and not lose anything | ✅ **Yes — this is exactly what ClaudeRoam is for** |
-| **I want to run Claude Code inside a browser** so I never install anything locally | ❌ No. That's claude.ai/code's job, and it has its own architectural limits (no user-level config, no `auto` mode, no cross-session memory). ClaudeRoam can't change those |
-
-If your goal is the first one — **use desktop Claude Code on each Mac you switch between, and let ClaudeRoam carry your config in git**. That's the supported workflow.
-
----
-
-## Mental model
-
-Claude Code reads config from **three places** every time it starts. ClaudeRoam manages the first one. Your projects own the second. The third is the live conversation.
+Every time Claude Code starts, it loads config from three places. ClaudeRoam manages the first.
 
 ```mermaid
 flowchart TB
@@ -194,20 +148,19 @@ flowchart TB
     A --> B --> C
 ```
 
-> **Rule of thumb**<br/>
-> If it follows _you_ across projects → **personal** (ClaudeRoam).<br/>
-> If it belongs to _this codebase_ → **project repo**.<br/>
-> If it's just for _this conversation_ → nothing, it'll be in the transcript.
+> **Rule of thumb**
+> - Follows _you_ across projects → **personal** (ClaudeRoam)
+> - Belongs to _this codebase_ → **project repo**
+> - Only for _this conversation_ → nothing, lives in the transcript
 
-## What's in ClaudeRoam vs what's in each project
+### Personal config vs project config
 
 |  | ClaudeRoam (personal) | Each project repo |
 |---|---|---|
 | **Lives at** | `~/clauderoam/` → `~/.claude/` (symlinks) | `<project>/CLAUDE.md` + `<project>/.claude/` |
 | **Who edits it** | You, alone | You and any contributors to that project |
-| **Travels with** | Your Claude account & GitHub identity | The codebase |
-| **Lifetime** | Years (your career) | Lifetime of the project |
-| **Examples** | "Reply in 中文" · "use conventional commits" · your `/commit` slash command · the `code-reviewer` agent you use everywhere | "Python 3.12, `uv run pytest`" · "import sort: stdlib, third-party, local" · a `migration-checker` agent only useful here |
+| **Travels with** | Your identity (across Macs and accounts) | The codebase |
+| **Examples** | "Reply in 中文" · `code-reviewer` agent · `/commit` slash command | "Python 3.12 + pytest" · project build commands · `migration-checker` agent |
 
 ```mermaid
 flowchart LR
@@ -225,49 +178,18 @@ flowchart LR
     P3 --> CC
 ```
 
-When you open `startup-app` in Claude Code, it loads **your personal layer + startup-app's project layer**, combined. Open `my-blog` next, same personal layer + my-blog's project layer. Two contexts, zero conflict.
+Open `startup-app` in Claude Code → it loads your personal layer + startup-app's project layer, combined. Open `my-blog` next → same personal layer + my-blog's project layer. Two contexts, zero conflict.
 
-## Project registry — pulling all your repos onto a new Mac
+### Symlinks, not sync
 
-ClaudeRoam doesn't sync project _code_ (each project is its own GitHub repo) but it does track **which projects you have** so a new machine can pull them in one command.
-
-The list lives at `~/clauderoam/projects.tsv` — synced via git alongside your config.
-
-```bash
-clauderoam projects add        # register a project (interactive)
-clauderoam projects list       # see the registry
-clauderoam projects clone-all  # clone every registered project (skips existing)
-clauderoam projects pull-all   # git pull each clean project
-clauderoam projects status     # which projects are dirty / ahead / missing
-clauderoam projects remove <name>
-```
-
-So the complete "set up a new Mac" flow becomes:
-
-```bash
-brew install YunyueLi/tap/clauderoam        # 1. install the CLI
-git clone <your-clauderoam-repo> ~/clauderoam
-clauderoam install                          # 2. personal config
-clauderoam projects clone-all               # 3. all your projects
-# 4. install per-project deps as needed (npm install / pip install / ...)
-```
-
-Four lines, full developer environment. The hero GIF at the top of this README shows the personal-config part of that flow. The projects part:
-
-<p align="center">
-  <img src=".assets/projects.gif" alt="projects.tsv on the old Mac → clauderoam projects clone-all on the new Mac → ~/Code/ populated with all your project directories" width="900">
-</p>
-
-## What ClaudeRoam actually does (under the hood)
-
-It does **not** copy or sync files. It uses **symlinks**.
+ClaudeRoam doesn't copy files. It uses symlinks.
 
 ```
 ~/.claude/CLAUDE.md ────► ~/clauderoam/CLAUDE.md
                           (the real file, tracked in git)
 ```
 
-Editing one *is* editing the other. There's only one copy. No "did I forget to sync" anxiety.
+Editing one *is* editing the other. There's only one copy on disk. No "did I forget to sync" question.
 
 ```mermaid
 flowchart LR
@@ -278,17 +200,17 @@ flowchart LR
       CC2["~/.claude/CLAUDE.md"] -.symlink.-> R2["~/clauderoam/CLAUDE.md"]
     end
     subgraph GH["📦 GitHub"]
-      G["clauderoam repo"]
+      G["clauderoam-config repo"]
     end
     R1 <-->|git push/pull| G
     R2 <-->|git push/pull| G
 ```
 
-**Switch accounts?** The symlink doesn't care which Claude account is signed in. Your config keeps working — only the credential file (`~/.claude/.credentials.json`) changes, which is exactly what you want.
+Switching Claude accounts doesn't disturb any of this. Your symlinks don't depend on which account is signed in — `.credentials.json` changes (which is correct), nothing else.
 
-The one exception is **auto-memory**, which is folder-tree based and gets snapshotted (real copy) by `clauderoam sync`. See [Memory](#memory) below.
+The one exception is **auto-memory**: it's a folder tree (not a single file), so it gets snapshotted by `clauderoam sync` rather than symlinked. See [Memory](#memory).
 
-### Multi-device push, with conflict handling
+## Multi-device push, with automatic conflict handling
 
 Two Macs both running `clauderoam push` on a schedule? Each produces a memory snapshot commit. They diverge. `clauderoam push` (v0.5.2+) reconciles automatically — the 4 cases it handles:
 
@@ -311,123 +233,78 @@ flowchart TD
     class Refuse bad
 ```
 
-Memory snapshots are auto-regenerable from `~/.claude/projects/`, so last-writer-wins is the correct semantics for them. Edited `CLAUDE.md` or custom agents are not — losing those would be data loss, so push refuses to auto-resolve when those files diverge.
+Memory snapshots are auto-regenerable from `~/.claude/projects/`, so last-writer-wins is correct for them. Edited `CLAUDE.md` or custom agents are not — losing those would be real data loss, so push refuses to auto-resolve when those files diverge.
 
 ## Memory
 
-Claude Code stores per-project memory at `~/.claude/projects/<encoded-path>/memory/`. Each project gets its own bucket:
-
-```
-~/.claude/projects/
-├── -Users-you-Desktop-my-blog/
-│   └── memory/
-│       ├── MEMORY.md           ← index, always loaded
-│       ├── user_xxx.md         ← facts about you
-│       ├── feedback_xxx.md     ← corrections you've given
-│       └── project_xxx.md      ← project state
-│
-├── -Users-you-Desktop-startup-app/
-│   └── memory/  ← totally independent from my-blog's memory
-│
-└── -Users-you-Desktop-clauderoam/
-    └── memory/
-```
+Claude Code stores per-project memory at `~/.claude/projects/<encoded-path>/memory/` — separate buckets per codebase. Two commands move them through git:
 
 | Command | What it does |
 |---|---|
-| `clauderoam sync` | Copy every project's `memory/` into the clauderoam repo |
-| `clauderoam restore` | Reverse: copy from repo back to `~/.claude/projects/`. Rewrites the username if the new machine has a different `$USER` |
+| `clauderoam sync` | Snapshot every project's `memory/` into the clauderoam repo |
+| `clauderoam restore` | Reverse direction. Rewrites the username portion of paths if the new machine has a different `$USER` |
 
-## Install
+The username rewriting matters: on Mac A your projects live at `/Users/you-a/Desktop/...`; on Mac B they live at `/Users/you-b/Desktop/...`. Restoring memory from A to B without the rewrite would leave the paths pointing nowhere.
 
-### Prerequisites
+## Project registry
 
-On a fresh machine, set these up **before** running `clauderoam init`, otherwise the GitHub clone step will fail with `Permission denied (publickey)`.
+ClaudeRoam doesn't sync project _code_ (each project is its own GitHub repo) but it does track **which projects you have**, so a new machine can pull them in one command.
 
-| Need | Why | Get it |
+The list lives at `~/clauderoam/projects.tsv` — synced via git alongside your config.
+
+```bash
+clauderoam projects add        # register a project (interactive)
+clauderoam projects list       # see the registry
+clauderoam projects clone-all  # clone every registered project (skips existing)
+clauderoam projects pull-all   # git pull each clean project
+clauderoam projects status     # which projects are dirty / ahead / missing
+clauderoam projects remove <name>
+```
+
+<p align="center">
+  <img src=".assets/projects.gif" alt="projects.tsv on the old Mac → clauderoam projects clone-all on the new Mac → ~/Code/ populated with all your project directories" width="900">
+</p>
+
+## Where it works
+
+| Surface | Status | Note |
 |---|---|---|
-| [Homebrew](https://brew.sh/) | installs the CLI | `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"` |
-| [`gh` CLI](https://cli.github.com/) | GitHub auth + SSH key upload | `brew install gh` |
-| **GitHub SSH key** | cloning your private config and project repos | see below |
-| Git identity | commit author info | `git config --global user.name "..."`<br/>`git config --global user.email "..."` |
+| **Claude Code desktop** (macOS / Linux / Windows) | ✅ Full | Reads `~/.claude/`; ClaudeRoam symlinks into it |
+| **Claude Code CLI** (terminal) | ✅ Full | Same `~/.claude/` mechanism |
+| **VS Code / JetBrains** extensions | ✅ Full | Same `~/.claude/` mechanism |
+| **[claude.ai/code](https://claude.ai/code)** (web) | ⚠️ Project-only | Each web session is an isolated sandbox; no persistent `~/.claude/`. Workaround: open your `clauderoam-config` repo as the project so its `CLAUDE.md` loads — but `auto` mode and cross-project memory still aren't available |
+| **Claude iOS / Android** app | ➖ N/A | Chat client. Use the [GitHub @claude bot](https://github.com/apps/claude) for mobile cloud work |
 
-#### GitHub SSH key — 3 commands
+> "Cloud workflow" can mean two different things. See the [FAQ](#-faq) for which one ClaudeRoam solves.
 
-```bash
-# 1. generate (no passphrase for convenience; add one if you prefer)
-ssh-keygen -t ed25519 -C "you@example.com" -f ~/.ssh/id_ed25519 -N ""
+---
 
-# 2. upload to GitHub
-gh auth login                                                # if not done
-gh ssh-key add ~/.ssh/id_ed25519.pub --title "$(hostname)"
+## Reference
 
-# 3. confirm
-ssh -T git@github.com   # answer yes once, expect "Hi <username>!"
-```
-
-> **Gotcha**: when `gh auth login` asks _"Upload your SSH public key to your GitHub account?"_ the cursor sits on **Skip** by default. **Choose "Add an SSH key" instead** and it does steps 1+2 in one go. If you've already selected Skip, just run the manual steps above — same result.
-
-### macOS / Linux (Homebrew)
-
-```bash
-brew install YunyueLi/tap/clauderoam
-clauderoam init
-```
-
-Updates: `brew upgrade clauderoam` (updates the CLI only — your config repo is yours and is never touched).
-
-### Without Homebrew (curl)
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/YunyueLi/ClaudeRoam/main/install.sh | bash
-clauderoam init
-```
-
-Installs to `~/.local/bin/clauderoam` + `~/.local/share/clauderoam/`. Verifies sha256 against the release manifest. Override paths with `CLAUDEROAM_PREFIX`.
-
-### From source (git clone)
-
-```bash
-git clone https://github.com/YunyueLi/ClaudeRoam.git ~/clauderoam
-cd ~/clauderoam
-./clauderoam init
-```
-
-### On a second device
-
-The CLI install is the same. To bring your config and all your project code:
-
-```bash
-brew install YunyueLi/tap/clauderoam        # or use install.sh / git clone
-git clone <your-clauderoam-config-repo> ~/clauderoam
-clauderoam install                          # personal config
-clauderoam projects clone-all               # all your project repos
-```
-
-## Commands
+### Commands
 
 | Command | What it does |
 |---|---|
 | `clauderoam init` | Interactive first-time setup — personalize and install |
-| `clauderoam install` | Re-create the symlinks (idempotent, backs up first) |
+| `clauderoam install` | (Re-)create the symlinks (idempotent, backs up first) |
 | `clauderoam doctor` | Verify symlinks point right & no secrets are tracked |
 | `clauderoam sync` | Snapshot `~/.claude/projects/*/memory/` into `./memory/` |
 | `clauderoam restore` | Restore memory snapshots (handles username changes) |
-| `clauderoam push` | `sync` + `git commit` + `git push` |
+| `clauderoam push` | `sync` + `git commit` + `git push` (with conflict auto-resolve) |
 | `clauderoam status` | Show repo state and current symlinks |
-| `clauderoam projects ...` | Manage your project registry — see [Project registry](#project-registry--pulling-all-your-repos-onto-a-new-mac) |
-| `clauderoam --dry-run` | Preview any command without making changes |
+| `clauderoam projects ...` | Manage your project registry — see [Project registry](#project-registry) |
+| `clauderoam --dry-run` | Preview any command without changing anything |
 
-## What gets synced
+### What gets synced
 
 | ✅ Synced to git | ❌ Stays on the machine |
 |---|---|
 | `CLAUDE.md` · `settings.json` · `keybindings.json` | `.credentials.json` — your auth token |
 | `agents/` · `skills/` · `commands/` | `sessions/` · `shell-snapshots/` · `telemetry/` |
 | `memory/` (snapshots) | `policy-limits.json` · `projects/` runtime data |
-| `projects.tsv` (project registry) | the project _code_ — that's each project's own git repo |
+| `projects.tsv` (project registry) | the project _code_ itself — that's each project's own git repo |
 
-## Examples
+### Examples
 
 Drop-in [agents](./examples/agents) and [slash commands](./examples/commands):
 
@@ -445,28 +322,28 @@ clauderoam push
 
 ## Troubleshooting
 
-| Symptom | What it means | Fix |
+| Symptom | Meaning | Fix |
 |---|---|---|
 | Claude Code doesn't recognize you / your preferences seem missing | The `~/.claude/` symlinks got broken or removed | `clauderoam install` |
-| `clauderoam push` fails with `Permission denied (publickey)` | This Mac has no SSH key on file with GitHub | See [Prerequisites](#prerequisites) — the 3 ssh-keygen + gh ssh-key add commands |
-| `clauderoam push` fails with `[rejected] (fetch first)` | Another Mac pushed while you were offline; you've diverged | Run `clauderoam push` again — v0.5.2+ auto-resolves memory-only divergence. If it still fails, the diverged files include non-memory edits; `cd ~/clauderoam && git status` and resolve manually. |
-| Banner / GIFs not playing after a push | GitHub's CDN cache (≤5 min) | Wait or hard-refresh the page |
-| You're not sure what state things are in | | `clauderoam doctor` runs a full health check with colored output |
+| `clauderoam push` fails with `Permission denied (publickey)` | This Mac has no SSH key on file with GitHub | See [Prerequisites](#prerequisites-do-this-first-on-every-new-mac) |
+| `clauderoam push` fails with `[rejected] (fetch first)` | Local commits diverged with non-memory changes (v0.5.2 auto-resolves memory-only divergences) | `cd ~/clauderoam && git status` and resolve manually |
+| GIFs not playing right after a push | GitHub's CDN cache (≤5 min) | Wait or hard-refresh |
+| Not sure what state things are in | | `clauderoam doctor` — full colored health check |
 
-For anything else, run `clauderoam doctor` first — its output is usually enough to diagnose.
+---
 
 ## Documentation
 
-- [Setup](./docs/setup.md) — install, uninstall, machine-local overrides, PATH
+- [Setup](./docs/setup.md) — install, uninstall, machine-local overrides
 - [Multi-device workflow](./docs/multi-device.md) — adding Macs, iPhone, iPad
-- [Switching Claude accounts](./docs/multi-account.md) — the migration checklist
-- [Auto-sync](./docs/auto-sync.md) — optional hands-off shell hook
-- [Releasing](./docs/RELEASING.md) — for maintainers: how to cut a release
-- [Upstreaming to homebrew-core](./docs/HOMEBREW-CORE.md) — when/how to apply
+- [Switching Claude accounts](./docs/multi-account.md) — migration checklist
+- [Auto-sync](./docs/auto-sync.md) — optional hands-off shell hook / LaunchAgent
+- [Releasing](./docs/RELEASING.md) — for maintainers
+- [Upstreaming to homebrew-core](./docs/HOMEBREW-CORE.md) — when/how
 - [FAQ](./docs/faq.md)
 
 <details>
-<summary><b>📊 How ClaudeRoam compares to other Claude sync projects</b></summary>
+<summary><b>📊 Comparison vs other Claude sync projects</b></summary>
 
 <br/>
 
@@ -495,13 +372,13 @@ For anything else, run `clauderoam doctor` first — its output is usually enoug
 No. Symlinks are transparent — Claude Code reads `~/.claude/` exactly as before.
 
 **Should your ClaudeRoam config repo be public or private?**<br/>
-Private if you sync `memory/` (it may contain project notes). Otherwise public is fine and lets you show off your setup.
+Private if you sync `memory/` (it can contain project notes). Otherwise public is fine and lets you show off your setup.
 
 **Does `init` / `install` delete anything?**<br/>
-No. It copies your current `~/.claude/` to `~/.claude.bak.<timestamp>` first. Run `--dry-run` to preview.
+No. Your existing `~/.claude/` is copied to `~/.claude.bak.<timestamp>` first. Run `--dry-run` to preview.
 
 **Is this a portable Claude Code _binary_?**<br/>
-No — it's portable **config**. For USB-drive Claude Code, see [`SonnyTaylor/claude-code-portable`](https://github.com/SonnyTaylor/claude-code-portable).
+No — it's portable **config**. For USB-drive Claude Code see [`SonnyTaylor/claude-code-portable`](https://github.com/SonnyTaylor/claude-code-portable).
 
 **Linux? WSL?**<br/>
 Should work. Pure bash, only standard Unix tools.
@@ -510,10 +387,13 @@ Should work. Pure bash, only standard Unix tools.
 Yes: `~/.claude/settings.local.json` and `~/.claude/CLAUDE.local.md` are gitignored and loaded in addition to the shared versions.
 
 **How do project `CLAUDE.md` files interact with my personal one?**<br/>
-They _combine_. Personal sets defaults; project overrides where they conflict. See [Mental model](#mental-model) above.
+They _combine_. Personal sets defaults; project overrides where they conflict.
+
+<a name="cloud"></a>**"Cloud workflow" — does that mean I should switch to claude.ai/code?**<br/>
+"Cloud" can mean two things: (1) data and config live in GitHub instead of one Mac (← ClaudeRoam solves this), or (2) Claude Code runs in a browser, no local install (← that's claude.ai/code, with limits ClaudeRoam can't change: no `auto` mode, no user-level config, no persistent memory). For "follow me everywhere", you want (1) with desktop Claude Code on each Mac. For mobile or "someone else's computer", use the [@claude GitHub bot](https://github.com/apps/claude).
 
 **How do I undo everything?**<br/>
-Remove the symlinks in `~/.claude/` and restore from `~/.claude.bak.<timestamp>`. See [docs/setup.md#uninstall](./docs/setup.md).
+Remove the symlinks in `~/.claude/` and restore from `~/.claude.bak.<timestamp>`. See [docs/setup.md](./docs/setup.md).
 
 </details>
 

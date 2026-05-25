@@ -6,7 +6,7 @@
 
 [![CI](https://github.com/YunyueLi/ClaudeRoam/actions/workflows/ci.yml/badge.svg)](https://github.com/YunyueLi/ClaudeRoam/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Shell](https://img.shields.io/badge/shell-bash-89e051)](clauderoam)
+[![Shell](https://img.shields.io/badge/shell-bash-89e051)]()
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey)]()
 [![Version](https://img.shields.io/badge/version-0.5.2-orange)]()
 [![Homebrew](https://img.shields.io/badge/homebrew-tap-FBB040)](https://github.com/YunyueLi/homebrew-tap)
@@ -27,7 +27,7 @@
 上个月买了台新 MacBook，本来兴致勃勃要折腾，结果发现整个上午要花在重装重配 Claude Code 上：
 
 - 几周里反复调教出来的 `CLAUDE.md`
-- 自己写的 7 个 subagent（code review、git 操作、跑测试……）
+- 自己写的 7 个 subagent（code review、git 操作、跑测试…）
 - 跟我思维方式匹配的 commit / PR slash 命令
 - 在十来个项目里积累出来的 auto-memory
 
@@ -35,21 +35,11 @@
 
 两周后又因为接外包要切到客户的 Claude 账号 —— 同样的故事，几小时调出来的东西又一次清零。
 
-**ClaudeRoam** 就是第二次清零之后写出来的。新 Mac 上 3 条命令：
-
-```bash
-brew install YunyueLi/tap/clauderoam
-git clone <你的 config repo> ~/clauderoam
-clauderoam install
-```
-
-`CLAUDE.md`、自定义 agent、slash 命令、auto-memory 快照 —— 全回来了。换账号也不丢，**只有 credentials 文件被替换**（这正是你要的）。
-
-核心机制就是：你那个装着可移植 Claude Code 状态的 git repo，被 symlink 到 `~/.claude/`，Claude Code 照常读取。没有 daemon、没有后台服务、不用复制粘贴 —— 就是 dotfiles，只不过专门为 Claude Code 做了优化。
+**ClaudeRoam** 就是第二次清零之后写出来的。本质就是把可移植的 Claude Code 状态放进一个 git repo，symlink 回 `~/.claude/`，Claude Code 照常读取。没有 daemon、没有后台服务、不用复制粘贴 —— 就是 dotfiles，只不过专门为 Claude Code 做了优化。
 
 ## 它具体帮你做什么
 
-5 类 Claude Code 的自定义，平时只活在一台 Mac 上：
+5 类 Claude Code 自定义，平时只活在一台 Mac 上：
 
 | 东西 | 例子 |
 |---|---|
@@ -59,45 +49,55 @@ clauderoam install
 | **项目清单** | 哪些 GitHub repo 你希望每台 Mac 上都有 |
 | **auto-memory** | Claude 跨 session 记住的关于你的事 |
 
-ClaudeRoam 让这些东西跟着**你**走，不跟着机器走。具体表现：
+ClaudeRoam 让这些东西跟着**你**走，不跟着机器走。4 个具体场景：
 
-### ① 新 Mac 上 ~5 分钟全套恢复
+| 场景 | 你做什么 | 结果 |
+|---|---|---|
+| **新 Mac 一键还原** | 4 行命令（[见 Install](#install)） | Claude Code 认得你、用你的风格、有你写的 agent、项目代码到位。约 5 分钟。 |
+| **换 Claude 账号** | 旧账号登出、新账号登入 | 只有 `.credentials.json` 被替换（这正是想要的）。偏好、agent、命令、memory：原封不动。 |
+| **iPhone 上派活** | issue 里写 `@claude 帮我修 README §3 的 typo` | Claude 通过 [GitHub @claude bot](https://github.com/apps/claude) 在云端跑、开 PR。**iPhone 上不存任何状态**。 |
+| **多台 Mac 并发** | 每台 Mac 的 LaunchAgent 每 30 分钟 push 一次 | v0.5.2+ 自动 resolve memory-only 分叉。**你不会看到 "manual fix required" 错误**。 |
+
+---
+
+## Install
+
+### 先决条件（每台新 Mac 都先做这步）
+
+不做这步，后面 `git clone` 会报 `Permission denied (publickey)`。
+
+| 需要 | 怎么装 |
+|---|---|
+| [Homebrew](https://brew.sh/) | `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"` |
+| [`gh`](https://cli.github.com/) CLI | `brew install gh` |
+| GitHub SSH key | 跑 `gh auth login`，**走到 "Upload your SSH public key" 那步选 "Add an SSH key"**（光标默认停在 Skip，不要按 enter） |
+| Git 身份 | `git config --global user.name "..."` 和 `user.email "..."` |
+
+如果不小心选了 Skip，3 条命令补救：
 
 ```bash
-brew install YunyueLi/tap/clauderoam                                        # 1. 装工具
-git clone git@github.com:<你>/clauderoam-config.git ~/clauderoam            # 2. 拉数据
-clauderoam install                                                          # 3. 接入 ~/.claude/
-clauderoam projects clone-all                                               # 4. 拉所有项目代码
+ssh-keygen -t ed25519 -C "you@example.com" -f ~/.ssh/id_ed25519 -N ""
+gh ssh-key add ~/.ssh/id_ed25519.pub --title "$(hostname)"
+ssh -T git@github.com   # 第一次问 yes/no 选 yes，看到 "Hi <用户名>!" 就通了
 ```
 
-四条命令 → Claude Code 立刻认得你、用你的风格、有你写的 agent、项目代码也都到位。**不需要重新配置**。
-
-### ② 换 Claude 账号不丢东西
-
-旧账号登出 → 新账号登入。`~/.claude/` 里那些 symlink 还指向你的 config repo。**只有 `.credentials.json` 被换了**，这正是你想要的（新账号 token）。
-
-偏好、agent、slash 命令、memory：全都还在。
-
-### ③ iPhone 上发任务
-
-在你的项目 repo 上装 [Claude GitHub App](https://github.com/apps/claude)。用 GitHub iOS App 开个 issue：
-
-> @claude 帮我修 README 第 3 段的 typo
-
-Claude 在云端跑、开 PR。你过会儿任意设备上点 merge。**iPhone 上不存任何状态**。
-
-### ④ 多台 Mac 同时用，零冲突
-
-两台 Mac 都跑 LaunchAgent，每 30 分钟 `clauderoam push`。它们会产生互相分叉的 memory 快照。**ClaudeRoam v0.5.2+ 自动识别"分叉只动了 memory"，自动 resolve** —— 你完全看不到任何"需要手动处理"的错误。
-
-## 快速安装
+### 第一台 Mac（创建你的配置 repo）
 
 ```bash
 brew install YunyueLi/tap/clauderoam
 clauderoam init
 ```
 
-`init` 会在 `~/clauderoam/` 创建你的配置 repo、个性化 `CLAUDE.md`、symlink 到 `~/.claude/`。每台新设备同样两条命令（前提是你已经把 repo push 到 GitHub）。
+`init` 会创建 `~/clauderoam/`、个性化 `CLAUDE.md`、symlink 到 `~/.claude/`。然后把这个新 repo push 到你的 GitHub。
+
+### 之后每台 Mac（用你已有的配置 repo）
+
+```bash
+brew install YunyueLi/tap/clauderoam
+git clone git@github.com:<你>/clauderoam-config.git ~/clauderoam
+clauderoam install
+clauderoam projects clone-all   # 顺便把所有已注册项目 repo 拉下来
+```
 
 <details>
 <summary>没装 Homebrew？用 curl 或 git clone。</summary>
@@ -106,9 +106,9 @@ clauderoam init
 # curl 一键安装（带 sha256 校验）
 curl -fsSL https://raw.githubusercontent.com/YunyueLi/ClaudeRoam/main/install.sh | bash
 
-# 或 git clone
-git clone https://github.com/YunyueLi/ClaudeRoam.git ~/clauderoam
-cd ~/clauderoam && ./clauderoam init
+# 或 git clone 源码
+git clone https://github.com/YunyueLi/ClaudeRoam.git ~/ClaudeRoam-src
+cd ~/ClaudeRoam-src && ./clauderoam init
 ```
 
 </details>
@@ -121,7 +121,7 @@ cd ~/clauderoam && ./clauderoam init
 
 | 你想… | 怎么做 |
 |---|---|
-| 加一个 slash 命令或 agent | 跟 Claude Code 说："帮我加个 `/refactor` 命令，干 XX"。Claude 会写到 `~/.claude/commands/` 然后跑 `clauderoam push`。30 分钟后所有 Mac 同步。 |
+| 加一个 slash 命令或 agent | 跟 Claude Code 说："帮我加个 `/refactor` 命令，干 XX"。Claude 会把文件写到 `~/.claude/commands/` 然后跑 `clauderoam push` |
 | 改偏好 | 编辑 `~/.claude/CLAUDE.md`（或让 Claude 改），然后 `clauderoam push` |
 | 看同步状态 | `clauderoam status` |
 | 体检 | `clauderoam doctor` |
@@ -129,57 +129,11 @@ cd ~/clauderoam && ./clauderoam init
 
 ---
 
-## ClaudeRoam 在哪些场景生效
+## 它内部到底在做什么
 
-ClaudeRoam 管的是**本地 Claude Code 安装** —— 也就是会读 `~/.claude/` 的那些。包括 Mac 桌面 App、CLI、IDE 扩展。**浏览器版（claude.ai/code）是另一个运行时**，不在它的覆盖范围里。
+### 3 层配置 Claude Code 同时读
 
-| 入口 | 状态 | 原因 |
-|---|---|---|
-| **Claude Code 桌面 App**（macOS / Linux / Windows） | ✅ 全部生效 | 读 `~/.claude/`，ClaudeRoam symlink 到里面 |
-| **Claude Code CLI**（终端） | ✅ 全部生效 | 同一套 `~/.claude/` 机制 |
-| **VS Code / JetBrains** 扩展 | ✅ 全部生效 | 同一套 `~/.claude/` 机制 |
-| **[claude.ai/code](https://claude.ai/code)**（网页版） | ⚠️ 仅项目级 | 每个网页 session 都是独立沙箱，根本没有 `~/.claude/`。**绕过办法**：把 `clauderoam-config` repo 当项目打开，它的 `CLAUDE.md` 会被加载 —— 但 `auto` 模式、跨项目记忆、跨 session 记忆都还是没有 |
-| **Claude iOS / Android** App | ➖ 不适用 | 只读聊天客户端。移动端的云端工作请用 [GitHub @claude bot](https://github.com/apps/claude) 通过 issue/PR 异步触发 |
-
-```mermaid
-flowchart TD
-    Q{你在哪里用<br/>Claude Code？}
-    Q -->|桌面 App| A
-    Q -->|CLI 终端| A
-    Q -->|VS Code · JetBrains| A
-    Q -->|claude.ai/code| B
-    Q -->|iOS · Android App| C
-
-    A[✅ <b>clauderoam 全部生效</b><br/>~/.claude/ ◄ symlink ◄ ~/clauderoam<br/>auto 模式 · 记忆 · 个人 CLAUDE.md]
-    B[⚠️ <b>仅项目级生效</b><br/>打开 clauderoam-config<br/>能读到你的 CLAUDE.md]
-    C[➖ <b>用 GitHub @claude</b><br/>从手机异步触发云端工作]
-
-    classDef ok    fill:#dcfce7,stroke:#16a34a,color:#14532d
-    classDef warn  fill:#fef3c7,stroke:#eab308,color:#78350f
-    classDef info  fill:#dbeafe,stroke:#3b82f6,color:#1e3a8a
-    classDef q     fill:#f3f4f6,stroke:#9ca3af,color:#111827
-    class A ok
-    class B warn
-    class C info
-    class Q q
-```
-
-### "全程云端" 有两种含义
-
-"云端工作流" 这个词被两种意思混着用。**ClaudeRoam 只解决其中一种**：
-
-| 你说"云端"指的是 | ClaudeRoam 管这个吗 |
-|---|---|
-| **我的数据和配置存在 GitHub**，不绑死在某一台 Mac 上 → 换 Mac、换 Claude 账号都不丢 | ✅ **就是干这个的** |
-| **我想在浏览器里跑 Claude Code**，本地完全不装东西 | ❌ 那是 claude.ai/code 的活，它本身有架构限制（没有用户级配置、没有 `auto` 模式、没有跨 session 记忆）。ClaudeRoam 改不了这些 |
-
-如果你想要的是第一种 —— **在你切换的每台 Mac 上都装 Claude Code 桌面版，让 ClaudeRoam 帮你把配置用 git 带过去**。这是支持的工作流。
-
----
-
-## 心智模型
-
-Claude Code 每次启动都从**三个地方**读配置。ClaudeRoam 管第一层，你的项目管第二层，第三层是当前对话。
+每次 Claude Code 启动都从**三个地方**读配置。ClaudeRoam 管第一层。
 
 ```mermaid
 flowchart TB
@@ -187,87 +141,55 @@ flowchart TB
     classDef project fill:#fef3c7,stroke:#f59e0b,color:#78350f
     classDef session fill:#e5e7eb,stroke:#6b7280,color:#1f2937
 
-    A["<b>1. 个人层</b><br/>~/.claude/<br/><i>「我怎么干活」</i><br/><br/>偏好 · agent · slash 命令<br/>auto-memory · 快捷键"]:::personal
-    B["<b>2. 项目层</b><br/>&lt;项目&gt;/CLAUDE.md + .claude/<br/><i>「这个项目怎么干活」</i><br/><br/>技术栈 · 测试命令 · 规范<br/>仅项目内可用的 agent"]:::project
-    C["<b>3. 会话层</b><br/>当前对话<br/><i>「我们现在在做什么」</i>"]:::session
+    A["<b>1. 个人层</b><br/>~/.claude/<br/><i>'我怎么干活'</i><br/><br/>偏好 · agents · slash 命令<br/>auto-memory · 快捷键"]:::personal
+    B["<b>2. 项目层</b><br/>&lt;project&gt;/CLAUDE.md + .claude/<br/><i>'这个项目怎么干活'</i><br/><br/>技术栈 · 测试命令 · 规范<br/>项目专属 agent"]:::project
+    C["<b>3. 会话层</b><br/>当前对话<br/><i>'我们现在在干什么'</i>"]:::session
 
     A --> B --> C
 ```
 
-> **判断准则**<br/>
-> 跟着_你_跨项目走的 → **个人层**（ClaudeRoam）<br/>
-> 属于_这个代码库_的 → **项目 repo**<br/>
-> 仅这次对话的 → 什么都不用做，对话记录里有
+> **判断口诀**
+> - 跟着_你_跨项目走的 → **个人层**（ClaudeRoam）
+> - 属于_这个代码库_的 → **项目 repo**
+> - 只是_这次对话_的 → 不用存，在 transcript 里
 
-## ClaudeRoam 装什么 vs 项目 repo 装什么
+### 个人配置 vs 项目配置
 
 |  | ClaudeRoam（个人） | 每个项目的 repo |
 |---|---|---|
-| **存在哪** | `~/clauderoam/` → `~/.claude/`（symlink） | `<项目>/CLAUDE.md` + `<项目>/.claude/` |
-| **谁来编辑** | 你一个人 | 你和这个项目的所有贡献者 |
-| **跟谁走** | 你的 Claude 账号和 GitHub 身份 | 代码库 |
-| **生命周期** | 多年（你的职业生涯） | 项目的生命周期 |
-| **举例** | "用中文回复" · "用 conventional commits" · 你的 `/commit` 命令 · 处处通用的 `code-reviewer` agent | "Python 3.12, `uv run pytest`" · "import 顺序：标准库、第三方、本地" · 只在这里有用的 `migration-checker` agent |
+| **位置** | `~/clauderoam/` → `~/.claude/`（symlink） | `<project>/CLAUDE.md` + `<project>/.claude/` |
+| **谁改** | 只有你 | 你和这个项目的所有协作者 |
+| **跟着谁走** | 你这个人（跨 Mac、跨账号） | 跟着代码库 |
+| **例子** | "用中文回复" · `code-reviewer` agent · `/commit` slash 命令 | "Python 3.12 + pytest" · 项目专属 build 命令 · `migration-checker` agent |
 
 ```mermaid
 flowchart LR
     subgraph You["👤 你"]
-      CR["📦 ClaudeRoam<br/>(个人配置)"]
+      CR["📦 ClaudeRoam<br/>（个人配置）"]
     end
-    subgraph Projects["🏗️ 项目 repos"]
+    subgraph Projects["🏗️ 项目 repo"]
       P1["📦 my-blog<br/>+ CLAUDE.md"]
       P2["📦 startup-app<br/>+ CLAUDE.md"]
       P3["📦 ..."]
     end
-    CR -.symlinks.-> CC["💻 ~/.claude/<br/>(Claude Code 读这里)"]
+    CR -.symlinks.-> CC["💻 ~/.claude/<br/>（Claude Code 读这里）"]
     P1 --> CC
     P2 --> CC
     P3 --> CC
 ```
 
-在 `startup-app` 里打开 Claude Code 时，它加载**你的个人层 + startup-app 项目层**，组合使用。切换到 `my-blog`，同样的个人层 + my-blog 的项目层。两个上下文，零冲突。
+在 `startup-app` 里打开 Claude Code → 个人层 + startup-app 项目层组合加载。切到 `my-blog` → 同样的个人层 + my-blog 项目层。两个 context 互不冲突。
 
-## 项目清单 —— 新 Mac 一键拉所有 repo
+### Symlink，不是同步
 
-ClaudeRoam 不同步项目_代码_（每个项目自己是一个 GitHub repo），但它会跟踪**你有哪些项目**，让新机器能一条命令把它们拉回来。
-
-清单存在 `~/clauderoam/projects.tsv` —— 和其他个人配置一起走 git。
-
-```bash
-clauderoam projects add        # 注册一个项目（交互式）
-clauderoam projects list       # 看清单
-clauderoam projects clone-all  # 把每个已注册项目都 clone 过来（已存在的跳过）
-clauderoam projects pull-all   # 给每个干净的项目 git pull
-clauderoam projects status     # 哪些项目脏 / 领先 / 没拉
-clauderoam projects remove <name>
-```
-
-所以"新 Mac 设置"的完整流程是：
-
-```bash
-brew install YunyueLi/tap/clauderoam        # 1. 装 CLI
-git clone <你的 clauderoam repo> ~/clauderoam
-clauderoam install                          # 2. 个人配置
-clauderoam projects clone-all               # 3. 所有项目代码
-# 4. 各项目按需装依赖（npm install / pip install / ...）
-```
-
-四行命令，完整开发环境。README 顶部的 hero GIF 演了前 3 步里的"个人配置回来了"，下面这个补完了"项目代码也回来了"那部分：
-
-<p align="center">
-  <img src=".assets/projects.gif" alt="老 Mac 的 projects.tsv → 新 Mac clauderoam projects clone-all → ~/Code/ 出现所有项目目录" width="900">
-</p>
-
-## ClaudeRoam 内部到底在做什么
-
-它**不** copy、也**不** sync 文件。它用的是 **symlink**。
+ClaudeRoam 不 copy 文件，用 **symlink**。
 
 ```
 ~/.claude/CLAUDE.md ────► ~/clauderoam/CLAUDE.md
-                          （真文件，git 跟踪的版本）
+                          （真文件，git 跟踪）
 ```
 
-改一个就是改另一个 —— 只有一份。没有"我忘了同步吗"的焦虑。
+改一边就是改另一边。**只有一份**。没有"我是不是忘了同步"这种问题。
 
 ```mermaid
 flowchart LR
@@ -278,19 +200,19 @@ flowchart LR
       CC2["~/.claude/CLAUDE.md"] -.symlink.-> R2["~/clauderoam/CLAUDE.md"]
     end
     subgraph GH["📦 GitHub"]
-      G["clauderoam repo"]
+      G["clauderoam-config repo"]
     end
     R1 <-->|git push/pull| G
     R2 <-->|git push/pull| G
 ```
 
-**换账号？** Symlink 不在乎你登的是哪个 Claude 账号。配置照常工作 —— 只有凭证文件（`~/.claude/.credentials.json`）会被替换，**这正是你想要的行为**。
+换 Claude 账号不影响这一切。Symlink 不依赖你登的哪个账号 —— 只有 `.credentials.json` 被替换（这正确），其他都不动。
 
-唯一的例外是 **auto-memory** —— 因为是文件树结构，由 `clauderoam sync` 做真正的拷贝快照。见下方 [Memory](#memory) 部分。
+唯一的例外是 **auto-memory**：它是文件树（不是单文件），所以走 `clauderoam sync` 拷贝快照，不走 symlink。见下面 [Memory](#memory)。
 
-### 多设备 push，自带冲突处理
+## 多设备 push，自动处理冲突
 
-两台 Mac 都定时跑 `clauderoam push`？两边都会产生 memory 快照 commit，必然分叉。`clauderoam push`（v0.5.2+）会自动 reconcile，它处理的 4 种情况：
+两台 Mac 都定时跑 `clauderoam push`？两边都会产生 memory 快照 commit，必然分叉。`clauderoam push`（v0.5.2+）自动 reconcile，处理 4 种情况：
 
 ```mermaid
 flowchart TD
@@ -300,7 +222,7 @@ flowchart TD
     Compare -->|本地落后，能 FF| FF[git merge --ff-only] --> Sync
     Compare -->|分叉| MemOnly{本地 commit<br/>只动了 memory/？}
     MemOnly -->|是| Auto[git reset --hard origin/main<br/>memory 可再生] --> Sync
-    MemOnly -->|否| Refuse([❌ exit 1<br/>告诉你如何 resolve])
+    MemOnly -->|否| Refuse([❌ exit 1<br/>告诉你怎么 resolve])
     Sync[clauderoam sync<br/>快照 memory] --> Push([git commit + git push])
 
     classDef ok fill:#dcfce7,stroke:#16a34a,color:#14532d
@@ -315,128 +237,83 @@ memory 快照来自 `~/.claude/projects/`，每次 sync 重新生成 —— last
 
 ## Memory
 
-Claude Code 把项目级 memory 存在 `~/.claude/projects/<编码路径>/memory/`，每个项目独立：
+Claude Code 把项目级 memory 存在 `~/.claude/projects/<编码路径>/memory/`，每个项目独立。两条命令通过 git 来回搬：
 
-```
-~/.claude/projects/
-├── -Users-you-Desktop-my-blog/
-│   └── memory/
-│       ├── MEMORY.md           ← 索引，始终加载
-│       ├── user_xxx.md         ← 关于你的事实
-│       ├── feedback_xxx.md     ← 你给过的纠正
-│       └── project_xxx.md      ← 项目状态
-│
-├── -Users-you-Desktop-startup-app/
-│   └── memory/  ← 跟 my-blog 的 memory 完全独立
-│
-└── -Users-you-Desktop-clauderoam/
-    └── memory/
-```
-
-| 命令 | 作用 |
+| 命令 | 干啥 |
 |---|---|
-| `clauderoam sync` | 把每个项目的 `memory/` 拷贝进 clauderoam 仓库 |
-| `clauderoam restore` | 反向：从仓库拷贝回 `~/.claude/projects/`。在新机器上自动重写用户名 |
+| `clauderoam sync` | 把每个项目的 `memory/` 快照到 ClaudeRoam repo |
+| `clauderoam restore` | 反向。如果新机器 `$USER` 不同，自动改写用户名部分 |
 
-## 安装
+用户名重写很关键：Mac A 上你的项目在 `/Users/you-a/Desktop/...`，Mac B 在 `/Users/you-b/Desktop/...`。不改写的话，从 A 还原到 B 后 memory 里的路径就指向不存在的地方了。
 
-### 先决条件（新机器必看）
+## 项目清单
 
-在新 Mac 上跑 `clauderoam init` **之前**先把这几样配好，不然 git clone 私有 repo 那步会报 `Permission denied (publickey)`。
+ClaudeRoam 不同步项目_代码_（每个项目自己是 GitHub repo），但它跟踪**你有哪些项目**，让新机器一条命令把它们拉回来。
 
-| 需要 | 干什么的 | 怎么装 |
+清单存在 `~/clauderoam/projects.tsv` —— 和你的配置一起走 git。
+
+```bash
+clauderoam projects add        # 注册一个项目（交互式）
+clauderoam projects list       # 看清单
+clauderoam projects clone-all  # 拉所有已注册项目（已存在的跳过）
+clauderoam projects pull-all   # 给每个干净的项目 git pull
+clauderoam projects status     # 哪些项目脏 / 领先 / 没拉
+clauderoam projects remove <name>
+```
+
+<p align="center">
+  <img src=".assets/projects.gif" alt="老 Mac 的 projects.tsv → 新 Mac clauderoam projects clone-all → ~/Code/ 出现所有项目目录" width="900">
+</p>
+
+## 在哪些场景生效
+
+| 平台 | 状态 | 说明 |
 |---|---|---|
-| [Homebrew](https://brew.sh/) | 装 CLI 用 | `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"` |
-| [`gh` CLI](https://cli.github.com/) | GitHub 登录 + 上传 SSH key | `brew install gh` |
-| **GitHub SSH key** | clone 你的私有 config / 项目 repo | 见下面 3 行命令 |
-| Git 身份 | commit 时记作者 | `git config --global user.name "..."`<br/>`git config --global user.email "..."` |
+| **Claude Code 桌面 App**（macOS / Linux / Windows） | ✅ 全部生效 | 读 `~/.claude/`，ClaudeRoam symlink 到里面 |
+| **Claude Code CLI**（终端） | ✅ 全部生效 | 同样的 `~/.claude/` 机制 |
+| **VS Code / JetBrains** 扩展 | ✅ 全部生效 | 同样的 `~/.claude/` 机制 |
+| **[claude.ai/code](https://claude.ai/code)**（浏览器版） | ⚠️ 只能项目级 | 每个会话都是隔离的沙箱，没有持久的 `~/.claude/`。变通：把 `clauderoam-config` repo 作为项目打开，它的 `CLAUDE.md` 会被加载 —— 但 `auto` 模式和跨项目 memory 仍然没有 |
+| **Claude iOS / Android** App | ➖ 不适用 | 纯聊天客户端。手机上做云端任务请用 [GitHub @claude bot](https://github.com/apps/claude) |
 
-#### GitHub SSH key —— 3 条命令搞定
+> "云端工作流"这个词有两层含义，ClaudeRoam 只解决其中一种 —— 见 [FAQ](#-faq)。
 
-```bash
-# 1. 生成（图方便不设密码；要安全就去掉 -N ""）
-ssh-keygen -t ed25519 -C "you@example.com" -f ~/.ssh/id_ed25519 -N ""
+---
 
-# 2. 上传到 GitHub
-gh auth login                                                # 还没登过的话
-gh ssh-key add ~/.ssh/id_ed25519.pub --title "$(hostname)"
+## Reference
 
-# 3. 验证
-ssh -T git@github.com   # 第一次问 yes/no 选 yes；看到 "Hi <用户名>!" 就通了
-```
+### 命令
 
-> **坑**：`gh auth login` 走到 _"Upload your SSH public key to your GitHub account?"_ 时，光标默认停在 **Skip**。**选 "Add an SSH key" 一步完成**。如果你已经选了 Skip，跑上面 3 条命令补救，效果一样。
-
-### macOS / Linux（Homebrew）
-
-```bash
-brew install YunyueLi/tap/clauderoam
-clauderoam init
-```
-
-升级：`brew upgrade clauderoam`（只升级 CLI 本身，**绝不动你的配置 repo**）。
-
-### 不用 Homebrew（curl）
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/YunyueLi/ClaudeRoam/main/install.sh | bash
-clauderoam init
-```
-
-装到 `~/.local/bin/clauderoam` + `~/.local/share/clauderoam/`。会用 release manifest 验证 sha256。用 `CLAUDEROAM_PREFIX` 覆盖路径。
-
-### 从源码安装（git clone）
-
-```bash
-git clone https://github.com/YunyueLi/ClaudeRoam.git ~/clauderoam
-cd ~/clauderoam
-./clauderoam init
-```
-
-### 在第二台设备上
-
-CLI 安装同上。把配置和所有项目代码一起拉过来：
-
-```bash
-brew install YunyueLi/tap/clauderoam       # 或 install.sh / git clone
-git clone <你的 clauderoam 配置 repo> ~/clauderoam
-clauderoam install                         # 个人配置
-clauderoam projects clone-all              # 所有项目 repo
-```
-
-## 命令
-
-| 命令 | 作用 |
+| 命令 | 干啥 |
 |---|---|
-| `clauderoam init` | 交互式首次设置 —— 个性化 + 安装 |
-| `clauderoam install` | 重建 symlink（幂等，改动前先备份） |
-| `clauderoam doctor` | 验证 symlink 正确、敏感文件无泄漏 |
+| `clauderoam init` | 交互式首次安装（个性化 + install） |
+| `clauderoam install` | (重新) 创建 symlink（幂等，先备份） |
+| `clauderoam doctor` | 检查 symlink 是否正确、是否有敏感文件进 git |
 | `clauderoam sync` | 把 `~/.claude/projects/*/memory/` 快照到 `./memory/` |
-| `clauderoam restore` | 恢复 memory（处理用户名变化） |
-| `clauderoam push` | `sync` + `git commit` + `git push` |
-| `clauderoam status` | 看仓库状态和当前 symlink |
-| `clauderoam projects ...` | 管理项目清单 —— 详见 [项目清单](#项目清单--新-mac-一键拉所有-repo) |
-| `clauderoam --dry-run` | 任何命令的预览模式 |
+| `clauderoam restore` | 反向恢复 memory（处理用户名差异） |
+| `clauderoam push` | `sync` + `git commit` + `git push`（带冲突自动 resolve） |
+| `clauderoam status` | 看 repo 和 symlink 状态 |
+| `clauderoam projects ...` | 管理项目清单 — 见 [项目清单](#项目清单) |
+| `clauderoam --dry-run` | 任意命令前加这个 = 预览，不实际改 |
 
-## 什么会被同步
+### 什么会同步
 
-| ✅ 同步到 git | ❌ 仅本机 |
+| ✅ 进 git | ❌ 留在本机 |
 |---|---|
-| `CLAUDE.md` · `settings.json` · `keybindings.json` | `.credentials.json` —— 你的登录凭证 |
+| `CLAUDE.md` · `settings.json` · `keybindings.json` | `.credentials.json` —— 你的登录 token |
 | `agents/` · `skills/` · `commands/` | `sessions/` · `shell-snapshots/` · `telemetry/` |
 | `memory/`（快照） | `policy-limits.json` · `projects/` 运行时数据 |
 | `projects.tsv`（项目清单） | 项目_代码_本身 —— 那是每个项目自己的 git repo |
 
-## 示例
+### 示例
 
-开箱即用的 [agents](./examples/agents) 和 [slash 命令](./examples/commands)：
+可以直接复制使用的 [agent](./examples/agents) 和 [slash 命令](./examples/commands)：
 
-- 🤖 `code-reviewer` — 聚焦的 diff 审查
-- 🤖 `git-helper` — 谨慎的 commit/branch/PR 操作
-- 🤖 `test-runner` — 自动找到一次改动该跑的测试
+- 🤖 `code-reviewer` —— 聚焦的 diff 审查
+- 🤖 `git-helper` —— 标准化的 commit/branch/PR 流程
+- 🤖 `test-runner` —— 找到一次改动对应的测试并跑
 - 💬 `/commit` `/pr` `/sync` `/new-project` `/save`
 
-安装一个：
+装一个：
 
 ```bash
 cp examples/agents/code-reviewer.md agents/
@@ -447,30 +324,30 @@ clauderoam push
 
 | 症状 | 含义 | 修复 |
 |---|---|---|
-| Claude Code 不认得你 / 偏好没生效 | `~/.claude/` 里的 symlink 断了 | `clauderoam install` |
-| `clauderoam push` 报 `Permission denied (publickey)` | 这台 Mac 没在 GitHub 上注册 SSH key | 见[先决条件](#%E5%85%88%E5%86%B3%E6%9D%A1%E4%BB%B6%E6%96%B0%E6%9C%BA%E5%99%A8%E5%BF%85%E7%9C%8B) 那 3 条 ssh-keygen + gh ssh-key add 命令 |
-| `clauderoam push` 报 `[rejected] (fetch first)` | 另一台 Mac 推过、你这边落后了 | 再跑一次 `clauderoam push` —— v0.5.2+ 会自动 resolve 只动 memory 的分叉。如果还不行，说明分叉里包含 memory 之外的文件，`cd ~/clauderoam && git status` 手工处理 |
-| GIF 不播 / 看不到刚 push 的改动 | GitHub CDN 缓存（≤5 分钟） | 等一下或硬刷页面 |
-| 不知道现在状态如何 | | 跑 `clauderoam doctor`，彩色输出基本能定位 |
+| Claude Code 不认得你 / 偏好没生效 | `~/.claude/` 里的 symlink 断了或被删了 | `clauderoam install` |
+| `clauderoam push` 报 `Permission denied (publickey)` | 这台 Mac 没在 GitHub 上注册 SSH key | 见[先决条件](#%E5%85%88%E5%86%B3%E6%9D%A1%E4%BB%B6%E6%AF%8F%E5%8F%B0%E6%96%B0-mac-%E9%83%BD%E5%85%88%E5%81%9A%E8%BF%99%E6%AD%A5) |
+| `clauderoam push` 报 `[rejected] (fetch first)` | 本地 commit 跟远端分叉了，且分叉里有非 memory 的改动（memory-only 分叉 v0.5.2 会自动 resolve） | `cd ~/clauderoam && git status` 手工处理 |
+| GIF 不播 / 看不到刚 push 的内容 | GitHub CDN 缓存（≤5 分钟） | 等一下或硬刷页面 |
+| 不知道现在状态如何 | | `clauderoam doctor` —— 彩色完整体检 |
 
-任何其他问题，先跑 `clauderoam doctor` —— 输出通常足够定位。
+---
 
 ## 文档
 
-- [Setup](./docs/setup.md) — 安装、卸载、本机覆盖、加入 PATH
-- [多设备工作流](./docs/multi-device.md) — 新 Mac、iPhone、iPad
-- [换 Claude 账号](./docs/multi-account.md) — 迁移清单
-- [自动同步](./docs/auto-sync.md) — 可选的自动 shell hook
-- [发版流程](./docs/RELEASING.md) — 维护者用：怎么 cut release
-- [上游 homebrew-core](./docs/HOMEBREW-CORE.md) — 什么时候 / 怎么申请
+- [Setup](./docs/setup.md) —— 安装、卸载、本机覆盖
+- [Multi-device workflow](./docs/multi-device.md) —— 多设备协作（含 iPhone/iPad）
+- [Switching Claude accounts](./docs/multi-account.md) —— 换账号迁移清单
+- [Auto-sync](./docs/auto-sync.md) —— 可选的自动 sync hook / LaunchAgent
+- [Releasing](./docs/RELEASING.md) —— 给维护者：怎么发版
+- [Upstreaming to homebrew-core](./docs/HOMEBREW-CORE.md) —— 什么时候、怎么申请
 - [FAQ](./docs/faq.md)
 
 <details>
-<summary><b>📊 跟其他 Claude 同步项目怎么比</b></summary>
+<summary><b>📊 跟同类项目对比</b></summary>
 
 <br/>
 
-| 项目 | ⭐ | 同步后端 | 自动同步 | Doctor | Memory 快照 | 多账号专注度 | 双语 | 技术栈 |
+| 项目 | ⭐ | 同步方式 | 自动同步 | Doctor | Memory 快照 | 多账号 | 双语 | 技术栈 |
 |---|---|---|---|---|---|---|---|---|
 | **ClaudeRoam** | — | git | 可选 shell hook | ✓ | ✓ + 用户名重写 | **✓ 专为此设计** | ✓ 中英 | 纯 bash |
 | [renefichtmueller/claude-sync](https://github.com/renefichtmueller/claude-sync) | 16 | git · iCloud · Dropbox · Syncthing · rsync | ✓ | 隐式 | 手动 | ✗ | ✗ | TypeScript |
@@ -478,11 +355,11 @@ clauderoam push
 | [elizabethfuentes12/claude-code-dotfiles](https://github.com/elizabethfuentes12/claude-code-dotfiles) | 9 | git | ✓ shell function | ✗ | ✗ | ✗ | ✗ | shell |
 | [zircote/.claude](https://github.com/zircote/.claude) | 24 | git（fork 模式） | ✗ | ✗ | ✗ | ✗ | ✗ | dotfiles + 100+ agents |
 
-**选 ClaudeRoam** 如果你会换 Claude 账号、想要中英双语、偏爱零依赖，或想要换 Mac 后能正确恢复（自动重写用户名）的 memory 快照。
+**选 ClaudeRoam** 如果你会换 Claude 账号、想要中英双语、偏爱零依赖、或想要在换 Mac 时正确恢复（带用户名重写）的 memory 快照。
 
-**选 renefichtmueller/claude-sync** 如果想要多种同步后端。
+**选 renefichtmueller/claude-sync** 如果你想要多种同步后端（iCloud、Dropbox、Syncthing）。
 
-**选 zircote/.claude** 如果主要想要一个精心策划的 agent 库。
+**选 zircote/.claude** 如果你更想要一个精心策划的 agent 库。
 
 </details>
 
@@ -492,35 +369,38 @@ clauderoam push
 <br/>
 
 **会不会搞坏 Claude Code？**<br/>
-不会。Symlink 对 Claude Code 透明 —— 它读 `~/.claude/` 和之前一样。
+不会。Symlink 对 Claude Code 透明 —— 它照常读 `~/.claude/`。
 
-**ClaudeRoam 数据 repo 该公开还是私有？**<br/>
-同步 `memory/` 的话建议私有（可能含项目笔记）。否则公开也行，还能展示你的配置。
+**你的 ClaudeRoam 配置 repo 该公开还是私有？**<br/>
+如果同步 `memory/` 建议私有（可能含项目笔记）。否则公开也行，还能 show off 你的配置。
 
-**`init` / `install` 会删东西吗？**<br/>
-不会。它会先把 `~/.claude/` 拷贝到 `~/.claude.bak.<时间戳>`。可以 `--dry-run` 先预览。
+**`init` / `install` 会删什么吗？**<br/>
+不会。你现有的 `~/.claude/` 在动手之前被拷到 `~/.claude.bak.<时间戳>`。想先看会做什么用 `--dry-run`。
 
-**这是可移植的 Claude Code **二进制**吗？**<br/>
-不是 —— 是可移植**配置**。要 U 盘版 Claude Code 看 [`SonnyTaylor/claude-code-portable`](https://github.com/SonnyTaylor/claude-code-portable)。
+**这是便携的 Claude Code _二进制_吗？**<br/>
+不是 —— 是便携的**配置**。要 U 盘版 Claude Code 看 [`SonnyTaylor/claude-code-portable`](https://github.com/SonnyTaylor/claude-code-portable)。
 
-**Linux / WSL 支持吗？**<br/>
-应该支持，只用标准 Unix 工具。
+**支持 Linux / WSL 吗？**<br/>
+应该支持。纯 bash，只用标准 Unix 工具。
 
-**能有不同步的本机覆盖吗？**<br/>
-可以：`~/.claude/settings.local.json` 和 `~/.claude/CLAUDE.local.md` 被 gitignore，跟共享版本一起加载。
+**能不能有"只在这台机器"的覆盖？**<br/>
+可以：`~/.claude/settings.local.json` 和 `~/.claude/CLAUDE.local.md` 是 gitignore 的，会在共享版**之外**额外加载。
 
-**项目级 `CLAUDE.md` 怎么跟个人的协作？**<br/>
-**组合**。个人层定默认，项目层在冲突处覆盖。详见上面 [心智模型](#心智模型) 部分。
+**项目里的 `CLAUDE.md` 跟我个人的怎么交互？**<br/>
+**叠加**。个人层是默认，项目层覆盖冲突的部分。
 
-**怎么撤销？**<br/>
-删 `~/.claude/` 里的 symlink，从 `~/.claude.bak.<时间戳>` 恢复。详见 [docs/setup.md](./docs/setup.md)。
+<a name="cloud"></a>**"云端工作流" —— 意思是我应该用 claude.ai/code 吗？**<br/>
+"云端"有两层含义：(1) 数据和配置存 GitHub，不绑死在一台 Mac（← ClaudeRoam 解决这个），或者 (2) Claude Code 跑在浏览器里、不装本地（← 那是 claude.ai/code 的活，它有 ClaudeRoam 改不了的限制：没 `auto` 模式、没用户级配置、没跨 session memory）。要"跟着你到处走"，你要的是 (1)，加每台 Mac 上的桌面 Claude Code。手机或临时用别人的电脑场景，用 [@claude GitHub bot](https://github.com/apps/claude) 异步派活。
+
+**怎么完全撤销？**<br/>
+删 `~/.claude/` 里的 symlink，从 `~/.claude.bak.<时间戳>` 还原。见 [docs/setup.md](./docs/setup.md)。
 
 </details>
 
 ## 贡献
 
-欢迎 Issue 和 PR —— 详见 [CONTRIBUTING.md](./CONTRIBUTING.md)。保持小、保持 bash、保持可读。
+欢迎 issue 和 PR —— 见 [CONTRIBUTING.md](./CONTRIBUTING.md)。保持小、保持 bash、保持可读。
 
 ## License
 
-[MIT](./LICENSE) © YunyueLi 与贡献者们
+[MIT](./LICENSE) © YunyueLi 和贡献者
