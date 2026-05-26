@@ -51,7 +51,7 @@ git config --global user.email "you@example.com"
 ## First-time install
 
 ```bash
-git clone https://github.com/<you>/clauderoam.git ~/clauderoam
+git clone https://github.com/<you>/ClaudeRoam.git ~/clauderoam
 cd ~/clauderoam
 ./clauderoam init
 ```
