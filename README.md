@@ -135,18 +135,9 @@ When you do need to touch it:
 
 Every time Claude Code starts, it loads config from three places. ClaudeRoam manages the first.
 
-```mermaid
-flowchart TB
-    classDef personal fill:#dbeafe,stroke:#3b82f6,color:#1e3a8a
-    classDef project fill:#fef3c7,stroke:#f59e0b,color:#78350f
-    classDef session fill:#e5e7eb,stroke:#6b7280,color:#1f2937
-
-    A["<b>1. Personal layer</b><br/>~/.claude/<br/><i>'How I work'</i><br/><br/>preferences · agents · slash commands<br/>auto-memory · keybindings"]:::personal
-    B["<b>2. Project layer</b><br/>&lt;project&gt;/CLAUDE.md + .claude/<br/><i>'How this codebase works'</i><br/><br/>tech stack · test commands · conventions<br/>project-only agents"]:::project
-    C["<b>3. Session layer</b><br/>This conversation<br/><i>'What we're doing right now'</i>"]:::session
-
-    A --> B --> C
-```
+<p align="center">
+  <img src=".assets/diagrams/mental-model.svg" alt="Three layers Claude Code reads from: personal (managed by ClaudeRoam), project, session" width="100%">
+</p>
 
 > **Rule of thumb**
 > - Follows _you_ across projects → **personal** (ClaudeRoam)
@@ -162,21 +153,9 @@ flowchart TB
 | **Travels with** | Your identity (across Macs and accounts) | The codebase |
 | **Examples** | "Reply in 中文" · `code-reviewer` agent · `/commit` slash command | "Python 3.12 + pytest" · project build commands · `migration-checker` agent |
 
-```mermaid
-flowchart LR
-    subgraph You["👤 You"]
-      CR["📦 ClaudeRoam<br/>(personal config)"]
-    end
-    subgraph Projects["🏗️ Project repos"]
-      P1["📦 my-blog<br/>+ CLAUDE.md"]
-      P2["📦 startup-app<br/>+ CLAUDE.md"]
-      P3["📦 ..."]
-    end
-    CR -.symlinks.-> CC["💻 ~/.claude/<br/>(Claude Code reads here)"]
-    P1 --> CC
-    P2 --> CC
-    P3 --> CC
-```
+<p align="center">
+  <img src=".assets/diagrams/personal-vs-project.svg" alt="ClaudeRoam (personal config) and your project repos both feed into ~/.claude/, where Claude Code reads" width="100%">
+</p>
 
 Open `startup-app` in Claude Code → it loads your personal layer + startup-app's project layer, combined. Open `my-blog` next → same personal layer + my-blog's project layer. Two contexts, zero conflict.
 
@@ -191,20 +170,9 @@ ClaudeRoam doesn't copy files. It uses symlinks.
 
 Editing one *is* editing the other. There's only one copy on disk. No "did I forget to sync" question.
 
-```mermaid
-flowchart LR
-    subgraph M1["💻 Mac A"]
-      CC1["~/.claude/CLAUDE.md"] -.symlink.-> R1["~/clauderoam/CLAUDE.md"]
-    end
-    subgraph M2["💻 Mac B"]
-      CC2["~/.claude/CLAUDE.md"] -.symlink.-> R2["~/clauderoam/CLAUDE.md"]
-    end
-    subgraph GH["📦 GitHub"]
-      G["clauderoam-config repo"]
-    end
-    R1 <-->|git push/pull| G
-    R2 <-->|git push/pull| G
-```
+<p align="center">
+  <img src=".assets/diagrams/multi-device-sync.svg" alt="Two Macs each symlink ~/.claude/ → ~/clauderoam/, both sync via git push/pull to a single GitHub repo" width="100%">
+</p>
 
 Switching Claude accounts doesn't disturb any of this. Your symlinks don't depend on which account is signed in — `.credentials.json` changes (which is correct), nothing else.
 
@@ -214,24 +182,9 @@ The one exception is **auto-memory**: it's a folder tree (not a single file), so
 
 Two Macs both running `clauderoam push` on a schedule? Each produces a memory snapshot commit. They diverge. `clauderoam push` (v0.5.2+) reconciles automatically — the 4 cases it handles:
 
-```mermaid
-flowchart TD
-    Start([clauderoam push]) --> Fetch[git fetch origin]
-    Fetch --> Compare{compare HEAD<br/>vs origin/main}
-    Compare -->|local at-or-ahead| Push
-    Compare -->|behind, FF| FF[git merge --ff-only] --> Sync
-    Compare -->|diverged| MemOnly{local commits<br/>only in memory/?}
-    MemOnly -->|yes| Auto[git reset --hard origin/main<br/>memory is regenerable] --> Sync
-    MemOnly -->|no| Refuse([❌ exit 1<br/>tell user how to resolve])
-    Sync[clauderoam sync<br/>snapshot memory] --> Push([git commit + git push])
-
-    classDef ok fill:#dcfce7,stroke:#16a34a,color:#14532d
-    classDef warn fill:#fef3c7,stroke:#f59e0b,color:#78350f
-    classDef bad fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
-    class FF,Auto,Push ok
-    class MemOnly warn
-    class Refuse bad
-```
+<p align="center">
+  <img src=".assets/diagrams/push-state-machine.svg" alt="clauderoam push state machine: fetch, then 4 cases — at-or-ahead, fast-forward, memory-only divergence auto-resolves, other-files divergence refuses" width="100%">
+</p>
 
 Memory snapshots are auto-regenerable from `~/.claude/projects/`, so last-writer-wins is correct for them. Edited `CLAUDE.md` or custom agents are not — losing those would be real data loss, so push refuses to auto-resolve when those files diverge.
 

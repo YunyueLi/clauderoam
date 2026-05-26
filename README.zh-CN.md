@@ -135,18 +135,9 @@ cd ~/ClaudeRoam-src && ./clauderoam init
 
 每次 Claude Code 启动都从**三个地方**读配置。ClaudeRoam 管第一层。
 
-```mermaid
-flowchart TB
-    classDef personal fill:#dbeafe,stroke:#3b82f6,color:#1e3a8a
-    classDef project fill:#fef3c7,stroke:#f59e0b,color:#78350f
-    classDef session fill:#e5e7eb,stroke:#6b7280,color:#1f2937
-
-    A["<b>1. 个人层</b><br/>~/.claude/<br/><i>'我怎么干活'</i><br/><br/>偏好 · agents · slash 命令<br/>auto-memory · 快捷键"]:::personal
-    B["<b>2. 项目层</b><br/>&lt;project&gt;/CLAUDE.md + .claude/<br/><i>'这个项目怎么干活'</i><br/><br/>技术栈 · 测试命令 · 规范<br/>项目专属 agent"]:::project
-    C["<b>3. 会话层</b><br/>当前对话<br/><i>'我们现在在干什么'</i>"]:::session
-
-    A --> B --> C
-```
+<p align="center">
+  <img src=".assets/diagrams/mental-model.svg" alt="Claude Code 启动时读取的三层配置：个人层（ClaudeRoam 管）、项目层、会话层" width="100%">
+</p>
 
 > **判断口诀**
 > - 跟着_你_跨项目走的 → **个人层**（ClaudeRoam）
@@ -162,21 +153,9 @@ flowchart TB
 | **跟着谁走** | 你这个人（跨 Mac、跨账号） | 跟着代码库 |
 | **例子** | "用中文回复" · `code-reviewer` agent · `/commit` slash 命令 | "Python 3.12 + pytest" · 项目专属 build 命令 · `migration-checker` agent |
 
-```mermaid
-flowchart LR
-    subgraph You["👤 你"]
-      CR["📦 ClaudeRoam<br/>（个人配置）"]
-    end
-    subgraph Projects["🏗️ 项目 repo"]
-      P1["📦 my-blog<br/>+ CLAUDE.md"]
-      P2["📦 startup-app<br/>+ CLAUDE.md"]
-      P3["📦 ..."]
-    end
-    CR -.symlinks.-> CC["💻 ~/.claude/<br/>（Claude Code 读这里）"]
-    P1 --> CC
-    P2 --> CC
-    P3 --> CC
-```
+<p align="center">
+  <img src=".assets/diagrams/personal-vs-project.svg" alt="ClaudeRoam（个人配置）和项目 repo 都汇入 ~/.claude/，Claude Code 从这里读" width="100%">
+</p>
 
 在 `startup-app` 里打开 Claude Code → 个人层 + startup-app 项目层组合加载。切到 `my-blog` → 同样的个人层 + my-blog 项目层。两个 context 互不冲突。
 
@@ -191,20 +170,9 @@ ClaudeRoam 不 copy 文件，用 **symlink**。
 
 改一边就是改另一边。**只有一份**。没有"我是不是忘了同步"这种问题。
 
-```mermaid
-flowchart LR
-    subgraph M1["💻 Mac A"]
-      CC1["~/.claude/CLAUDE.md"] -.symlink.-> R1["~/clauderoam/CLAUDE.md"]
-    end
-    subgraph M2["💻 Mac B"]
-      CC2["~/.claude/CLAUDE.md"] -.symlink.-> R2["~/clauderoam/CLAUDE.md"]
-    end
-    subgraph GH["📦 GitHub"]
-      G["clauderoam-config repo"]
-    end
-    R1 <-->|git push/pull| G
-    R2 <-->|git push/pull| G
-```
+<p align="center">
+  <img src=".assets/diagrams/multi-device-sync.svg" alt="两台 Mac 各自把 ~/.claude/ symlink 到 ~/clauderoam/，通过 git push/pull 同步到同一个 GitHub repo" width="100%">
+</p>
 
 换 Claude 账号不影响这一切。Symlink 不依赖你登的哪个账号 —— 只有 `.credentials.json` 被替换（这正确），其他都不动。
 
@@ -214,24 +182,9 @@ flowchart LR
 
 两台 Mac 都定时跑 `clauderoam push`？两边都会产生 memory 快照 commit，必然分叉。`clauderoam push`（v0.5.2+）自动 reconcile，处理 4 种情况：
 
-```mermaid
-flowchart TD
-    Start([clauderoam push]) --> Fetch[git fetch origin]
-    Fetch --> Compare{比较 HEAD<br/>和 origin/main}
-    Compare -->|本地领先或一致| Push
-    Compare -->|本地落后，能 FF| FF[git merge --ff-only] --> Sync
-    Compare -->|分叉| MemOnly{本地 commit<br/>只动了 memory/？}
-    MemOnly -->|是| Auto[git reset --hard origin/main<br/>memory 可再生] --> Sync
-    MemOnly -->|否| Refuse([❌ exit 1<br/>告诉你怎么 resolve])
-    Sync[clauderoam sync<br/>快照 memory] --> Push([git commit + git push])
-
-    classDef ok fill:#dcfce7,stroke:#16a34a,color:#14532d
-    classDef warn fill:#fef3c7,stroke:#f59e0b,color:#78350f
-    classDef bad fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
-    class FF,Auto,Push ok
-    class MemOnly warn
-    class Refuse bad
-```
+<p align="center">
+  <img src=".assets/diagrams/push-state-machine.svg" alt="clauderoam push 状态机：fetch 后 4 种情况 —— at-or-ahead 直接 push、能 FF 就 FF、memory-only 分叉自动 resolve、其他分叉拒绝并 exit 1" width="100%">
+</p>
 
 memory 快照来自 `~/.claude/projects/`，每次 sync 重新生成 —— last-writer-wins 是它的正确语义。但手动改的 `CLAUDE.md` 或自定义 agent 不一样，丢了就是丢了 —— 所以 push 在这两种文件分叉时拒绝自动处理。
 
