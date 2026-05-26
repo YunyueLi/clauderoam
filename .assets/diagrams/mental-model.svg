@@ -1,124 +1,69 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 560" width="1000" height="560">
-  <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0f172a"/>
-      <stop offset="50%" stop-color="#1e1b4b"/>
-      <stop offset="100%" stop-color="#0f172a"/>
-    </linearGradient>
-    <linearGradient id="title" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#38bdf8"/>
-      <stop offset="50%" stop-color="#a78bfa"/>
-      <stop offset="100%" stop-color="#f472b6"/>
-    </linearGradient>
-    <linearGradient id="personalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1e40af" stop-opacity="0.45"/>
-      <stop offset="100%" stop-color="#312e81" stop-opacity="0.25"/>
-    </linearGradient>
-    <linearGradient id="projectGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#b45309" stop-opacity="0.4"/>
-      <stop offset="100%" stop-color="#78350f" stop-opacity="0.25"/>
-    </linearGradient>
-    <linearGradient id="sessionGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#475569" stop-opacity="0.4"/>
-      <stop offset="100%" stop-color="#1e293b" stop-opacity="0.3"/>
-    </linearGradient>
-    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="130%">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="5"/>
-      <feOffset dx="0" dy="3"/>
-      <feComponentTransfer><feFuncA type="linear" slope="0.45"/></feComponentTransfer>
-      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 440" width="1000" height="440">
+  <rect width="1000" height="440" fill="#ffffff"/>
 
-  <!-- Background -->
-  <rect width="1000" height="560" rx="16" fill="url(#bg)"/>
-
-  <!-- Subtle grid -->
-  <g stroke="#1e293b" stroke-width="1" opacity="0.4">
-    <line x1="0" y1="140" x2="1000" y2="140"/>
-    <line x1="0" y1="280" x2="1000" y2="280"/>
-    <line x1="0" y1="420" x2="1000" y2="420"/>
-  </g>
+  <!-- Eyebrow -->
+  <text x="80" y="58" font-family="-apple-system, system-ui, sans-serif"
+        font-size="11" font-weight="600" fill="#6366f1" letter-spacing="2">THREE LAYERS</text>
 
   <!-- Title -->
-  <text x="500" y="50" font-family="-apple-system, system-ui, sans-serif"
-        font-size="26" font-weight="700" fill="url(#title)" text-anchor="middle" letter-spacing="-0.5">
+  <text x="80" y="92" font-family="-apple-system, system-ui, sans-serif"
+        font-size="26" font-weight="600" fill="#0f172a" letter-spacing="-0.5">
     How Claude Code reads your config
   </text>
-  <text x="500" y="78" font-family="-apple-system, system-ui, sans-serif"
-        font-size="14" fill="#94a3b8" text-anchor="middle">
-    Three layers loaded on every session — top → down
+  <text x="80" y="118" font-family="-apple-system, system-ui, sans-serif"
+        font-size="14" fill="#64748b">
+    Loaded top to bottom on every session.
   </text>
 
-  <!-- ====== Card 1: Personal ====== -->
-  <g transform="translate(140, 120)">
-    <rect width="720" height="108" rx="14" fill="url(#personalGrad)" stroke="#60a5fa" stroke-opacity="0.55" stroke-width="1.5"/>
+  <!-- Top rule -->
+  <line x1="80" y1="148" x2="920" y2="148" stroke="#e5e7eb" stroke-width="1"/>
 
-    <circle cx="44" cy="54" r="24" fill="#3b82f6" filter="url(#cardShadow)"/>
-    <text x="44" y="62" font-family="-apple-system, system-ui, sans-serif" font-size="22" font-weight="700" fill="#fff" text-anchor="middle">1</text>
-
-    <text x="92" y="42" font-family="-apple-system, system-ui, sans-serif" font-size="20" font-weight="700" fill="#dbeafe" letter-spacing="1">PERSONAL</text>
-    <text x="92" y="65" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="13" fill="#93c5fd">~/.claude/</text>
-    <text x="92" y="92" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#cbd5e1">
-      preferences  ·  custom agents  ·  slash commands  ·  auto-memory
-    </text>
-
-    <text x="696" y="42" font-family="-apple-system, system-ui, sans-serif" font-size="12" fill="#c4b5fd" text-anchor="end" font-style="italic">
-      ClaudeRoam manages this layer
-    </text>
-    <text x="696" y="92" font-family="-apple-system, system-ui, sans-serif" font-size="11" fill="#64748b" text-anchor="end">
-      "How I work"
-    </text>
+  <!-- ===== Row 1: Personal (ClaudeRoam-managed, left accent stripe) ===== -->
+  <g transform="translate(80, 148)">
+    <rect x="0" y="0" width="3" height="84" fill="#6366f1"/>
+    <text x="32" y="36" font-family="ui-monospace, 'SF Mono', Menlo, monospace"
+          font-size="13" font-weight="500" fill="#94a3b8">01</text>
+    <text x="96" y="36" font-family="-apple-system, system-ui, sans-serif"
+          font-size="15" font-weight="600" fill="#0f172a">Personal</text>
+    <text x="180" y="36" font-family="-apple-system, system-ui, sans-serif"
+          font-size="14" fill="#cbd5e1">·</text>
+    <text x="196" y="36" font-family="ui-monospace, 'SF Mono', Menlo, monospace"
+          font-size="13" fill="#475569">~/.claude/</text>
+    <text x="96" y="62" font-family="-apple-system, system-ui, sans-serif"
+          font-size="13" fill="#475569">Preferences, custom agents, slash commands, auto-memory.</text>
+    <text x="96" y="80" font-family="-apple-system, system-ui, sans-serif"
+          font-size="12" fill="#6366f1">Managed by ClaudeRoam, synced across machines.</text>
+    <line x1="0" y1="100" x2="840" y2="100" stroke="#e5e7eb" stroke-width="1"/>
   </g>
 
-  <!-- Arrow 1 → 2 -->
-  <g transform="translate(500, 232)">
-    <line x1="0" y1="0" x2="0" y2="28" stroke="#64748b" stroke-width="2"/>
-    <polygon points="0,32 -6,22 6,22" fill="#64748b"/>
+  <!-- ===== Row 2: Project ===== -->
+  <g transform="translate(80, 248)">
+    <text x="32" y="36" font-family="ui-monospace, 'SF Mono', Menlo, monospace"
+          font-size="13" font-weight="500" fill="#94a3b8">02</text>
+    <text x="96" y="36" font-family="-apple-system, system-ui, sans-serif"
+          font-size="15" font-weight="600" fill="#0f172a">Project</text>
+    <text x="172" y="36" font-family="-apple-system, system-ui, sans-serif"
+          font-size="14" fill="#cbd5e1">·</text>
+    <text x="188" y="36" font-family="ui-monospace, 'SF Mono', Menlo, monospace"
+          font-size="13" fill="#475569">&lt;project&gt;/CLAUDE.md + .claude/</text>
+    <text x="96" y="62" font-family="-apple-system, system-ui, sans-serif"
+          font-size="13" fill="#475569">Tech stack, test commands, conventions, per-project agents.</text>
+    <text x="96" y="80" font-family="-apple-system, system-ui, sans-serif"
+          font-size="12" fill="#94a3b8">Travels with the codebase.</text>
+    <line x1="0" y1="100" x2="840" y2="100" stroke="#e5e7eb" stroke-width="1"/>
   </g>
 
-  <!-- ====== Card 2: Project ====== -->
-  <g transform="translate(140, 268)">
-    <rect width="720" height="108" rx="14" fill="url(#projectGrad)" stroke="#fbbf24" stroke-opacity="0.5" stroke-width="1.5"/>
-
-    <circle cx="44" cy="54" r="24" fill="#f59e0b" filter="url(#cardShadow)"/>
-    <text x="44" y="62" font-family="-apple-system, system-ui, sans-serif" font-size="22" font-weight="700" fill="#fff" text-anchor="middle">2</text>
-
-    <text x="92" y="42" font-family="-apple-system, system-ui, sans-serif" font-size="20" font-weight="700" fill="#fef3c7" letter-spacing="1">PROJECT</text>
-    <text x="92" y="65" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="13" fill="#fcd34d">&lt;project&gt;/CLAUDE.md + .claude/</text>
-    <text x="92" y="92" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#cbd5e1">
-      tech stack  ·  test commands  ·  conventions  ·  project-only agents
-    </text>
-
-    <text x="696" y="42" font-family="-apple-system, system-ui, sans-serif" font-size="12" fill="#94a3b8" text-anchor="end" font-style="italic">
-      Travels with the codebase
-    </text>
-    <text x="696" y="92" font-family="-apple-system, system-ui, sans-serif" font-size="11" fill="#64748b" text-anchor="end">
-      "How this codebase works"
-    </text>
-  </g>
-
-  <!-- Arrow 2 → 3 -->
-  <g transform="translate(500, 380)">
-    <line x1="0" y1="0" x2="0" y2="28" stroke="#64748b" stroke-width="2"/>
-    <polygon points="0,32 -6,22 6,22" fill="#64748b"/>
-  </g>
-
-  <!-- ====== Card 3: Session ====== -->
-  <g transform="translate(140, 416)">
-    <rect width="720" height="108" rx="14" fill="url(#sessionGrad)" stroke="#94a3b8" stroke-opacity="0.4" stroke-width="1.5"/>
-
-    <circle cx="44" cy="54" r="24" fill="#64748b" filter="url(#cardShadow)"/>
-    <text x="44" y="62" font-family="-apple-system, system-ui, sans-serif" font-size="22" font-weight="700" fill="#fff" text-anchor="middle">3</text>
-
-    <text x="92" y="42" font-family="-apple-system, system-ui, sans-serif" font-size="20" font-weight="700" fill="#e2e8f0" letter-spacing="1">SESSION</text>
-    <text x="92" y="65" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="13" fill="#cbd5e1">this conversation</text>
-    <text x="92" y="92" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#94a3b8">
-      whatever we type right now  ·  ephemeral, lives in the transcript only
-    </text>
-
-    <text x="696" y="42" font-family="-apple-system, system-ui, sans-serif" font-size="12" fill="#94a3b8" text-anchor="end" font-style="italic">
-      Not persisted
-    </text>
+  <!-- ===== Row 3: Session ===== -->
+  <g transform="translate(80, 348)">
+    <text x="32" y="36" font-family="ui-monospace, 'SF Mono', Menlo, monospace"
+          font-size="13" font-weight="500" fill="#94a3b8">03</text>
+    <text x="96" y="36" font-family="-apple-system, system-ui, sans-serif"
+          font-size="15" font-weight="600" fill="#0f172a">Session</text>
+    <text x="176" y="36" font-family="-apple-system, system-ui, sans-serif"
+          font-size="14" fill="#cbd5e1">·</text>
+    <text x="192" y="36" font-family="ui-monospace, 'SF Mono', Menlo, monospace"
+          font-size="13" fill="#475569">this conversation</text>
+    <text x="96" y="62" font-family="-apple-system, system-ui, sans-serif"
+          font-size="13" fill="#475569">Whatever we type right now — lives in the transcript only.</text>
   </g>
 </svg>

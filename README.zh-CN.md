@@ -157,7 +157,7 @@ cd ~/ClaudeRoam-src && ./clauderoam init
   <img src=".assets/diagrams/personal-vs-project.svg" alt="ClaudeRoam（个人配置）和项目 repo 都汇入 ~/.claude/，Claude Code 从这里读" width="100%">
 </p>
 
-在 `startup-app` 里打开 Claude Code → 个人层 + startup-app 项目层组合加载。切到 `my-blog` → 同样的个人层 + my-blog 项目层。两个 context 互不冲突。
+在 Project A 里打开 Claude Code → 个人层 + Project A 项目层组合加载。切到 Project B → 同样的个人层 + Project B 项目层。两个 context 互不冲突。
 
 ### Symlink，不是同步
 

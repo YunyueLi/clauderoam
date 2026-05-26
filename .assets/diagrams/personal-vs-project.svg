@@ -1,118 +1,82 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 560" width="1000" height="560">
-  <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0f172a"/>
-      <stop offset="50%" stop-color="#1e1b4b"/>
-      <stop offset="100%" stop-color="#0f172a"/>
-    </linearGradient>
-    <linearGradient id="title" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#38bdf8"/>
-      <stop offset="50%" stop-color="#a78bfa"/>
-      <stop offset="100%" stop-color="#f472b6"/>
-    </linearGradient>
-    <linearGradient id="cr" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1e40af" stop-opacity="0.55"/>
-      <stop offset="100%" stop-color="#3730a3" stop-opacity="0.3"/>
-    </linearGradient>
-    <linearGradient id="proj" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#b45309" stop-opacity="0.45"/>
-      <stop offset="100%" stop-color="#78350f" stop-opacity="0.25"/>
-    </linearGradient>
-    <linearGradient id="hub" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0e7490" stop-opacity="0.55"/>
-      <stop offset="100%" stop-color="#155e75" stop-opacity="0.35"/>
-    </linearGradient>
-    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="5"/>
-      <feOffset dx="0" dy="3"/>
-      <feComponentTransfer><feFuncA type="linear" slope="0.45"/></feComponentTransfer>
-      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 500" width="1000" height="500">
+  <rect width="1000" height="500" fill="#ffffff"/>
 
-  <rect width="1000" height="560" rx="16" fill="url(#bg)"/>
+  <!-- Eyebrow -->
+  <text x="80" y="58" font-family="-apple-system, system-ui, sans-serif"
+        font-size="11" font-weight="600" fill="#6366f1" letter-spacing="2">TWO SOURCES</text>
 
   <!-- Title -->
-  <text x="500" y="50" font-family="-apple-system, system-ui, sans-serif"
-        font-size="26" font-weight="700" fill="url(#title)" text-anchor="middle" letter-spacing="-0.5">
+  <text x="80" y="92" font-family="-apple-system, system-ui, sans-serif"
+        font-size="26" font-weight="600" fill="#0f172a" letter-spacing="-0.5">
     Personal config vs project config
   </text>
-  <text x="500" y="78" font-family="-apple-system, system-ui, sans-serif"
-        font-size="14" fill="#94a3b8" text-anchor="middle">
-    Two separate sources — one follows you, the other follows the code
+  <text x="80" y="118" font-family="-apple-system, system-ui, sans-serif"
+        font-size="14" fill="#64748b">
+    One follows you. The other follows the code. Both end up in <tspan font-family="ui-monospace, 'SF Mono', Menlo, monospace" fill="#334155">~/.claude/</tspan>.
   </text>
 
-  <!-- ====== Left section header: YOU ====== -->
-  <g transform="translate(60, 130)">
-    <text x="0" y="0" font-family="-apple-system, system-ui, sans-serif" font-size="11" font-weight="600" fill="#a78bfa" letter-spacing="2">👤  YOU</text>
+  <!-- ===== Left column: ClaudeRoam (Personal) ===== -->
+  <g transform="translate(80, 162)">
+    <!-- Left accent stripe -->
+    <rect x="0" y="0" width="3" height="190" fill="#6366f1"/>
+
+    <text x="20" y="22" font-family="-apple-system, system-ui, sans-serif"
+          font-size="11" font-weight="600" fill="#6366f1" letter-spacing="2">PERSONAL</text>
+    <text x="20" y="48" font-family="-apple-system, system-ui, sans-serif"
+          font-size="18" font-weight="600" fill="#0f172a">ClaudeRoam</text>
+    <text x="20" y="70" font-family="ui-monospace, 'SF Mono', Menlo, monospace"
+          font-size="13" fill="#475569">~/clauderoam/</text>
+
+    <line x1="20" y1="90" x2="400" y2="90" stroke="#e5e7eb" stroke-width="1"/>
+
+    <text x="20" y="116" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#334155">“reply in 中文”</text>
+    <text x="20" y="138" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#334155">/commit slash command</text>
+    <text x="20" y="160" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#334155">code-reviewer agent</text>
+    <text x="20" y="182" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#334155">auto-memory across projects</text>
+
+    <text x="20" y="210" font-family="-apple-system, system-ui, sans-serif" font-size="12" fill="#94a3b8">One repo, tracked in git.</text>
   </g>
 
-  <!-- ClaudeRoam card -->
-  <g transform="translate(60, 150)" filter="url(#shadow)">
-    <rect width="320" height="220" rx="14" fill="url(#cr)" stroke="#60a5fa" stroke-opacity="0.55" stroke-width="1.5"/>
-    <text x="22" y="38" font-family="-apple-system, system-ui, sans-serif" font-size="18" font-weight="700" fill="#dbeafe">ClaudeRoam</text>
-    <text x="22" y="58" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="12" fill="#93c5fd">~/clauderoam/</text>
+  <!-- ===== Right column: Project repos ===== -->
+  <g transform="translate(540, 162)">
+    <rect x="0" y="0" width="3" height="190" fill="#e5e7eb"/>
 
-    <line x1="22" y1="76" x2="298" y2="76" stroke="#3b82f6" stroke-opacity="0.3" stroke-width="1"/>
+    <text x="20" y="22" font-family="-apple-system, system-ui, sans-serif"
+          font-size="11" font-weight="600" fill="#94a3b8" letter-spacing="2">PROJECT REPOS</text>
+    <text x="20" y="48" font-family="-apple-system, system-ui, sans-serif"
+          font-size="18" font-weight="600" fill="#0f172a">Project A · Project B · …</text>
+    <text x="20" y="70" font-family="ui-monospace, 'SF Mono', Menlo, monospace"
+          font-size="13" fill="#475569">&lt;project&gt;/CLAUDE.md + .claude/</text>
 
-    <text x="22" y="102" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#cbd5e1">"reply in 中文"</text>
-    <text x="22" y="124" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#cbd5e1">/commit slash command</text>
-    <text x="22" y="146" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#cbd5e1">code-reviewer agent</text>
-    <text x="22" y="168" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#cbd5e1">auto-memory across projects</text>
-    <text x="22" y="190" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#cbd5e1">…your way of working</text>
+    <line x1="20" y1="90" x2="400" y2="90" stroke="#e5e7eb" stroke-width="1"/>
 
-    <text x="298" y="208" font-family="-apple-system, system-ui, sans-serif" font-size="10" fill="#94a3b8" text-anchor="end" font-style="italic">one repo, in git</text>
+    <text x="20" y="116" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#334155">Tech stack &amp; runtime</text>
+    <text x="20" y="138" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#334155">Test &amp; build commands</text>
+    <text x="20" y="160" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#334155">Code conventions</text>
+    <text x="20" y="182" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#334155" font-style="italic">Different for every project.</text>
+
+    <text x="20" y="210" font-family="-apple-system, system-ui, sans-serif" font-size="12" fill="#94a3b8">One per codebase.</text>
   </g>
 
-  <!-- ====== Right section header: PROJECT REPOS ====== -->
-  <g transform="translate(620, 130)">
-    <text x="0" y="0" font-family="-apple-system, system-ui, sans-serif" font-size="11" font-weight="600" fill="#fbbf24" letter-spacing="2">🏗️  YOUR PROJECT REPOS</text>
-  </g>
+  <!-- ===== Connector lines to hub ===== -->
+  <!-- Left → hub -->
+  <path d="M 280 392 L 280 420 L 500 420" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="316" y="412" font-family="-apple-system, system-ui, sans-serif" font-size="11" fill="#94a3b8">symlinks</text>
 
-  <!-- Project card stack -->
-  <g transform="translate(620, 150)">
-    <!-- Card 3 (back) -->
-    <g transform="translate(20, 28)" opacity="0.5">
-      <rect width="320" height="60" rx="10" fill="url(#proj)" stroke="#fbbf24" stroke-opacity="0.3" stroke-width="1"/>
-    </g>
-    <!-- Card 2 (middle) -->
-    <g transform="translate(10, 14)" opacity="0.75">
-      <rect width="320" height="60" rx="10" fill="url(#proj)" stroke="#fbbf24" stroke-opacity="0.4" stroke-width="1"/>
-    </g>
-    <!-- Card 1 (front) -->
-    <g filter="url(#shadow)">
-      <rect width="320" height="220" rx="14" fill="url(#proj)" stroke="#fbbf24" stroke-opacity="0.55" stroke-width="1.5"/>
+  <!-- Right → hub -->
+  <path d="M 740 392 L 740 420 L 500 420" fill="none" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="660" y="412" font-family="-apple-system, system-ui, sans-serif" font-size="11" fill="#94a3b8">on open</text>
 
-      <text x="22" y="38" font-family="-apple-system, system-ui, sans-serif" font-size="18" font-weight="700" fill="#fef3c7">my-blog / startup-app / …</text>
-      <text x="22" y="58" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="12" fill="#fcd34d">&lt;project&gt;/CLAUDE.md + .claude/</text>
+  <!-- Arrow into hub -->
+  <line x1="500" y1="420" x2="500" y2="438" stroke="#cbd5e1" stroke-width="1.5"/>
+  <polygon points="500,444 495,436 505,436" fill="#cbd5e1"/>
 
-      <line x1="22" y1="76" x2="298" y2="76" stroke="#f59e0b" stroke-opacity="0.3" stroke-width="1"/>
-
-      <text x="22" y="102" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#cbd5e1">"Python 3.12 + uv run pytest"</text>
-      <text x="22" y="124" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#cbd5e1">import sort order</text>
-      <text x="22" y="146" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#cbd5e1">migration-checker agent</text>
-      <text x="22" y="168" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#cbd5e1">…this codebase's conventions</text>
-      <text x="22" y="190" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#cbd5e1" font-style="italic">(different per project)</text>
-
-      <text x="298" y="208" font-family="-apple-system, system-ui, sans-serif" font-size="10" fill="#94a3b8" text-anchor="end" font-style="italic">one per codebase</text>
-    </g>
-  </g>
-
-  <!-- Arrows from both into hub -->
-  <!-- From ClaudeRoam (left card bottom-right) → Hub (top-left) -->
-  <path d="M 320 410 Q 400 460 460 470" fill="none" stroke="#60a5fa" stroke-width="2" stroke-dasharray="6 4" opacity="0.7"/>
-  <polygon points="465,475 455,470 461,463" fill="#60a5fa" opacity="0.7"/>
-  <text x="350" y="450" font-family="-apple-system, system-ui, sans-serif" font-size="11" fill="#93c5fd" font-style="italic">symlinks</text>
-
-  <!-- From Projects (right card bottom-left) → Hub (top-right) -->
-  <path d="M 680 410 Q 600 460 540 470" fill="none" stroke="#fbbf24" stroke-width="2" opacity="0.7"/>
-  <polygon points="535,475 545,470 539,463" fill="#fbbf24" opacity="0.7"/>
-  <text x="635" y="450" font-family="-apple-system, system-ui, sans-serif" font-size="11" fill="#fcd34d" font-style="italic">on open</text>
-
-  <!-- ====== Hub: ~/.claude/ ====== -->
-  <g transform="translate(370, 460)" filter="url(#shadow)">
-    <rect width="260" height="64" rx="10" fill="url(#hub)" stroke="#22d3ee" stroke-opacity="0.6" stroke-width="1.5"/>
-    <text x="130" y="28" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="15" font-weight="700" fill="#cffafe" text-anchor="middle">~/.claude/</text>
-    <text x="130" y="48" font-family="-apple-system, system-ui, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle" font-style="italic">Claude Code reads here, both layers combined</text>
+  <!-- ===== Hub: ~/.claude/ ===== -->
+  <g transform="translate(340, 444)">
+    <rect width="320" height="42" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <text x="160" y="20" font-family="ui-monospace, 'SF Mono', Menlo, monospace"
+          font-size="14" font-weight="600" fill="#0f172a" text-anchor="middle">~/.claude/</text>
+    <text x="160" y="34" font-family="-apple-system, system-ui, sans-serif"
+          font-size="11" fill="#94a3b8" text-anchor="middle">Claude Code reads here, both layers combined.</text>
   </g>
 </svg>

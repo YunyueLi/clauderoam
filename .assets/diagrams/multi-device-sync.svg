@@ -1,153 +1,106 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 540" width="1100" height="540">
-  <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0f172a"/>
-      <stop offset="50%" stop-color="#1e1b4b"/>
-      <stop offset="100%" stop-color="#0f172a"/>
-    </linearGradient>
-    <linearGradient id="title" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#38bdf8"/>
-      <stop offset="50%" stop-color="#a78bfa"/>
-      <stop offset="100%" stop-color="#f472b6"/>
-    </linearGradient>
-    <linearGradient id="mac" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1e293b" stop-opacity="0.7"/>
-      <stop offset="100%" stop-color="#0f172a" stop-opacity="0.5"/>
-    </linearGradient>
-    <linearGradient id="claudeDir" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0e7490" stop-opacity="0.55"/>
-      <stop offset="100%" stop-color="#155e75" stop-opacity="0.3"/>
-    </linearGradient>
-    <linearGradient id="roamDir" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1e40af" stop-opacity="0.55"/>
-      <stop offset="100%" stop-color="#312e81" stop-opacity="0.3"/>
-    </linearGradient>
-    <linearGradient id="github" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#374151" stop-opacity="0.85"/>
-      <stop offset="100%" stop-color="#111827" stop-opacity="0.85"/>
-    </linearGradient>
-    <linearGradient id="arrowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.8"/>
-      <stop offset="100%" stop-color="#a78bfa" stop-opacity="0.8"/>
-    </linearGradient>
-    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="5"/>
-      <feOffset dx="0" dy="3"/>
-      <feComponentTransfer><feFuncA type="linear" slope="0.4"/></feComponentTransfer>
-      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 520" width="1100" height="520">
+  <rect width="1100" height="520" fill="#ffffff"/>
 
-  <rect width="1100" height="540" rx="16" fill="url(#bg)"/>
+  <!-- Eyebrow -->
+  <text x="80" y="58" font-family="-apple-system, system-ui, sans-serif"
+        font-size="11" font-weight="600" fill="#6366f1" letter-spacing="2">MULTI-DEVICE</text>
 
   <!-- Title -->
-  <text x="550" y="50" font-family="-apple-system, system-ui, sans-serif"
-        font-size="26" font-weight="700" fill="url(#title)" text-anchor="middle" letter-spacing="-0.5">
+  <text x="80" y="92" font-family="-apple-system, system-ui, sans-serif"
+        font-size="26" font-weight="600" fill="#0f172a" letter-spacing="-0.5">
     Symlinks, not sync
   </text>
-  <text x="550" y="78" font-family="-apple-system, system-ui, sans-serif"
-        font-size="14" fill="#94a3b8" text-anchor="middle">
-    Two Macs, one git repo, zero copy-paste
+  <text x="80" y="118" font-family="-apple-system, system-ui, sans-serif"
+        font-size="14" fill="#64748b">
+    Two Macs, one git repo, zero copy-paste.
   </text>
 
   <!-- ============ Mac A panel ============ -->
-  <g transform="translate(60, 130)" filter="url(#shadow)">
-    <rect width="320" height="320" rx="14" fill="url(#mac)" stroke="#334155" stroke-width="1.5"/>
+  <g transform="translate(80, 160)">
+    <text x="0" y="14" font-family="-apple-system, system-ui, sans-serif"
+          font-size="11" font-weight="600" fill="#94a3b8" letter-spacing="2">MAC A</text>
 
-    <!-- Mac chrome -->
-    <circle cx="22" cy="22" r="5" fill="#ef4444" opacity="0.7"/>
-    <circle cx="38" cy="22" r="5" fill="#f59e0b" opacity="0.7"/>
-    <circle cx="54" cy="22" r="5" fill="#10b981" opacity="0.7"/>
-    <text x="160" y="26" font-family="-apple-system, system-ui, sans-serif" font-size="13" font-weight="600" fill="#e2e8f0" text-anchor="middle">💻  Mac A</text>
-
-    <!-- ~/.claude card -->
-    <g transform="translate(20, 60)">
-      <rect width="280" height="74" rx="10" fill="url(#claudeDir)" stroke="#22d3ee" stroke-opacity="0.5" stroke-width="1.5"/>
-      <text x="14" y="26" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="13" font-weight="700" fill="#cffafe">~/.claude/</text>
-      <text x="14" y="46" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="11" fill="#67e8f9">CLAUDE.md</text>
-      <text x="14" y="60" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="11" fill="#67e8f9">agents/  commands/  …</text>
-      <text x="266" y="26" font-family="-apple-system, system-ui, sans-serif" font-size="10" fill="#94a3b8" text-anchor="end" font-style="italic">Claude reads here</text>
+    <!-- ~/.claude/ card -->
+    <g transform="translate(0, 32)">
+      <rect width="280" height="72" rx="6" fill="#ffffff" stroke="#e5e7eb" stroke-width="1.5"/>
+      <text x="16" y="26" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="13" font-weight="600" fill="#0f172a">~/.claude/</text>
+      <text x="16" y="46" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="12" fill="#64748b">CLAUDE.md, agents/, commands/</text>
+      <text x="16" y="62" font-family="-apple-system, system-ui, sans-serif" font-size="11" fill="#94a3b8" font-style="italic">Claude Code reads here.</text>
     </g>
 
-    <!-- Symlink arrow -->
-    <g transform="translate(160, 158)">
-      <line x1="0" y1="-12" x2="0" y2="36" stroke="#a78bfa" stroke-width="2" stroke-dasharray="5 3"/>
-      <polygon points="0,40 -5,32 5,32" fill="#a78bfa"/>
-      <rect x="-50" y="2" width="100" height="20" rx="10" fill="#1e1b4b" stroke="#a78bfa" stroke-opacity="0.5" stroke-width="1"/>
-      <text x="0" y="16" font-family="-apple-system, system-ui, sans-serif" font-size="10" fill="#c4b5fd" text-anchor="middle" font-style="italic">symlink</text>
+    <!-- Symlink connector -->
+    <g transform="translate(140, 110)">
+      <line x1="0" y1="0" x2="0" y2="44" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <polygon points="0,48 -4,40 4,40" fill="#cbd5e1"/>
+      <text x="12" y="28" font-family="-apple-system, system-ui, sans-serif" font-size="11" fill="#94a3b8" font-style="italic">symlink</text>
     </g>
 
-    <!-- ~/clauderoam card -->
-    <g transform="translate(20, 200)">
-      <rect width="280" height="100" rx="10" fill="url(#roamDir)" stroke="#60a5fa" stroke-opacity="0.5" stroke-width="1.5"/>
-      <text x="14" y="26" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="13" font-weight="700" fill="#dbeafe">~/clauderoam/</text>
-      <text x="14" y="46" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="11" fill="#93c5fd">CLAUDE.md  (real file)</text>
-      <text x="14" y="60" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="11" fill="#93c5fd">agents/  commands/  …</text>
-      <text x="14" y="80" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="11" fill="#93c5fd">.git/</text>
-      <text x="266" y="26" font-family="-apple-system, system-ui, sans-serif" font-size="10" fill="#94a3b8" text-anchor="end" font-style="italic">tracked in git</text>
-    </g>
-  </g>
-
-  <!-- ============ Mac B panel (mirror of A) ============ -->
-  <g transform="translate(720, 130)" filter="url(#shadow)">
-    <rect width="320" height="320" rx="14" fill="url(#mac)" stroke="#334155" stroke-width="1.5"/>
-
-    <circle cx="22" cy="22" r="5" fill="#ef4444" opacity="0.7"/>
-    <circle cx="38" cy="22" r="5" fill="#f59e0b" opacity="0.7"/>
-    <circle cx="54" cy="22" r="5" fill="#10b981" opacity="0.7"/>
-    <text x="160" y="26" font-family="-apple-system, system-ui, sans-serif" font-size="13" font-weight="600" fill="#e2e8f0" text-anchor="middle">💻  Mac B</text>
-
-    <g transform="translate(20, 60)">
-      <rect width="280" height="74" rx="10" fill="url(#claudeDir)" stroke="#22d3ee" stroke-opacity="0.5" stroke-width="1.5"/>
-      <text x="14" y="26" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="13" font-weight="700" fill="#cffafe">~/.claude/</text>
-      <text x="14" y="46" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="11" fill="#67e8f9">CLAUDE.md</text>
-      <text x="14" y="60" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="11" fill="#67e8f9">agents/  commands/  …</text>
-      <text x="266" y="26" font-family="-apple-system, system-ui, sans-serif" font-size="10" fill="#94a3b8" text-anchor="end" font-style="italic">Claude reads here</text>
-    </g>
-
-    <g transform="translate(160, 158)">
-      <line x1="0" y1="-12" x2="0" y2="36" stroke="#a78bfa" stroke-width="2" stroke-dasharray="5 3"/>
-      <polygon points="0,40 -5,32 5,32" fill="#a78bfa"/>
-      <rect x="-50" y="2" width="100" height="20" rx="10" fill="#1e1b4b" stroke="#a78bfa" stroke-opacity="0.5" stroke-width="1"/>
-      <text x="0" y="16" font-family="-apple-system, system-ui, sans-serif" font-size="10" fill="#c4b5fd" text-anchor="middle" font-style="italic">symlink</text>
-    </g>
-
-    <g transform="translate(20, 200)">
-      <rect width="280" height="100" rx="10" fill="url(#roamDir)" stroke="#60a5fa" stroke-opacity="0.5" stroke-width="1.5"/>
-      <text x="14" y="26" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="13" font-weight="700" fill="#dbeafe">~/clauderoam/</text>
-      <text x="14" y="46" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="11" fill="#93c5fd">CLAUDE.md  (real file)</text>
-      <text x="14" y="60" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="11" fill="#93c5fd">agents/  commands/  …</text>
-      <text x="14" y="80" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="11" fill="#93c5fd">.git/</text>
-      <text x="266" y="26" font-family="-apple-system, system-ui, sans-serif" font-size="10" fill="#94a3b8" text-anchor="end" font-style="italic">tracked in git</text>
+    <!-- ~/clauderoam/ card -->
+    <g transform="translate(0, 164)">
+      <rect width="280" height="92" rx="6" fill="#ffffff" stroke="#e5e7eb" stroke-width="1.5"/>
+      <text x="16" y="26" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="13" font-weight="600" fill="#0f172a">~/clauderoam/</text>
+      <text x="16" y="46" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="12" fill="#64748b">CLAUDE.md (real file), agents/, …</text>
+      <text x="16" y="62" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="12" fill="#64748b">.git/</text>
+      <text x="16" y="82" font-family="-apple-system, system-ui, sans-serif" font-size="11" fill="#94a3b8" font-style="italic">Tracked in git.</text>
     </g>
   </g>
 
   <!-- ============ GitHub hub (center) ============ -->
-  <g transform="translate(425, 240)" filter="url(#shadow)">
-    <rect width="250" height="110" rx="14" fill="url(#github)" stroke="#a78bfa" stroke-opacity="0.5" stroke-width="1.5"/>
-    <text x="125" y="38" font-family="-apple-system, system-ui, sans-serif" font-size="22" text-anchor="middle">📦</text>
-    <text x="125" y="64" font-family="-apple-system, system-ui, sans-serif" font-size="14" font-weight="700" fill="#e2e8f0" text-anchor="middle">GitHub</text>
-    <text x="125" y="86" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="11" fill="#a78bfa" text-anchor="middle">clauderoam-config</text>
-    <text x="125" y="102" font-family="-apple-system, system-ui, sans-serif" font-size="10" fill="#94a3b8" text-anchor="middle" font-style="italic">private repo</text>
+  <g transform="translate(440, 268)">
+    <text x="0" y="-12" font-family="-apple-system, system-ui, sans-serif"
+          font-size="11" font-weight="600" fill="#6366f1" letter-spacing="2">GITHUB</text>
+    <rect width="220" height="76" rx="6" fill="#ffffff" stroke="#6366f1" stroke-width="1.5"/>
+    <text x="110" y="30" font-family="ui-monospace, 'SF Mono', Menlo, monospace"
+          font-size="13" font-weight="600" fill="#0f172a" text-anchor="middle">clauderoam-config</text>
+    <text x="110" y="50" font-family="-apple-system, system-ui, sans-serif"
+          font-size="11" fill="#64748b" text-anchor="middle">your private repo</text>
+    <text x="110" y="66" font-family="-apple-system, system-ui, sans-serif"
+          font-size="11" fill="#94a3b8" text-anchor="middle" font-style="italic">single source of truth</text>
   </g>
 
-  <!-- Arrow Mac A repo ↔ GitHub -->
-  <path d="M 340 295 Q 380 295 425 295" fill="none" stroke="url(#arrowGrad)" stroke-width="2.5"/>
-  <polygon points="350,290 340,295 350,300" fill="#38bdf8"/>
-  <polygon points="420,290 430,295 420,300" fill="#a78bfa"/>
-  <text x="382" y="282" font-family="-apple-system, system-ui, sans-serif" font-size="11" fill="#cbd5e1" text-anchor="middle" font-style="italic">git push/pull</text>
+  <!-- ============ Mac B panel (mirror of A) ============ -->
+  <g transform="translate(740, 160)">
+    <text x="0" y="14" font-family="-apple-system, system-ui, sans-serif"
+          font-size="11" font-weight="600" fill="#94a3b8" letter-spacing="2">MAC B</text>
 
-  <!-- Arrow Mac B repo ↔ GitHub -->
-  <path d="M 720 295 Q 700 295 675 295" fill="none" stroke="url(#arrowGrad)" stroke-width="2.5"/>
-  <polygon points="710,290 720,295 710,300" fill="#a78bfa"/>
-  <polygon points="685,290 675,295 685,300" fill="#38bdf8"/>
-  <text x="697" y="282" font-family="-apple-system, system-ui, sans-serif" font-size="11" fill="#cbd5e1" text-anchor="middle" font-style="italic">git push/pull</text>
+    <g transform="translate(0, 32)">
+      <rect width="280" height="72" rx="6" fill="#ffffff" stroke="#e5e7eb" stroke-width="1.5"/>
+      <text x="16" y="26" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="13" font-weight="600" fill="#0f172a">~/.claude/</text>
+      <text x="16" y="46" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="12" fill="#64748b">CLAUDE.md, agents/, commands/</text>
+      <text x="16" y="62" font-family="-apple-system, system-ui, sans-serif" font-size="11" fill="#94a3b8" font-style="italic">Claude Code reads here.</text>
+    </g>
 
-  <!-- Footer note -->
-  <text x="550" y="490" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#94a3b8" text-anchor="middle">
-    Editing <tspan font-family="ui-monospace,monospace" fill="#cbd5e1">~/.claude/CLAUDE.md</tspan> <tspan font-style="italic">is</tspan> editing <tspan font-family="ui-monospace,monospace" fill="#cbd5e1">~/clauderoam/CLAUDE.md</tspan> — there's only one file on disk.
-  </text>
-  <text x="550" y="510" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#94a3b8" text-anchor="middle">
-    Account switch? Only <tspan font-family="ui-monospace,monospace" fill="#cbd5e1">.credentials.json</tspan> changes. Symlinks, config, memory: untouched.
+    <g transform="translate(140, 110)">
+      <line x1="0" y1="0" x2="0" y2="44" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <polygon points="0,48 -4,40 4,40" fill="#cbd5e1"/>
+      <text x="12" y="28" font-family="-apple-system, system-ui, sans-serif" font-size="11" fill="#94a3b8" font-style="italic">symlink</text>
+    </g>
+
+    <g transform="translate(0, 164)">
+      <rect width="280" height="92" rx="6" fill="#ffffff" stroke="#e5e7eb" stroke-width="1.5"/>
+      <text x="16" y="26" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="13" font-weight="600" fill="#0f172a">~/clauderoam/</text>
+      <text x="16" y="46" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="12" fill="#64748b">CLAUDE.md (real file), agents/, …</text>
+      <text x="16" y="62" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="12" fill="#64748b">.git/</text>
+      <text x="16" y="82" font-family="-apple-system, system-ui, sans-serif" font-size="11" fill="#94a3b8" font-style="italic">Tracked in git.</text>
+    </g>
+  </g>
+
+  <!-- ============ Push/pull arrows (Mac A repo ↔ GitHub ↔ Mac B repo) ============ -->
+  <!-- Mac A bidirectional -->
+  <line x1="360" y1="310" x2="440" y2="310" stroke="#94a3b8" stroke-width="1.5"/>
+  <polygon points="370,305 360,310 370,315" fill="#94a3b8"/>
+  <polygon points="430,305 440,310 430,315" fill="#94a3b8"/>
+  <text x="400" y="298" font-family="-apple-system, system-ui, sans-serif" font-size="11" fill="#64748b" text-anchor="middle">git push/pull</text>
+
+  <!-- Mac B bidirectional -->
+  <line x1="660" y1="310" x2="740" y2="310" stroke="#94a3b8" stroke-width="1.5"/>
+  <polygon points="670,305 660,310 670,315" fill="#94a3b8"/>
+  <polygon points="730,305 740,310 730,315" fill="#94a3b8"/>
+  <text x="700" y="298" font-family="-apple-system, system-ui, sans-serif" font-size="11" fill="#64748b" text-anchor="middle">git push/pull</text>
+
+  <!-- ============ Footer ============ -->
+  <line x1="80" y1="464" x2="1020" y2="464" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="550" y="490" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#64748b" text-anchor="middle">
+    Editing <tspan font-family="ui-monospace, 'SF Mono', Menlo, monospace" fill="#0f172a">~/.claude/CLAUDE.md</tspan> is editing <tspan font-family="ui-monospace, 'SF Mono', Menlo, monospace" fill="#0f172a">~/clauderoam/CLAUDE.md</tspan> — only one file on disk.
   </text>
 </svg>

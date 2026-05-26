@@ -1,145 +1,92 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 720" width="1100" height="720">
-  <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0f172a"/>
-      <stop offset="50%" stop-color="#1e1b4b"/>
-      <stop offset="100%" stop-color="#0f172a"/>
-    </linearGradient>
-    <linearGradient id="title" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#38bdf8"/>
-      <stop offset="50%" stop-color="#a78bfa"/>
-      <stop offset="100%" stop-color="#f472b6"/>
-    </linearGradient>
-    <linearGradient id="startGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1e40af" stop-opacity="0.6"/>
-      <stop offset="100%" stop-color="#312e81" stop-opacity="0.4"/>
-    </linearGradient>
-    <linearGradient id="okGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#15803d" stop-opacity="0.55"/>
-      <stop offset="100%" stop-color="#14532d" stop-opacity="0.35"/>
-    </linearGradient>
-    <linearGradient id="warnGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#b45309" stop-opacity="0.6"/>
-      <stop offset="100%" stop-color="#78350f" stop-opacity="0.4"/>
-    </linearGradient>
-    <linearGradient id="badGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#b91c1c" stop-opacity="0.6"/>
-      <stop offset="100%" stop-color="#7f1d1d" stop-opacity="0.4"/>
-    </linearGradient>
-    <linearGradient id="decideGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#475569" stop-opacity="0.55"/>
-      <stop offset="100%" stop-color="#1e293b" stop-opacity="0.4"/>
-    </linearGradient>
-    <filter id="shadow" x="-15%" y="-15%" width="130%" height="135%">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
-      <feOffset dx="0" dy="2"/>
-      <feComponentTransfer><feFuncA type="linear" slope="0.45"/></feComponentTransfer>
-      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 520" width="1000" height="520">
+  <rect width="1000" height="520" fill="#ffffff"/>
 
-  <rect width="1100" height="720" rx="16" fill="url(#bg)"/>
+  <!-- Eyebrow -->
+  <text x="80" y="58" font-family="-apple-system, system-ui, sans-serif"
+        font-size="11" font-weight="600" fill="#6366f1" letter-spacing="2">CONFLICT HANDLING</text>
 
   <!-- Title -->
-  <text x="550" y="50" font-family="-apple-system, system-ui, sans-serif"
-        font-size="26" font-weight="700" fill="url(#title)" text-anchor="middle" letter-spacing="-0.5">
-    `clauderoam push` — automatic conflict handling
+  <text x="80" y="92" font-family="-apple-system, system-ui, sans-serif"
+        font-size="26" font-weight="600" fill="#0f172a" letter-spacing="-0.5">
+    <tspan font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="22" font-weight="500">clauderoam push</tspan> — four cases
   </text>
-  <text x="550" y="78" font-family="-apple-system, system-ui, sans-serif"
-        font-size="14" fill="#94a3b8" text-anchor="middle">
-    Four cases · v0.5.2+ · last-writer-wins for memory, refuse for everything else
+  <text x="80" y="118" font-family="-apple-system, system-ui, sans-serif"
+        font-size="14" fill="#64748b">
+    After <tspan font-family="ui-monospace, 'SF Mono', Menlo, monospace" fill="#334155">git fetch origin</tspan>, compare HEAD vs origin/main:
   </text>
 
-  <!-- Start node -->
-  <g transform="translate(450, 110)" filter="url(#shadow)">
-    <rect width="200" height="56" rx="28" fill="url(#startGrad)" stroke="#60a5fa" stroke-opacity="0.6" stroke-width="1.5"/>
-    <text x="100" y="36" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="14" font-weight="700" fill="#dbeafe" text-anchor="middle">clauderoam push</text>
+  <!-- Top rule -->
+  <line x1="80" y1="148" x2="920" y2="148" stroke="#e5e7eb" stroke-width="1"/>
+
+  <!-- ===== Case 01: at-or-ahead ===== -->
+  <g transform="translate(80, 148)">
+    <rect x="0" y="0" width="3" height="68" fill="#22c55e"/>
+    <text x="24" y="34" font-family="ui-monospace, 'SF Mono', Menlo, monospace"
+          font-size="13" font-weight="500" fill="#94a3b8">01</text>
+    <text x="84" y="34" font-family="-apple-system, system-ui, sans-serif"
+          font-size="14" font-weight="600" fill="#0f172a">at-or-ahead</text>
+    <text x="84" y="56" font-family="-apple-system, system-ui, sans-serif"
+          font-size="13" fill="#475569">Nothing to fetch.</text>
+    <text x="440" y="34" font-family="-apple-system, system-ui, sans-serif"
+          font-size="13" fill="#15803d">go to push</text>
+    <text x="840" y="34" font-family="-apple-system, system-ui, sans-serif"
+          font-size="11" fill="#16a34a" text-anchor="end" font-weight="500">OK</text>
+    <line x1="0" y1="84" x2="840" y2="84" stroke="#e5e7eb" stroke-width="1"/>
   </g>
 
-  <!-- Arrow start → fetch -->
-  <line x1="550" y1="166" x2="550" y2="194" stroke="#64748b" stroke-width="2"/>
-  <polygon points="550,200 544,190 556,190" fill="#64748b"/>
-
-  <!-- Fetch step -->
-  <g transform="translate(450, 200)">
-    <rect width="200" height="44" rx="10" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
-    <text x="100" y="29" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="12" fill="#cbd5e1" text-anchor="middle">git fetch origin</text>
+  <!-- ===== Case 02: behind, can FF ===== -->
+  <g transform="translate(80, 232)">
+    <rect x="0" y="0" width="3" height="68" fill="#22c55e"/>
+    <text x="24" y="34" font-family="ui-monospace, 'SF Mono', Menlo, monospace"
+          font-size="13" font-weight="500" fill="#94a3b8">02</text>
+    <text x="84" y="34" font-family="-apple-system, system-ui, sans-serif"
+          font-size="14" font-weight="600" fill="#0f172a">behind · can fast-forward</text>
+    <text x="84" y="56" font-family="ui-monospace, 'SF Mono', Menlo, monospace"
+          font-size="12" fill="#475569">git merge --ff-only</text>
+    <text x="440" y="34" font-family="-apple-system, system-ui, sans-serif"
+          font-size="13" fill="#15803d">go to push</text>
+    <text x="840" y="34" font-family="-apple-system, system-ui, sans-serif"
+          font-size="11" fill="#16a34a" text-anchor="end" font-weight="500">OK</text>
+    <line x1="0" y1="84" x2="840" y2="84" stroke="#e5e7eb" stroke-width="1"/>
   </g>
 
-  <!-- Arrow fetch → diamond -->
-  <line x1="550" y1="244" x2="550" y2="272" stroke="#64748b" stroke-width="2"/>
-  <polygon points="550,278 544,268 556,268" fill="#64748b"/>
-
-  <!-- Decision diamond -->
-  <g transform="translate(440, 280)" filter="url(#shadow)">
-    <polygon points="110,0 220,55 110,110 0,55" fill="url(#decideGrad)" stroke="#94a3b8" stroke-opacity="0.55" stroke-width="1.5"/>
-    <text x="110" y="48" font-family="-apple-system, system-ui, sans-serif" font-size="13" font-weight="600" fill="#e2e8f0" text-anchor="middle">compare HEAD</text>
-    <text x="110" y="66" font-family="-apple-system, system-ui, sans-serif" font-size="13" font-weight="600" fill="#e2e8f0" text-anchor="middle">vs origin/main</text>
+  <!-- ===== Case 03: diverged, memory-only ===== -->
+  <g transform="translate(80, 316)">
+    <rect x="0" y="0" width="3" height="68" fill="#f59e0b"/>
+    <text x="24" y="34" font-family="ui-monospace, 'SF Mono', Menlo, monospace"
+          font-size="13" font-weight="500" fill="#94a3b8">03</text>
+    <text x="84" y="34" font-family="-apple-system, system-ui, sans-serif"
+          font-size="14" font-weight="600" fill="#0f172a">diverged · memory-only</text>
+    <text x="84" y="56" font-family="ui-monospace, 'SF Mono', Menlo, monospace"
+          font-size="12" fill="#475569">reset --hard origin/main</text>
+    <text x="440" y="34" font-family="-apple-system, system-ui, sans-serif"
+          font-size="13" fill="#b45309">auto-resolve</text>
+    <text x="440" y="56" font-family="-apple-system, system-ui, sans-serif"
+          font-size="11" fill="#94a3b8" font-style="italic">memory is regenerable</text>
+    <text x="840" y="34" font-family="-apple-system, system-ui, sans-serif"
+          font-size="11" fill="#d97706" text-anchor="end" font-weight="500">AUTO</text>
+    <line x1="0" y1="84" x2="840" y2="84" stroke="#e5e7eb" stroke-width="1"/>
   </g>
 
-  <!-- ====== Case A: at-or-ahead ====== -->
-  <line x1="540" y1="390" x2="540" y2="430" stroke="#22c55e" stroke-width="2"/>
-  <polygon points="540,436 534,426 546,426" fill="#22c55e"/>
-  <text x="540" y="420" font-family="-apple-system, system-ui, sans-serif" font-size="10" fill="#86efac" text-anchor="middle">at-or-ahead</text>
-
-  <g transform="translate(440, 436)" filter="url(#shadow)">
-    <rect width="200" height="50" rx="10" fill="url(#okGrad)" stroke="#22c55e" stroke-opacity="0.5" stroke-width="1.5"/>
-    <text x="100" y="22" font-family="-apple-system, system-ui, sans-serif" font-size="12" font-weight="600" fill="#dcfce7" text-anchor="middle">no remote work to fetch</text>
-    <text x="100" y="40" font-family="-apple-system, system-ui, sans-serif" font-size="11" fill="#86efac" text-anchor="middle" font-style="italic">→ go to push step</text>
+  <!-- ===== Case 04: diverged, non-memory files ===== -->
+  <g transform="translate(80, 400)">
+    <rect x="0" y="0" width="3" height="68" fill="#ef4444"/>
+    <text x="24" y="34" font-family="ui-monospace, 'SF Mono', Menlo, monospace"
+          font-size="13" font-weight="500" fill="#94a3b8">04</text>
+    <text x="84" y="34" font-family="-apple-system, system-ui, sans-serif"
+          font-size="14" font-weight="600" fill="#0f172a">diverged · includes non-memory files</text>
+    <text x="84" y="56" font-family="ui-monospace, 'SF Mono', Menlo, monospace"
+          font-size="12" fill="#475569">exit 1</text>
+    <text x="440" y="34" font-family="-apple-system, system-ui, sans-serif"
+          font-size="13" fill="#991b1b">refuse, ask user to resolve</text>
+    <text x="840" y="34" font-family="-apple-system, system-ui, sans-serif"
+          font-size="11" fill="#dc2626" text-anchor="end" font-weight="500">REFUSE</text>
+    <line x1="0" y1="84" x2="840" y2="84" stroke="#e5e7eb" stroke-width="1"/>
   </g>
 
-  <!-- ====== Case B: can FF (left) ====== -->
-  <path d="M 440 330 Q 330 330 230 380" fill="none" stroke="#22c55e" stroke-width="2"/>
-  <polygon points="232,386 226,376 238,376" fill="#22c55e"/>
-  <text x="290" y="328" font-family="-apple-system, system-ui, sans-serif" font-size="10" fill="#86efac" text-anchor="middle">behind, can FF</text>
-
-  <g transform="translate(130, 386)" filter="url(#shadow)">
-    <rect width="200" height="80" rx="10" fill="url(#okGrad)" stroke="#22c55e" stroke-opacity="0.5" stroke-width="1.5"/>
-    <text x="100" y="22" font-family="-apple-system, system-ui, sans-serif" font-size="12" font-weight="600" fill="#dcfce7" text-anchor="middle">fast-forward</text>
-    <text x="100" y="42" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="11" fill="#86efac" text-anchor="middle">git merge --ff-only</text>
-    <text x="100" y="68" font-family="-apple-system, system-ui, sans-serif" font-size="11" fill="#86efac" text-anchor="middle" font-style="italic">→ go to sync + push</text>
-  </g>
-
-  <!-- ====== Case C: diverged memory-only (right) ====== -->
-  <path d="M 660 330 Q 770 330 870 380" fill="none" stroke="#f59e0b" stroke-width="2"/>
-  <polygon points="868,386 874,376 862,376" fill="#f59e0b"/>
-  <text x="810" y="328" font-family="-apple-system, system-ui, sans-serif" font-size="10" fill="#fcd34d" text-anchor="middle">diverged, memory-only</text>
-
-  <g transform="translate(770, 386)" filter="url(#shadow)">
-    <rect width="200" height="80" rx="10" fill="url(#warnGrad)" stroke="#f59e0b" stroke-opacity="0.55" stroke-width="1.5"/>
-    <text x="100" y="22" font-family="-apple-system, system-ui, sans-serif" font-size="12" font-weight="600" fill="#fef3c7" text-anchor="middle">auto-resolve</text>
-    <text x="100" y="42" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="10" fill="#fcd34d" text-anchor="middle">reset --hard origin/main</text>
-    <text x="100" y="68" font-family="-apple-system, system-ui, sans-serif" font-size="11" fill="#fcd34d" text-anchor="middle" font-style="italic">memory is regenerable</text>
-  </g>
-
-  <!-- ====== Case D: diverged with other files (bottom) ====== -->
-  <line x1="550" y1="500" x2="550" y2="540" stroke="#dc2626" stroke-width="2"/>
-  <polygon points="550,546 544,536 556,536" fill="#dc2626"/>
-  <text x="550" y="530" font-family="-apple-system, system-ui, sans-serif" font-size="10" fill="#fca5a5" text-anchor="middle">diverged, includes non-memory files</text>
-
-  <g transform="translate(440, 548)" filter="url(#shadow)">
-    <rect width="200" height="70" rx="10" fill="url(#badGrad)" stroke="#ef4444" stroke-opacity="0.55" stroke-width="1.5"/>
-    <text x="100" y="24" font-family="-apple-system, system-ui, sans-serif" font-size="13" font-weight="700" fill="#fecaca" text-anchor="middle">❌ refuse</text>
-    <text x="100" y="46" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="11" fill="#fca5a5" text-anchor="middle">exit 1, tell user</text>
-    <text x="100" y="60" font-family="-apple-system, system-ui, sans-serif" font-size="10" fill="#fca5a5" text-anchor="middle" font-style="italic">how to handle manually</text>
-  </g>
-
-  <!-- ====== Common terminator: sync + commit + push ====== -->
-  <!-- Lines converging from Cases A, B, C (NOT D) -->
-  <!-- From Case A (down to terminator) -->
-  <line x1="540" y1="486" x2="540" y2="510" stroke="#22c55e" stroke-width="2" opacity="0.6"/>
-
-  <!-- From Case B (right curve down) -->
-  <path d="M 230 466 Q 230 540 380 660" fill="none" stroke="#22c55e" stroke-width="2" opacity="0.6"/>
-
-  <!-- From Case C (left curve down) -->
-  <path d="M 870 466 Q 870 540 720 660" fill="none" stroke="#f59e0b" stroke-width="2" opacity="0.6"/>
-
-  <!-- Terminator -->
-  <g transform="translate(350, 656)" filter="url(#shadow)">
-    <rect width="400" height="50" rx="25" fill="url(#startGrad)" stroke="#60a5fa" stroke-opacity="0.6" stroke-width="1.5"/>
-    <text x="200" y="30" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="13" font-weight="700" fill="#dbeafe" text-anchor="middle">
-      clauderoam sync  →  git commit  →  git push
-    </text>
-  </g>
+  <!-- ===== Footer ===== -->
+  <text x="500" y="500" font-family="-apple-system, system-ui, sans-serif"
+        font-size="13" fill="#64748b" text-anchor="middle">
+    Cases 01–03 end in <tspan font-family="ui-monospace, 'SF Mono', Menlo, monospace" fill="#0f172a">sync → git commit → git push</tspan>.
+  </text>
 </svg>

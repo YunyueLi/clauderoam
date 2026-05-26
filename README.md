@@ -157,7 +157,7 @@ Every time Claude Code starts, it loads config from three places. ClaudeRoam man
   <img src=".assets/diagrams/personal-vs-project.svg" alt="ClaudeRoam (personal config) and your project repos both feed into ~/.claude/, where Claude Code reads" width="100%">
 </p>
 
-Open `startup-app` in Claude Code → it loads your personal layer + startup-app's project layer, combined. Open `my-blog` next → same personal layer + my-blog's project layer. Two contexts, zero conflict.
+Open Project A in Claude Code → it loads your personal layer + Project A's project layer, combined. Open Project B next → same personal layer + Project B's project layer. Two contexts, zero conflict.
 
 ### Symlinks, not sync
 
