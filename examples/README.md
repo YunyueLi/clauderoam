@@ -19,7 +19,7 @@ start using right away.
 | [`/commit`](./commands/commit.md) | Propose a conventional-commit message from staged diff, then commit |
 | [`/pr`](./commands/pr.md) | Open a PR for the current branch with a structured title and body |
 | [`/sync`](./commands/sync.md) | `git pull` across all your project repos in one go |
-| [`/save`](./commands/save.md) | Sync auto-memory and push your clauderoam repo |
+| [`/save`](./commands/save.md) | Sync auto-memory and push your ClaudeRoam config repo |
 
 ## How to install an example
 

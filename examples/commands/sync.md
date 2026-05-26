@@ -1,5 +1,5 @@
 ---
-description: Pull latest changes across all the user's project repos in one place — code, clauderoam config, anywhere else relevant.
+description: Pull latest changes across all the user's project repos in one place — code, ClaudeRoam config, anywhere else relevant.
 ---
 
 The user is starting a session (often on a new device, or after time away) and wants everything up to date.
@@ -26,6 +26,6 @@ The user is starting a session (often on a new device, or after time away) and w
    - `⚠️  <repo>: has local changes, skipped pull`
    - `❌ <repo>: error (<short reason>)`
 
-4. **Always include the user's clauderoam repo** — find it via `readlink ~/.claude/CLAUDE.md`.
+4. **Always include the user's ClaudeRoam config repo** — find its local checkout via `readlink ~/.claude/CLAUDE.md`.
 
 5. If any repo was skipped due to local changes, suggest `cd <repo> && git status` so the user can deal with them.
